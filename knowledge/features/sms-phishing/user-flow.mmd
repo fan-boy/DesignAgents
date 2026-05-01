@@ -1,0 +1,77 @@
+flowchart TD
+    A([New Campaign button]) --> B[Step 1: Channel selection]
+    B --> C{Channel?}
+    C -- Email --> EMAIL([Email phishing wizard])
+    C -- SMS --> D[Step 2: Target group]
+
+    D --> D1{Coverage?}
+    D1 -- 0% coverage --> D2[Hard block: upload phone numbers\nLaunch disabled]
+    D1 -- Partial coverage --> D3[Warning callout shown\nAdmin can proceed]
+    D1 -- Full coverage --> D4[No warning]
+    D2 --> D5[Admin uploads CSV via coverage drawer]
+    D5 --> D1
+    D3 --> E[Step 3: Message]
+    D4 --> E
+
+    E --> E1{Encoding?}
+    E1 -- Unicode detected --> E2[Encoding warning shown\nLimit updates to 70 chars]
+    E1 -- GSM-7 only --> E3[Standard 160-char counter]
+    E2 --> F[Step 4: Delivery configuration]
+    E3 --> F
+
+    F --> F1{Schedule conflict?}
+    F1 -- Exclusion window overlap --> F2[Inline warning\nAdmin can override]
+    F1 -- No conflict --> G[Step 5: Review + launch]
+    F2 --> G
+
+    G --> G1{TCPA checkbox?}
+    G1 -- Unchecked --> G2[Launch button disabled]
+    G2 -- Admin checks box --> G1
+    G1 -- Checked --> G3{Coverage at review?}
+    G3 -- 0% hard block --> G4[Launch blocked\nResolution path shown]
+    G3 -- Partial warning --> G5[Warning callout shown\nAdmin launches]
+    G3 -- OK --> G6[Admin launches]
+    G5 --> H[Campaign detail: Sending]
+    G6 --> H
+
+    H --> H1{Delivery events}
+    H1 -- Employee clicks link --> H2[Click recorded\nDebrief page served]
+    H1 -- Bot/scanner click --> H3[Click filtered\nFiltered count updated]
+    H1 -- Delivery failure --> H4[Per-user row: Not delivered\nExcluded stats updated]
+    H1 -- Employee replies STOP --> H5[Send queue removal\nOpt-out record created\nAdmin notified]
+    H1 -- Carrier rate-limit --> H6[Status: Delivery Slowed\nDelivery continues]
+    H1 -- All sends complete --> H7[Status: Completed\nFinal stats locked]
+
+    H2 --> M[Employee: Mobile debrief landing page]
+    M --> M1[Pause · Verify · Report]
+    M1 --> M2[CTA: Complete 2-min training]
+
+    H7 --> I[Campaign detail: Completed]
+    I --> I1[Per-user results table\nDelivered · Clicked · Risk score delta]
+
+    subgraph Wizard
+        B
+        D
+        E
+        F
+        G
+    end
+
+    subgraph Post-launch
+        H
+        H1
+        H2
+        H3
+        H4
+        H5
+        H6
+        H7
+        I
+        I1
+    end
+
+    subgraph Employee experience
+        M
+        M1
+        M2
+    end

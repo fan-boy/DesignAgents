@@ -1,0 +1,143 @@
+{
+  "feature_name": "SMS Phishing (Smishing) Simulation",
+  "feature_slug": "sms-phishing",
+  "analyzed_at": "2026-05-01",
+  "direct_competitors": ["KnowBe4", "Hoxhunt", "Cofense"],
+  "adjacent_competitors": ["Proofpoint SAT"],
+  "workflow_stages": [
+    "Phone number data requirements",
+    "Campaign creation entry point",
+    "Template library and message creation",
+    "Scheduling, targeting, and launch",
+    "Delivery and interaction tracking",
+    "Debrief experience",
+    "Risk score integration"
+  ],
+  "competitors": [
+    {
+      "name": "KnowBe4",
+      "url": "knowbe4.com",
+      "tier": "direct",
+      "entry_point": "Main Phishing navigation section; campaign type selector at wizard start includes Smishing as a first-class option alongside Email, Vishing, and multi-vector",
+      "setup_friction": "Phone numbers must be in user profiles before launching; import via CSV, AD sync, or HRIS integration; phone field is optional per user so partial coverage is common",
+      "core_flow": [
+        "Select campaign type (Smishing) at wizard start",
+        "Choose target group with member count preview",
+        "Select template from Smishing library (categorized by lure type)",
+        "Configure delivery spread and schedule window",
+        "Pre-launch review: shows delivery estimate and coverage warnings for missing phone numbers",
+        "Launch; results in campaign detail with per-user click breakdown"
+      ],
+      "feedback_states": ["Delivered", "Clicked", "Not delivered (number missing or failed)", "Campaign in progress"],
+      "error_prevention": "Coverage warning at pre-launch review step shows members excluded due to missing phone number; warning not a hard block; delivery spread default reduces obvious simultaneous delivery",
+      "trust_model": "Coverage gap shown before launch; per-user results in detail view; bot/scanner click filtering documented as automated but mechanism and filtered count not disclosed to admins",
+      "rbac_notes": "Admin roles for campaign creation and template library management; view-only roles can see results but not launch campaigns",
+      "repeat_use_efficiency": "Templates saved and reusable; group selections persist; scheduling supports recurring campaigns; smart defaults for delivery spread",
+      "ai_personalization": "Not observed — variable token substitution only (first name, company name); no AI-generated personalization for SMS content",
+      "risk_score_surface": "SmartRisk Score includes smishing click signals; treated with equivalent weight to email phishing clicks — no evidence of channel-differentiated weighting",
+      "remediation_path": "Employee who clicks lands on mobile-optimized debrief page explaining the simulation and missed clues; links to short training module; automated module assignment can be configured for clickers",
+      "confidence": "medium-high",
+      "source_notes": "Based on published help center documentation, product changelog, and publicly available demo recordings. UI details may have changed."
+    },
+    {
+      "name": "Proofpoint SAT",
+      "url": "proofpoint.com/us/products/security-awareness-training",
+      "tier": "adjacent",
+      "entry_point": "Security Awareness Training section under Simulations; SMS/voice simulations presented as a subsection — navigation hierarchy signals secondary capability",
+      "setup_friction": "Phone numbers sourced from Active Directory attributes or CSV; less flexible import tooling; coverage visualization less prominent",
+      "core_flow": [
+        "Navigate to Simulations, select SMS/Voice subsection",
+        "Select target group",
+        "Choose template from smaller SMS library (threat-intelligence-informed lures)",
+        "Configure schedule",
+        "Launch; results in campaign reporting"
+      ],
+      "feedback_states": ["Delivered", "Clicked", "Failed delivery"],
+      "error_prevention": "Pre-launch review present but less detailed on data quality issues; exclusion logic less configurable",
+      "trust_model": "Less transparent on partial delivery or bot-click filtering",
+      "rbac_notes": "Standard admin/viewer roles; phone data access follows standard user management permissions",
+      "repeat_use_efficiency": "Templates reusable; scheduling available; fewer smart defaults than KnowBe4",
+      "ai_personalization": "Not observed — template-based with threat intelligence-informed lure selection",
+      "risk_score_surface": "SMS clicks contribute to reporting metrics; integration into behavioral risk score not clearly documented",
+      "remediation_path": "Debrief landing page on click; mobile optimization quality not clearly documented — inferred to be responsive desktop rather than mobile-first",
+      "confidence": "medium",
+      "source_notes": "Based on product documentation and G2 reviews. Some observations inferred from documentation structure. Not directly observed in product UI."
+    },
+    {
+      "name": "Hoxhunt",
+      "url": "hoxhunt.com",
+      "tier": "direct",
+      "entry_point": "Email simulation only — no SMS/smishing simulation observed in public documentation",
+      "setup_friction": "N/A for SMS",
+      "core_flow": ["Email phishing simulation only"],
+      "feedback_states": ["N/A for SMS"],
+      "error_prevention": "N/A for SMS",
+      "trust_model": "N/A for SMS",
+      "rbac_notes": "N/A for SMS",
+      "repeat_use_efficiency": "N/A for SMS",
+      "ai_personalization": "Email-focused adaptive simulation; not observed on SMS channel",
+      "risk_score_surface": "Behavioral risk model exists for email signals only",
+      "remediation_path": "Email debrief model with gamified reporting; no SMS remediation path observed",
+      "confidence": "low (SMS-specific)",
+      "source_notes": "Absence of SMS capability based on public documentation and help center review. Treated as email-only."
+    },
+    {
+      "name": "Cofense",
+      "url": "cofense.com",
+      "tier": "direct",
+      "entry_point": "Email phishing simulation specialist; no SMS simulation in product scope based on published documentation",
+      "setup_friction": "N/A for SMS",
+      "core_flow": ["Email phishing simulation only; focused on reporter button behavior conditioning"],
+      "feedback_states": ["N/A for SMS"],
+      "error_prevention": "N/A for SMS",
+      "trust_model": "N/A for SMS",
+      "rbac_notes": "N/A for SMS",
+      "repeat_use_efficiency": "N/A for SMS",
+      "ai_personalization": "Not applicable for SMS",
+      "risk_score_surface": "No behavioral risk score; focused on reporting rate metrics",
+      "remediation_path": "Reporter button integration; email debrief only",
+      "confidence": "medium-high (email-only)",
+      "source_notes": "Cofense product scope confirms email-only simulation. Included to document depth-over-breadth positioning."
+    }
+  ],
+  "observed_patterns": [
+    "First-class channel selector at wizard start positions SMS as peer to email (KnowBe4)",
+    "Phone number coverage warning before launch — warning not a hard block (KnowBe4)",
+    "Template library organized by lure type (IT, HR, financial, delivery) not industry (KnowBe4)",
+    "Delivery spread / randomized send window as configurable option (KnowBe4)",
+    "Mobile-optimized debrief landing page for smishing click (KnowBe4)",
+    "Threat-intelligence-informed template lures correlated with active real-world campaigns (Proofpoint)",
+    "Per-user result breakdown in campaign detail view (KnowBe4)"
+  ],
+  "anti_patterns": [
+    "SMS as a secondary navigation item buried under a submenu — signals secondary capability, reduces admin adoption (Proofpoint)",
+    "Template-only personalization marketed as AI-driven — fails credibility test for enterprise security teams (KnowBe4, Proofpoint)",
+    "Silent partial delivery — missing phone numbers excluded without prominent count in campaign results (observed across all)",
+    "Desktop debrief served responsively to mobile — poor experience at the critical learning moment (inferred from Proofpoint)",
+    "Flat risk signal treatment — SMS click equated to email click with no channel-specific weighting (inferred from KnowBe4)"
+  ],
+  "differentiation_opportunities": [
+    "Genuine AI personalization for SMS: adapt spear phishing engine to 160-character constraint — no competitor observed doing this",
+    "Channel-aware risk scoring: model email and SMS susceptibility as separate behavioral signals",
+    "Coordinated multi-channel simulation: priming email followed by follow-up SMS in a single campaign scenario",
+    "Phone number coverage health as a persistent, first-class metric in group management UI",
+    "Transparent bot-click filtering with admin visibility: show filtered count and explanation — builds trust in result integrity"
+  ],
+  "design_implications": [
+    "Campaign wizard must present SMS as a first-class channel type at the top-level step",
+    "Phone number coverage must surface at group selection step and in campaign results",
+    "Template library needs categories grounded in realistic lure types with threat intelligence freshness signals",
+    "Message editor must show live character counter with encoding detection",
+    "Delivery spread should be a smart default, not an advanced option",
+    "Mobile debrief landing page is a new design surface — 375px viewport, Pause/Verify/Report framework",
+    "Risk score treatment should be visible in reporting UI rather than silently blended",
+    "If v1 is template-based only, use Smart Templates framing — not AI framing"
+  ],
+  "confidence_notes": [
+    "KnowBe4 observations are medium-high confidence based on published documentation and demo recordings",
+    "Proofpoint SAT observations are medium confidence; some inferences from documentation structure and G2 reviews",
+    "Hoxhunt SMS absence is medium confidence — no SMS simulation found in public materials",
+    "Cofense email-only is medium-high confidence based on explicit product positioning",
+    "No direct product session access was used for any competitor"
+  ]
+}
