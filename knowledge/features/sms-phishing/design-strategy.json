@@ -1,54 +1,67 @@
 {
   "feature_name": "SMS Phishing (Smishing) Simulation",
   "feature_slug": "sms-phishing",
-  "design_goal": "Enable a security admin to configure, launch, and review an SMS phishing simulation campaign using the existing campaign wizard, while handling SMS-specific constraints (phone coverage, character limits, legal disclosure, mobile debrief) with clarity and without requiring new mental models.",
-  "user_segments": ["security admin", "IT admin configuring employee phone data"],
-  "constraints": [
-    "No existing phone number data model in Dune — net-new infrastructure",
-    "TCPA compliance required — legal clearance not yet confirmed",
-    "Standard SMS limited to 160 characters (GSM-7) or 70 characters (Unicode)",
-    "v1 personalization scope unconfirmed (AI vs. template-based)",
-    "Risk scoring integration for SMS click signal not yet designed",
-    "Sender identity strategy (short code, 10DLC, toll-free) not decided"
+  "design_goal": "Enable a security admin to configure, test, and launch an SMS phishing simulation campaign — including remediation automation — in under 10 minutes, using a guided wizard that is additive to the existing simulation workflow and not a replacement for it.",
+  "user_segments": [
+    "security admin / awareness program owner",
+    "SOC / incident-response lead",
+    "people manager (receives alerts on repeat failures)",
+    "end user / employee (receives simulation and coaching)"
   ],
-  "selected_strategy": "Channel-extended existing wizard (Option A) with multi-channel-capable data model (Option C architecture)",
-  "selected_strategy_rationale": "Extends the existing email phishing wizard with a channel type selector at step 1. SMS-specific screens replace email-specific screens where needed. All existing patterns — group targeting, scheduling, exclusion windows, review-before-launch — carry over unchanged. The underlying campaign data model is designed for multi-channel from the start, enabling coordinated email + SMS campaigns as a future upgrade without retrofitting.",
+  "constraints": [
+    "v1 = SMS-only, US-first or limited supported-region beta",
+    "Template-based personalization only in v1 (approved library + light customization)",
+    "No real credential, OTP, or sensitive data collection at any time — enforced at client layer (no data serialization on submit), server layer (no payload accepted beyond campaign token), and admin UI layer (non-dismissible form safety lock)",
+    "Three simulation types in v1: Link only (debrief on click), Credential harvest (simulated login form → debrief), MFA harvest (simulated verification code form → debrief)",
+    "Phone numbers stored as hashes, not raw values (phone_hash in data model)",
+    "Customer owns legal basis (TCPA/GDPR); Dune provides admin acknowledgment at creation",
+    "Architecture must be extensible to WhatsApp, Signal, Telegram, QR-code lures, and vishing",
+    "Remediation Agent integration is a Must requirement",
+    "Test-send before launch is a Must requirement",
+    "Phone number sourcing strategy (HRIS, CSV, manual) is Phase 0 — not yet decided",
+    "Sender identity (short code, 10DLC, toll-free) not decided"
+  ],
+  "selected_strategy": "Dedicated Simulations → Smishing sub-nav section (Option B) with multi-channel-capable data model",
+  "selected_strategy_rationale": "PRD §8.1 explicitly specifies 'Admin navigates to Simulations → Smishing' as the entry point, indicating a dedicated section rather than a channel selector at wizard start. A dedicated sub-nav makes the smishing campaign list independently accessible and scopes reporting to SMS, enabling a future cross-channel comparison view as an explicit product decision. The underlying campaign data model uses type=smishing within a shared campaign entity that supports future multi-channel types.",
   "alternative_strategies": [
     {
-      "name": "Dedicated SMS campaign section",
-      "summary": "A new SMS Simulation entry point in the navigation with a wizard optimized from scratch for SMS.",
-      "rejected_because": "Two parallel wizards to maintain; campaign management splits by channel when it should be unified by goal; duplicates significant logic; Proofpoint took this approach and it reduced adoption."
+      "name": "Channel-extended existing wizard (Option A)",
+      "summary": "Add Smishing as a channel type at wizard step 1 alongside Email. All subsequent steps adapt to the selected channel.",
+      "rejected_because": "PRD specifies a dedicated Simulations → Smishing navigation path. A channel selector at wizard step 1 works technically but diverges from the PRD-stated navigation intent and makes the smishing campaign list harder to reach independently."
     },
     {
-      "name": "Channel-first multi-channel wizard",
-      "summary": "Redesign the campaign wizard to support multiple channels (email + SMS) simultaneously from step 1.",
-      "rejected_because": "Requires both email and SMS delivery to be production-ready simultaneously; significantly higher v1 complexity; harder to scope or cut if SMS delivery slips. Correct long-term direction but wrong v1 scope."
+      "name": "Channel-first multi-channel wizard (Option C)",
+      "summary": "Redesign the campaign creation wizard to support multiple channels (email + SMS) simultaneously from step 1.",
+      "rejected_because": "Requires both channels to be production-ready simultaneously; significantly higher v1 complexity; correct long-term direction but wrong v1 scope."
     }
   ],
   "tradeoffs": [
-    "Coordinated multi-channel attack simulation (a meaningful differentiator) cannot ship in v1 — admins must create two separate campaigns and manually coordinate timing",
-    "If TCPA legal clearance changes the requirement from acknowledgment to explicit pre-campaign consent, the review step design will need to be rebuilt",
-    "If v1 ships template-based only, the personalization story must be carefully calibrated — Smart Templates framing, not AI framing"
+    "Admins must navigate to the Smishing section to see SMS campaigns — no unified campaign list until a cross-channel comparison view ships",
+    "Phone coverage cold-start: feature is immediately limited by phone number data quality before Phase 0 sourcing decisions are made",
+    "Graduated risk scoring UI complexity: five event types require a more complex results table than the current email phishing detail view"
   ],
   "assumptions": [
-    "The existing email phishing campaign wizard is the correct structural reference",
-    "Phone number data will be importable via CSV in v1 at minimum",
-    "The TCPA acknowledgment checkbox at the review step is a minimum viable disclosure mechanism",
-    "Delivery spread (randomized send window) is technically feasible in v1",
-    "Bot-click filtering is handled at the infrastructure layer (Eng confirms)"
+    "A 7-step wizard (Audience → Message → Sender+Landing Page → Delivery → Remediation → Test Send → Review+Launch) is the correct structure",
+    "Remediation configuration is a dedicated wizard step (not an advanced settings panel) because it is a Must requirement",
+    "Test send is a dedicated wizard step because it is a Must requirement and should not be buried in review",
+    "Three simulation types ship in v1: Link only, Credential harvest, MFA harvest — each with distinct landing page, events (smishing_link_clicked / smishing_credential_submitted / smishing_mfa_submitted), and remediation rules",
+    "The graduated risk model (5–7 event types depending on simulation type) is reflected in the campaign detail view from day one",
+    "The compliance acknowledgment checkbox at Step 7 is the correct design for the customer-responsibility legal model",
+    "Screen 10 (campaign comparison view) ships as a Should-priority follow-on, not a v1 blocker"
   ],
   "open_issues": [
-    "TCPA legal clearance: if explicit employee consent is required (not just admin acknowledgment), a new pre-campaign employee notice flow is needed — changes Step 6 significantly",
-    "AI vs. template-based v1: if AI personalization is confirmed for v1, Step 3 (Message) needs a personalization preview mode — significant screen-level change",
-    "Sender identity: short code vs. 10DLC changes the SMS preview sender display in Step 3 and potentially the debrief copy",
-    "STOP reply permanence: if permanent across all campaigns, the coverage indicator needs an Opted Out segment separate from Missing",
-    "Risk score signal weighting: if SMS clicks are a new signal type (not equivalent to email), the campaign detail risk score delta column needs channel-aware labeling"
+    "Approval workflow scope (PM §16.7): RESOLVED — no approval workflow in v1; Launch Campaign is the only CTA at Step 7",
+    "Template editability in v1 (PM §16.8): RESOLVED — customer template creation confirmed for v1; full management UI (creation, cloning, editing, archiving) is in scope",
+    "Reporting in v1 scope (PM §16.6): the Reported metric card in campaign detail only renders if reporting is confirmed for v1",
+    "Sender identity (Eng): short code vs. 10DLC changes the SMS preview sender display in Step 2 and potentially debrief copy",
+    "Risk-weighting values (PM/Eng §16.5): confirmed as graduated and separate from email; credential-submitted and MFA-submitted expected to carry higher weight than click-only; values TBD; affects delta magnitude in results but not screen structure",
+    "Guardrails for harmful impersonation templates (PM §16.9): credential-harvest and MFA-harvest warnings are designed; emergency/legal/government impersonation guardrail needs content policy decision",
+    "Credential/MFA form client-side behavior (Eng): confirm form submit handler fires event + redirect with no data serialization at browser layer; confirm autofill does not trigger smishing event"
   ],
   "risks": [
-    "TCPA blocker: if legal clearance arrives late, the review step needs redesign",
-    "Phone coverage cold-start: feature is immediately limited by phone number data quality; onboarding path for phone data must be visible before first campaign is created",
-    "AI personalization gap: if v1 ships template-based, marketing must use Smart Templates framing — not AI framing",
-    "Bot-click filtering transparency: if Eng cannot surface filtered counts, the campaign results will be trusted less by sophisticated admins"
+    "Phone coverage cold-start: onboarding path for phone data must be visible before first campaign creation",
+    "Credential and MFA harvest template safety: design must enforce zero data collection at client layer (no data serialization on submit), server layer (endpoint accepts no payload beyond campaign token), and admin UI layer (non-dismissible form safety lock callout)",
+    "Graduated risk scoring complexity: collapsing to a simple click metric would misrepresent PRD intent and undermine behavioral analytics value"
   ],
   "ds_patterns_used": [
     "wizard",
@@ -58,16 +71,22 @@
     "badge"
   ],
   "new_patterns_required": [
-    "SMS bubble preview panel in message editor (Step 3) — renders message as a native SMS chat bubble at 360px; requires DS review for standardization across SMS and future vishing contexts",
-    "Phone coverage progress indicator (Step 2 and Group detail) — coverage bar + count inline with group selector; requires DS review if not already a standard group metadata pattern",
-    "Mobile debrief landing page — entirely new learner-facing surface at 375px; outside the admin UI design system; requires its own component library or a documented extension of Stillsuit DS v2"
+    "SMS bubble preview panel in message editor (Step 2) — renders message as a 360px native SMS chat bubble; requires DS review for standardization across SMS and future vishing contexts",
+    "Phone coverage progress indicator (Step 1 and Group detail) — coverage bar + count inline with audience selector; requires DS review",
+    "Remediation rule-builder cards (Step 5) — if/then toggle cards; may be a new DS pattern if not already standardized in Remediation Agent UI; requires DS review",
+    "Mobile debrief landing page — three states: link-only debrief, credential harvest debrief (form acknowledgment + debrief), MFA harvest debrief; entirely new learner-facing surface at 375px; outside admin UI design system; requires documented extension of or departure from Stillsuit DS v2",
+    "Graduated stats row (campaign detail) — 5–6 metric cards adapting to simulation type (Link only / Credential harvest / MFA harvest); requires DS review for consistent pattern across email and smishing result views",
+    "Template creation full-page form (Screen 1a) — simulation-type-conditional three-section editor (Details / Message / Landing page config); credential and MFA types add form configuration sub-section in Section 3; requires DS review",
+    "Simulated login form (credential harvest landing page) — client-only form, no data serialization on submit; fire smishing_credential_submitted event + redirect; requires DS review and Eng confirmation",
+    "Simulated MFA verification form (MFA harvest landing page) — single-field OTP form; same client-only smishing_mfa_submitted event pattern; requires DS review",
+    "Two-screen mobile preview panel — swipeable form screen + coaching screen preview for credential and MFA templates; requires DS review"
   ],
   "next_actions": [
-    "Resolve TCPA question with PM before starting Figma — acknowledgment checkbox vs. pre-campaign employee notice flow are very different screen states",
-    "Get Eng confirmation on v1 personalization scope (AI vs. template) — determines whether Step 3 is a template library or a personalization wizard",
-    "Open Group detail view in Figma and map the phone coverage tab against existing Group component — most contained new surface, good starting point",
-    "Design the mobile debrief landing page first — highest-stakes new surface, most clearly scoped, no unresolved decisions block it",
-    "Confirm with Eng which sender identity will be used in v1 so SMS preview panel renders the correct sender format"
+    "Design Screen 11 (mobile debrief) — three states now defined (link-only, credential harvest, MFA harvest); no remaining blockers; highest-stakes new surface",
+    "Design Screen 1a (Template creation form) — start with simulation type selector and credential/MFA form configuration sub-section; these are the riskiest new patterns requiring DS review",
+    "Align with Eng on credential/MFA form client-side behavior (open issue 7) before designing the form back-navigation 'simulation ended' state",
+    "Open Group detail view in Figma and map phone coverage tab (Screen 12) — most contained new admin surface, no unresolved blockers",
+    "Align with Eng on sender identity before designing SMS preview panel in Step 2 (Screen 3) and Screen 1a"
   ],
   "last_updated": "2026-05-01"
 }

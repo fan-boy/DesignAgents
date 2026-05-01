@@ -4,7 +4,7 @@ description: >
   Research and compare how competitors solve a specific feature, workflow, or user problem.
   Use when evaluating product patterns, identifying opportunities, auditing similar experiences,
   or generating structured competitor documentation for downstream design work.
-  Grounded in Dune Security's competitive landscape: SAT platforms (KnowBe4, Hoxhunt, Proofpoint,
+  Grounded in Dune Security's competitive landscape: SAT platforms (Adaptive Security, Fable Security, KnowBe4, Hoxhunt, Proofpoint,
   Cofense, Ninjio, Curricula), human risk management platforms (CybSafe, SoSafe, Mimecast), and
   adjacent products (Doppel). Always reads prd-research outputs before starting. Writes persistent
   files consumed by design-strategist, design-review, and dev-handoff skills.

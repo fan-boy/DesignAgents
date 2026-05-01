@@ -10,9 +10,13 @@ Last updated: 2026-05-01 · Updated with PRD-confirmed scope.
 - Link tracking beacon fires but employee device did not render the page (pre-fetch by link scanner or MDM tool) — false positive click event
 - Unicode characters in message reduce character limit from 160 to 70 without warning — message silently truncates or splits into multi-part SMS
 - SMS delivery confirmation receipt not available for all carriers — send success vs. delivery success cannot always be distinguished
-- `smishing_form_submitted` event fires — must confirm no real credential, OTP, or sensitive data was stored in any field on the landing page before the event is recorded
+- `smishing_credential_submitted` event fires — must confirm no real credential data was stored or transmitted; form submit handler fires event + redirect only; server endpoint accepts no payload beyond campaign token
+- `smishing_mfa_submitted` event fires — must confirm no real OTP or code was stored or transmitted; same client-only event pattern as credential harvest
+- Password manager browser extension autofills the simulated credential form fields — autofill alone must NOT fire a `smishing_credential_submitted` event; only the submit button click should trigger the event; flag for Eng confirmation
+- Browser "Save password" dialog appears after employee interacts with simulated credential form — expected behavior; no action needed in the simulation; note in admin documentation
+- Employee presses browser back button after completing the simulated form and reaching the debrief — returning to the form page must show a "This simulation has ended" state with form fields disabled; prevents confusion and repeat event recording
 - Test-send message is delivered to internal reviewers — must be visually distinguishable from a live simulation (labeled "TEST" or sent from a distinct sub-account)
-- Approval workflow is enabled by customer — campaign transitions to "Awaiting Approval" and cannot be launched until an approver acts; approver is unavailable or inactive account
+- ~~Approval workflow~~ — not in v1. Campaigns launch directly after admin completes Step 7.
 
 ## Permission states
 - Admin has campaign creation rights but employee PII (phone numbers) is access-restricted — can configure campaign but cannot verify number coverage
@@ -25,7 +29,10 @@ Last updated: 2026-05-01 · Updated with PRD-confirmed scope.
 
 ## Content states
 - Template library is empty (fresh tenant, no templates seeded) — campaign creation cannot proceed without at least one template
-- Admin selects a credential-harvest or MFA-code template — must trigger a safety warning callout: "This template includes a simulated form. No real credentials will be collected. Your coaching page must clearly explain this."
+- Admin selects a credential harvest template — must trigger a safety warning callout in Step 2: "This template includes a simulated login form. No real credentials will be collected or stored." Admin must acknowledge (checkbox) to continue
+- Admin selects an MFA harvest template — must trigger a safety warning callout: "This template includes a simulated verification form. No real codes will be collected or stored." Admin must acknowledge to continue
+- Simulation type mismatch: admin selects a credential/MFA template but then tries to configure a link-only coaching page in Step 3 — not possible; Step 3 renders the form configuration read-only view and the coaching page selector, not the guardrail path
+- Admin creates a credential harvest template with a form title that closely resembles a real SSO provider (Okta, Microsoft, Google Workspace) — inline warning with provider name; admin must acknowledge before saving; not a hard block
 - Admin selects an executive impersonation template — warn if the impersonated name matches a real executive in the tenant's directory (requires name-matching check)
 - Message contains Unicode characters (emoji, non-Latin) — character limit drops to 70; editor must warn before submission
 - Message contains characters that look like real emergency alerts (AMBER Alert formatting, government warning headers) — requires a content guardrail; design TBD (see open question §16.9)
@@ -34,6 +41,18 @@ Last updated: 2026-05-01 · Updated with PRD-confirmed scope.
 - Group contains only international phone numbers unsupported in v1 — entire campaign may fail if US-only is the initial constraint
 - Campaign target group changes between schedule time and send time (employee added or removed) — snapshot at schedule time or at send time?
 - Phone number goes stale during campaign (employee off-boards mid-campaign)
+
+## Template management states
+- Admin attempts to archive a template currently in use by one or more active campaigns — hard block; inline tooltip: "This template is used by [N] active campaigns."
+- Admin attempts to activate a template with incomplete required fields (empty coaching page, missing category) — activation blocked; inline field-level errors shown
+- Admin saves a template as Draft with an incomplete message — allowed; Draft templates cannot be selected in a campaign wizard
+- Admin clones a Dune Library template — creates a new Custom template pre-filled with Dune content; source changes to "Custom"; original is unaffected
+- Admin creates a template with the same name as an existing template — inline validation error on save; must resolve before saving
+- Credential-harvest or MFA-harvest template created by admin — same safety warning callout as when selecting a Dune template of that type; coaching page guardrail applies to the coaching page only (cannot contain form fields); the simulated form itself is configured in the Form configuration sub-section and is intentionally form-bearing by design
+- Template created via in-wizard drawer — saved as Draft by default; metadata (category, difficulty, tags) defaults to "Uncategorized" unless admin fills it; admin is prompted to complete metadata from the Templates tab
+- Admin edits a template that is used by a scheduled (not yet sent) campaign — changes apply to the campaign; inline warning: "This template is used by [N] upcoming campaigns. Changes will apply to all of them."
+- Admin edits a template that is used by a completed campaign — changes do not retroactively affect completed campaign results; completed campaigns record a snapshot of the template at send time
+- Template export: can admins export the template library (message body + coaching content)? Permission model not yet defined — flag for Eng
 
 ## Action states
 - Admin cancels a campaign that has already begun sending — messages already sent cannot be recalled; remaining sends must stop

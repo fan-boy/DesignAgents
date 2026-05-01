@@ -1,77 +1,141 @@
 flowchart TD
-    A([New Campaign button]) --> B[Step 1: Channel selection]
-    B --> C{Channel?}
-    C -- Email --> EMAIL([Email phishing wizard])
-    C -- SMS --> D[Step 2: Target group]
+    NAVTMPL([Simulations → Smishing → Templates tab]) --> TL[Template list]
+    TL --> TCREATE[Create Template button]
+    TL --> TCLONE[Clone button on existing template]
+    TCREATE --> TFORM[Template creation form\nDetails + Message + Coaching page]
+    TCLONE --> TFORM
+    TFORM --> TSAVE{Save action?}
+    TSAVE -- Save Draft --> TDRAFT[Template status: Draft\nNot available in campaigns]
+    TSAVE -- Save & Activate --> TACTIVE[Template status: Active\nAvailable in campaign wizard]
+    TFORM --> TGUARD{Coaching page\nhas form field?}
+    TGUARD -- Yes --> TBLOCK[Hard block\nRemove form to continue]
+    TBLOCK --> TFORM
 
-    D --> D1{Coverage?}
-    D1 -- 0% coverage --> D2[Hard block: upload phone numbers\nLaunch disabled]
-    D1 -- Partial coverage --> D3[Warning callout shown\nAdmin can proceed]
-    D1 -- Full coverage --> D4[No warning]
-    D2 --> D5[Admin uploads CSV via coverage drawer]
-    D5 --> D1
-    D3 --> E[Step 3: Message]
-    D4 --> E
+    NAV([Simulations → Smishing → Create Campaign]) --> S1[Step 1: Audience]
 
-    E --> E1{Encoding?}
-    E1 -- Unicode detected --> E2[Encoding warning shown\nLimit updates to 70 chars]
-    E1 -- GSM-7 only --> E3[Standard 160-char counter]
-    E2 --> F[Step 4: Delivery configuration]
-    E3 --> F
+    S1 --> COV{Coverage?}
+    COV -- 0% --> COVBLOCK[Hard block\nUpload phone numbers\nContinue disabled]
+    COV -- Partial --> COVWARN[Warning callout\nAdmin can proceed]
+    COV -- Full --> S2[Step 2: Message]
+    COVBLOCK --> CSVUP[Admin uploads CSV\nor configures HRIS sync]
+    CSVUP --> COV
+    COVWARN --> S2
 
-    F --> F1{Schedule conflict?}
-    F1 -- Exclusion window overlap --> F2[Inline warning\nAdmin can override]
-    F1 -- No conflict --> G[Step 5: Review + launch]
-    F2 --> G
+    S2 --> TMPL{Simulation type?}
+    TMPL -- Link only --> S3[Step 3: Sender + Landing Page]
+    TMPL -- Credential harvest --> CREDWARN[Safety warning callout\nAdmin acknowledges]
+    CREDWARN --> S3
+    TMPL -- MFA harvest --> MFAWARN[Safety warning callout\nAdmin acknowledges]
+    MFAWARN --> S3
+    TMPL -- No suitable template --> INWIZ[In-wizard: Create new template\n480px drawer]
+    INWIZ --> INWIZ_SAVE[Save template as Draft\nAuto-selected in wizard]
+    INWIZ_SAVE --> S3
 
-    G --> G1{TCPA checkbox?}
-    G1 -- Unchecked --> G2[Launch button disabled]
-    G2 -- Admin checks box --> G1
-    G1 -- Checked --> G3{Coverage at review?}
-    G3 -- 0% hard block --> G4[Launch blocked\nResolution path shown]
-    G3 -- Partial warning --> G5[Warning callout shown\nAdmin launches]
-    G3 -- OK --> G6[Admin launches]
-    G5 --> H[Campaign detail: Sending]
-    G6 --> H
+    S3 --> LPCHECK{Coaching page\nhas form field?}
+    LPCHECK -- Yes --> LPBLOCK[Hard block\nRemove form to continue]
+    LPBLOCK --> S3
+    LPCHECK -- No --> S4[Step 4: Delivery]
 
-    H --> H1{Delivery events}
-    H1 -- Employee clicks link --> H2[Click recorded\nDebrief page served]
-    H1 -- Bot/scanner click --> H3[Click filtered\nFiltered count updated]
-    H1 -- Delivery failure --> H4[Per-user row: Not delivered\nExcluded stats updated]
-    H1 -- Employee replies STOP --> H5[Send queue removal\nOpt-out record created\nAdmin notified]
-    H1 -- Carrier rate-limit --> H6[Status: Delivery Slowed\nDelivery continues]
-    H1 -- All sends complete --> H7[Status: Completed\nFinal stats locked]
+    S4 --> SCHED{Schedule\nconflict?}
+    SCHED -- Exclusion window overlap --> SCHEDWARN[Inline warning\nAdmin can override]
+    SCHED -- No conflict --> S5[Step 5: Remediation]
+    SCHEDWARN --> S5
 
-    H2 --> M[Employee: Mobile debrief landing page]
-    M --> M1[Pause · Verify · Report]
-    M1 --> M2[CTA: Complete 2-min training]
+    S5 --> S6[Step 6: Test Send]
 
-    H7 --> I[Campaign detail: Completed]
-    I --> I1[Per-user results table\nDelivered · Clicked · Risk score delta]
+    S6 --> TESTSKIP{Test sent?}
+    TESTSKIP -- Skipped --> S7SOFT[Step 7: Review + Launch\nSoft warning shown]
+    TESTSKIP -- Sent + reviewed --> S7[Step 7: Review + Launch]
+    S7SOFT --> S7
+
+    S7 --> COMPLY{Compliance\ncheckbox?}
+    COMPLY -- Unchecked --> COMPLOCK[Launch button disabled]
+    COMPLOCK -- Admin checks box --> COMPLY
+    COMPLY -- Checked, 0% coverage --> LAUNCHBLOCK[Hard block on launch\nResolution path shown]
+    COMPLY -- Checked, OK --> SENDING[Campaign sending]
+
+    SENDING --> EVENTS{Delivery events}
+    EVENTS -- Employee clicks link --> CLICK[smishing_link_clicked\nDebrief or form page served]
+    EVENTS -- Employee submits credential form --> CREDSUBMIT[smishing_credential_submitted\nHigh-risk signal\nZero real data stored\nDebrief State B served]
+    EVENTS -- Employee submits MFA form --> MFASUBMIT[smishing_mfa_submitted\nHigh-risk signal\nZero real data stored\nDebrief State C served]
+    EVENTS -- Employee reports --> REPORT[smishing_reported\nPositive signal]
+    EVENTS -- Bot / scanner click --> BOTFILTER[Click filtered\nFiltered count updated]
+    EVENTS -- Delivery failure --> FAIL[Per-user: Not delivered\nExcluded stats updated]
+    EVENTS -- STOP reply --> STOP[Send queue removal\nPermanent opt-out\nAdmin notified]
+    EVENTS -- Carrier rate-limit --> SLOW[Status: Delivery Slowed\nDelivery continues]
+    EVENTS -- All sends complete --> COMPLETE[Status: Completed\nFinal stats locked]
+
+    CLICK --> REMEDIATION{Remediation\nrule enabled?}
+    CREDSUBMIT --> REMEDIATION
+    MFASUBMIT --> REMEDIATION
+    REMEDIATION -- Assign training --> TRAIN[smishing_training_assigned]
+    REMEDIATION -- Notify manager --> MGRALERT[Manager email sent]
+    REMEDIATION -- Create ticket --> TICKET[ServiceNow ticket created]
+    REMEDIATION -- No rules --> NOACTION[No automated action]
+
+    CLICK --> DEBRIEFA[Employee: Debrief page\nState A — link only]
+    CREDSUBMIT --> DEBRIEFB[Employee: Debrief page\nState B — credential form submitted\nForm fields shown + safety message]
+    MFASUBMIT --> DEBRIEFB2[Employee: Debrief page\nState C — MFA code submitted\nCode field shown + safety message]
+    DEBRIEFA --> HOOK[Hook: This was a simulation]
+    DEBRIEFB --> HOOK
+    DEBRIEFB2 --> HOOK
+    HOOK --> REDFLAGS[Red flags from this message]
+    REDFLAGS --> PVR[Pause · Verify · Report]
+    PVR --> TRAINMOD[CTA: Complete 2-min training]
+    TRAINMOD --> TRAINDONE[smishing_training_completed\nRisk score recovers]
+
+    TRAIN --> TRAINDONE
+    COMPLETE --> RESULTS[Campaign detail: Results]
+    RESULTS --> STATS[Graduated stats row\nLink only: Delivered → Clicked → Reported → Training Completed\nCredential harvest: + Credential Submitted\nMFA harvest: + MFA Code Submitted]
+
+    subgraph Template management
+        TL
+        TCREATE
+        TCLONE
+        TFORM
+        TSAVE
+        TDRAFT
+        TACTIVE
+    end
 
     subgraph Wizard
-        B
-        D
-        E
-        F
-        G
+        S1
+        S2
+        S3
+        S4
+        S5
+        S6
+        S7
     end
 
     subgraph Post-launch
-        H
-        H1
-        H2
-        H3
-        H4
-        H5
-        H6
-        H7
-        I
-        I1
+        SENDING
+        EVENTS
+        CLICK
+        CREDSUBMIT
+        MFASUBMIT
+        REPORT
+        BOTFILTER
+        FAIL
+        STOP
+        SLOW
+        COMPLETE
+        RESULTS
+        STATS
+        REMEDIATION
+        TRAIN
+        MGRALERT
+        TICKET
+        NOACTION
     end
 
     subgraph Employee experience
-        M
-        M1
-        M2
+        DEBRIEFA
+        DEBRIEFB
+        DEBRIEFB2
+        HOOK
+        REDFLAGS
+        PVR
+        TRAINMOD
+        TRAINDONE
     end

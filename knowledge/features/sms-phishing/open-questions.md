@@ -6,12 +6,14 @@ Last updated: 2026-05-01 · PRD added, 6 questions resolved, 10 new PRD question
 ## Unresolved
 
 - [ ] [PM/Eng] Where do customer phone numbers live today in Dune, and what permissions exist around them? Do customers expect smishing to use personal phone numbers, work-issued numbers, or both? (PRD §16.1–16.2)
-- [ ] [Eng] What SMS sending provider should Dune use, and which countries should v1 support? (PRD §16.3)
+- [x] [Eng] What SMS sending provider should Dune use, and which countries should v1 support? (PRD §16.3)
 - [ ] [PM] How should opt-out and employee consent be handled by customer, region, and campaign type? (PRD §16.4)
 - [ ] [PM/Eng] What is the exact risk-weighting difference between email-phishing failures and smishing failures? PRD confirms separate weighting is required but leaves the values undefined. (PRD §16.5)
+- [ ] [PM/Eng] For credential harvest and MFA harvest simulation types: do `smishing_credential_submitted` and `smishing_mfa_submitted` carry the same risk weight as each other, or does MFA credential submission warrant a higher penalty given the real-world impact of MFA bypass attacks?
+- [ ] [Eng] Confirm credential/MFA form client-side safety: submit handler fires event + redirect with no data serialization at browser layer. Confirm that password manager autofill does NOT trigger `smishing_credential_submitted` — only explicit submit button interaction does.
 - [ ] [PM] Should reporting (user forwarding suspicious SMS) be in scope for v1, or should v1 track only click/submission behavior? PRD lists it as a tracking metric but Phase 0 interviews should validate demand. (PRD §16.6)
-- [ ] [PM] Do we need approval workflows for high-sensitivity templates (e.g., credential-harvest, executive impersonation)? If yes, this adds an "Awaiting Approval" campaign state to the detail view. (PRD §16.7)
-- [ ] [PM] Should smishing templates be customer-editable in v1, or approved-library only during beta? This changes the message editor scope (full custom vs. token-substitution only). (PRD §16.8)
+- [ ] [PM] Do we need approval workflows for high-sensitivity templates (e.g., credential-harvest, executive impersonation)? If yes, this adds an "Awaiting Approval" campaign state to the detail view. (PRD §16.7) — **Resolved below.**
+- [ ] [PM] Should smishing templates be customer-editable in v1, or approved-library only during beta? This changes the message editor scope (full custom vs. token-substitution only). (PRD §16.8) — **Resolved below.**
 - [ ] [PM] How will Dune prevent customers from sending messages that look like real emergencies, legal notices, or harmful impersonations? Guardrails design required. (PRD §16.9)
 - [ ] [PM] How should Dune price/package this capability — included simulation channel, add-on, or advanced user-risk module? (PRD §16.10)
 - [ ] [Eng] How will link scanner false positives (MDM and security tools auto-following tracking URLs) be detected and excluded from click metrics and risk scores? Not addressed in PRD.
@@ -34,3 +36,7 @@ Last updated: 2026-05-01 · PRD added, 6 questions resolved, 10 new PRD question
 - [x] [PM] Is multi-channel data modeling in scope for v1? — **Answer:** Yes — architecture must anticipate WhatsApp, Signal, Telegram, QR-code lures, and vishing-adjacent channels. The data model should be designed for multi-channel even though v1 ships SMS-only. The campaign `type = smishing` field makes this extensible. (PRD §1, §10)
 
 - [x] [Both] Is the mobile debrief a new mobile-first design surface? — **Answer:** Yes, confirmed. PRD §7.3 and §13 specify mobile-first, short, behavior-oriented coaching pages. The content structure is: (1) Hook — "This was a simulation." (2) Red flags from the specific message. (3) Correct behavior. (4) Micro-commitment. (PRD §13)
+
+- [x] [PM] Do we need approval workflows for high-sensitivity templates? — **Answer:** No approval workflow in v1. Campaigns launch directly after the admin completes the review step. The compliance acknowledgment checkbox at Step 7 is the only gate. (Decision: 2026-05-01)
+
+- [x] [PM] Should smishing templates be customer-editable in v1, or approved-library only during beta? — **Answer:** Customers can create and manage their own templates in v1. The Smishing section includes a Template management tab alongside the Campaigns tab. Customers can create templates from scratch or clone and customize Dune library templates. Dune library templates are read-only. (Decision: 2026-05-01)
