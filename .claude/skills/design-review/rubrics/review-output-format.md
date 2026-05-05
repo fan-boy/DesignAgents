@@ -1,30 +1,90 @@
 # Review Output Format
 
-Standard output structure for design reviews produced by the `/design-review` skill.
+Use this structure for every design review.
 
-## Sections
+## Review Summary
+Start with 2–4 bullets covering:
+- the biggest strengths
+- the most serious risks
+- overall confidence in the design
+- whether the design appears ready for handoff
 
-### 1. Review summary
-2–3 sentences. What was reviewed, who it's for, and the overall verdict.
+## Quality Bar Assessment
+Answer these directly:
+- Does this meet the expected Stripe-level standard of product craft?
+- If not, what specifically falls short?
+- Is the main gap in clarity, trust, consistency, state design, accessibility, or polish?
 
-### 2. Heuristic violations
-Grouped by Nielsen heuristic number or Dune-specific heuristic (D1–D5). Each finding:
-- **Severity:** S0–S4 (see `severity-scale.md`)
-- **Heuristic:** which principle is violated
-- **Finding:** what the problem is
-- **Location:** where in the design it occurs
-- **Recommendation:** what to do about it
+Keep this section concise and direct.
 
-### 3. Design system compliance
-Checklist pass/fail against token usage, component variants, spacing, and accessibility.
+## Findings
+List findings in priority order.
 
-### 4. RBAC & permissions
-Any permission boundary gaps or missing disabled states.
+For each finding include:
 
-### 5. Open questions
-Unresolved decisions that need PM or Eng input before the review can be fully closed.
+### ID
+Use `DR-01`, `DR-02`, etc.
 
-### 6. Verdict
-- **Ready for handoff** — no S0/S1 issues
-- **Needs revision** — one or more S0/S1 issues must be resolved first
-- **Needs PM/Eng input** — blocked on open questions
+### Severity
+Use S0–S4 from `severity-scale.md`.
+
+### Category
+Choose the most relevant category, such as:
+- Visibility of system status
+- Error prevention
+- Trust and risk communication
+- RBAC / permissions
+- Accessibility
+- Design system compliance
+- Hierarchy and clarity
+- State completeness
+- Operator efficiency
+
+### Location
+Name the screen, panel, frame, or interaction area.
+
+### Issue
+Describe what is wrong in concrete terms.
+
+### Why it matters
+Describe the user or business consequence.
+
+### Recommended fix
+Give a practical improvement, not a vague suggestion.
+
+### Principle / Heuristic violated
+Reference the most relevant heuristic(s) or product principle(s).
+
+### Teaching note
+Add one short lesson explaining what a strong product designer should notice here.
+
+## Strengths
+List 2–5 things working well.
+These should be specific and useful, not generic praise.
+
+## Open Questions
+Only include questions that materially affect confidence in the review.
+Label ownership when possible:
+- [PM]
+- [Eng]
+- [Both]
+- [Design]
+
+## Revision Priorities
+List the top 3–5 changes in order of importance.
+
+## Verdict
+End with exactly one of:
+- Ready for handoff
+- Needs revision
+- Blocked on open questions
+
+## Files Saved
+List the output files written to the feature folder.
+
+## Writing rules
+- Prefer fewer, stronger findings over long shallow lists
+- Be direct and specific
+- Avoid generic praise
+- Avoid vague advice like “improve spacing” without explaining the consequence
+- Focus on critique that will change the design meaningfully

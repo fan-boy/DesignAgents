@@ -1,0 +1,96 @@
+{
+  "feature_name": "SMS Phishing (Smishing) Simulation",
+  "feature_slug": "sms-phishing",
+  "review_scope": "17 [Rev 1] Figma frames — Smishing section landing, campaign creation wizard (entry modals + 5 wizard steps including rebuilt Notifications step and completed Review summary), template preview panel, bulk action component, and campaign status screens (Scheduled, In Progress, Result/Completed). Third review pass — direct Figma fixes applied during this pass.",
+  "review_focus": [
+    "state completeness",
+    "trust and risk communication",
+    "wizard flow completeness",
+    "design system compliance",
+    "information architecture",
+    "accessibility",
+    "graduated stat funnel accuracy",
+    "placeholder content readiness"
+  ],
+  "verdict": "ready for handoff",
+  "quality_bar_assessment": "All S4 and S2 findings resolved across three review passes and a direct-fix session. The Review screen campaign summary, Notifications step form, compliance gate, campaign table, and status screens now form a coherent, trust-correct feature. Two S3 items remain open by design (Reported signal pending PM scope, Preview panel CTA). One S2 accessibility annotation is needed before the dev-handoff doc is written. Design is ready for handoff pending those two pre-handoff tasks.",
+  "strengths": [
+    "Review screen campaign summary (Campaign Setup / Template / Target Audience / Notifications as read-only rows) is the correct pattern for a high-stakes wizard confirmation step",
+    "Graduated stat funnel with absolute numbers and percentages remains the strongest individual surface — tells the full campaign story",
+    "Compliance acknowledgment correctly implemented as DS Checkbox with disabled CTA state and checked-state annotation",
+    "Campaign table landing is production-ready with 5 status types, 7 columns, filter toolbar, and representative data",
+    "Notifications step rebuild correctly mirrors the Scheduled detail screen — wizard form and read-only detail view are in sync"
+  ],
+  "findings": [
+    {
+      "id": "DR-05",
+      "severity": "S3",
+      "category": "State completeness",
+      "location": "In Progress and Result screens → graduated stat funnel",
+      "issue": "The graduated funnel does not include a Reported signal card. PRD §11 defines smishing_reported as a distinct positive risk signal with dedicated event type and scoring weight.",
+      "why_it_matters": "The Reported signal is the only positive-direction event in the funnel. Without it, admins cannot measure reporting rate, compare it across campaigns, or see the Remediation Agent positive reinforcement trigger in the UI.",
+      "recommended_fix": "Add a Reported stat card with positive visual treatment. Confirm v1 scope with PM before designing — reporting mechanism is pending Phase 0 validation.",
+      "principles": ["State completeness matters", "Visibility of system status"],
+      "teaching_note": "A missing funnel step creates an analytical gap. Funnel design must be driven by the event taxonomy. If PM confirms v1 scope, this is a 30-minute addition."
+    },
+    {
+      "id": "DR-08",
+      "severity": "S3",
+      "category": "Trust and risk communication",
+      "location": "Template Preview panel → footer CTA",
+      "issue": "The Template Preview panel is titled Preview Attack but its primary CTA is Save Changes. The panel contains only informational content with no editing controls.",
+      "why_it_matters": "Save Changes on a view-only surface implies a phantom commitment. Admins may skip previewing templates to avoid unintended changes.",
+      "recommended_fix": "Replace Save Changes with Close (if view-only) or Use Template (if the panel triggers template selection). Align Cancel label to match.",
+      "principles": ["User control and freedom", "Match between system and the real world"],
+      "teaching_note": "CTA copy on a preview panel is a trust signal. The label must accurately describe the state change it causes — or the absence of one."
+    },
+    {
+      "id": "DR-13",
+      "severity": "S2",
+      "category": "Accessibility",
+      "location": "Create New Campaign wizard — Steps Container component",
+      "issue": "The wizard step bar has no design annotation specifying ARIA roles, step state labels (current / completed / locked), or back-navigation clickability.",
+      "why_it_matters": "Without the annotation, a developer implementing the wizard has no spec for keyboard accessibility or screen reader behavior on the step progress bar.",
+      "recommended_fix": "Add a Figma annotation specifying role=navigation + aria-label, each step's current/completed/locked state, and whether completed steps are clickable. Approximately 10 minutes of annotation work.",
+      "principles": ["Accessibility is a product-quality requirement"],
+      "teaching_note": "Wizard step bars are accessibility-critical components. Annotating at design time costs 10 minutes; retrofitting post-implementation costs a sprint."
+    },
+    {
+      "id": "DR-14",
+      "severity": "S1",
+      "category": "Polish",
+      "location": "Scheduled and In Progress screens → Templates / Training section",
+      "issue": "Multiple identical Ransomware 4mins training cards with no title, duration, or category variation.",
+      "why_it_matters": "Identical placeholder content cannot validate truncation, badge alignment, or layout against real data variation.",
+      "recommended_fix": "Use varied representative content — at least two different titles, a range of durations, and different category badges.",
+      "principles": ["Polish supports trust"],
+      "teaching_note": "Placeholder repetition hides layout fragility. Use varied content to stress-test components at design time."
+    }
+  ],
+  "resolved_findings": [
+    { "id": "DR-01", "original_severity": "S4", "resolution": "Notifications step rebuilt with Training Assignment card and Notifications Config card (Rev 1)" },
+    { "id": "DR-02", "original_severity": "S4", "resolution": "PLAYGROUND sidebar label replaced with Simulations across all frames (Rev 1)" },
+    { "id": "DR-03", "original_severity": "S4", "resolution": "Compliance checkbox replaced with DS Checkbox component + disabled CTA state (Rev 1)" },
+    { "id": "DR-04", "original_severity": "S3", "resolution": "Coming Soon and Secondary placeholder text replaced in stat cards (Rev 1)" },
+    { "id": "DR-06", "original_severity": "S3", "resolution": "Result screen stats corrected to Did Not Engage 89.3% with delta label (Rev 1)" },
+    { "id": "DR-07", "original_severity": "S3", "resolution": "Campaign list table added with 5 representative rows and toolbar (Rev 1)" },
+    { "id": "DR-09", "original_severity": "S4", "resolution": "Review screen Form Container rebuilt with 4-section campaign summary: Campaign Setup (name, channel, schedule, duration), Template (templates, persona, kill chain), Target Audience (users, groups, exclusions), Notifications (trigger, recipients, event). Compliance gate remains below summary (direct fix)" },
+    { "id": "DR-10", "original_severity": "S2", "resolution": "Section header Moderate badges updated to Risk: Moderate across 18 direct-node instances in In Progress and Result screens (direct fix)" },
+    { "id": "DR-11", "original_severity": "S2", "resolution": "3-day accuracy note on Result screen updated to past tense referencing did not engage metric name (direct fix)" },
+    { "id": "DR-12", "original_severity": "S2", "resolution": "Secondary token-name text nodes removed (Rev 1)" },
+    { "id": "DR-15", "original_severity": "S2", "resolution": "Tab 1 placeholder labels replaced with Risk Scores, Training Progress, Time on Platform, Simulation History in both In Progress and Result screens (direct fix)" },
+    { "id": "DR-16", "original_severity": "S2", "resolution": "Log In instance default text replaced with em-dash in In Progress and Result screens (direct fix)" }
+  ],
+  "open_questions": [
+    "[PM] Is the Reported signal card confirmed for v1? Pending Phase 0 validation — answer determines whether DR-05 must be designed before handoff.",
+    "[PM] Which tabs are confirmed v1 scope for the User Performance section? Current design shows Users, Departments, Risk Scores, Training Progress, Time on Platform, Simulation History.",
+    "[Design] Wizard step bar ARIA annotation (DR-13) must be added before dev-handoff doc is written."
+  ],
+  "revision_priorities": [
+    "Confirm DR-05 Reported signal scope with PM — design or defer before handoff",
+    "Add wizard step bar accessibility annotation (DR-13) — 10 minutes, required before running dev-handoff",
+    "Fix Save Changes CTA on Template Preview panel (DR-08) — replace with Close or Use Template",
+    "Replace Ransomware 4mins placeholder content (DR-14) with varied training card data"
+  ],
+  "last_updated": "2026-05-05"
+}

@@ -7,9 +7,9 @@ Dune Security · Internal Knowledge · Last updated: 2026
 
 ### Adaptive security
 **URL:** adaptivesecurity.com
-**Relevant for:** Largest SAT market share. The default incumbent in enterprise accounts. Benchmark for training catalog breadth (89+ highlighted titles), phishing simulation volume, and reporting dashboards.
-**When to compare:** Displacement deals, enterprise RFPs, any conversation about training catalog depth or phishing simulation scale.
-**When NOT to compare:** AI personalization, behavioral risk scoring, or speed of content delivery — KnowBe4's model is volume-based and not adaptive. Comparing here concedes ground we own.
+**Relevant for:** The only other relevant advanced SAT company based in the same city as us. Also very succesful 
+**When to compare:** Displacement deals, enterprise RFPs, any conversation about training catalog depth or phishing simulation scale, AI personalization,.
+**When NOT to compare:** behavioral risk scoring, or speed of content delivery — adaptives model is not really the model we want to build when it comes to trainnings. Comparing here concedes ground we own.
 
 ### KnowBe4
 **URL:** knowbe4.com

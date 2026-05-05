@@ -1,114 +1,148 @@
-# UX Heuristics
-Dune Security · Internal Knowledge · Last updated: 2026
+# Heuristics
 
----
+Use these heuristics to review the design. Evaluate every review against all 10 Nielsen heuristics plus the 5 Dune-specific heuristics below.
 
-## Nielsen's 10 Heuristics (Applied to Dune)
+## Nielsen's 10 Heuristics
 
-### 1. Visibility of System Status
-Keep users informed about what's happening, with appropriate feedback in reasonable time.
+### 1. Visibility of system status
+Check whether the interface clearly communicates what is happening now.
+Look for:
+- loading, saving, processing, syncing, or queued states
+- clear confirmation after important actions
+- clear progress or completion feedback
+- visible distinction between idle, pending, success, and failure
 
-**Dune context:** Simulation campaigns, agent runs, and risk score calculations are async. Users must always know if something is running, queued, completed, or failed — never leave them in a void.
+### 2. Match between system and the real world
+Check whether the design uses concepts, language, and structure users will understand.
+Look for:
+- plain-language labels
+- familiar mental models
+- information grouped in a way that matches user expectations
+- warnings and outcomes described in user terms, not internal jargon
 
-- Show progress states for campaign launch, agent activation, and module delivery.
-- Risk score changes should surface as a visual delta (before/after), not a silent update.
+### 3. User control and freedom
+Check whether users can recover, undo, cancel, or safely exit.
+Look for:
+- cancel / back / close pathways
+- confirmation before irreversible actions
+- ability to revise inputs before committing
+- graceful recovery from unintended actions
 
-### 2. Match Between System and the Real World
-Use language and concepts familiar to the user — not internal system terminology.
+### 4. Consistency and standards
+Check whether patterns are applied consistently across the flow.
+Look for:
+- consistent labels and interaction patterns
+- known Dune patterns reused appropriately
+- consistent hierarchy, spacing, and control usage
+- no unnecessary novelty where a standard pattern already exists
 
-**Dune context:** Our end users are employees at banks, healthcare orgs, and retailers — not security professionals.
+### 5. Error prevention
+Check whether the design prevents mistakes before they happen.
+Look for:
+- validation before submission
+- guardrails on destructive or risky actions
+- constrained input where appropriate
+- clear defaults and previews before commitment
 
-- "Phishing simulation" not "simulated threat vector."
-- "Your training is due" not "module assignment pending."
-- Admins can handle more technical language; learner-facing UI must be plain English.
+### 6. Recognition rather than recall
+Check whether users can act without depending on memory.
+Look for:
+- visible context at key decision points
+- discoverable actions
+- preserved information across steps
+- reduced need to remember previous selections or hidden rules
 
-### 3. User Control and Freedom
-Support undo, redo, and clear exits. Users make mistakes.
+### 7. Flexibility and efficiency of use
+Check whether the design supports both new and experienced users.
+Look for:
+- efficient paths for repeat tasks
+- shortcuts or bulk behaviors where relevant
+- reduced unnecessary repetition
+- smooth handling of frequent workflows
 
-**Dune context:** Simulation scheduling, group targeting, and agent configuration are high-stakes. Users need escape hatches.
+### 8. Aesthetic and minimalist design
+Check whether the interface is focused and readable.
+Look for:
+- strong visual hierarchy
+- reduced noise
+- clear CTA emphasis
+- no unnecessary content competing with the main task
 
-- Wizards must support Back navigation without data loss.
-- Destructive actions (delete campaign, deactivate agent) require a confirmation step.
-- Modals with form state must confirm before closing — not silently discard.
+### 9. Help users recognize, diagnose, and recover from errors
+Check whether errors are understandable and actionable.
+Look for:
+- specific error messages
+- clear cause and next step
+- recovery paths
+- no dead-end failure states
 
-### 4. Consistency and Standards
-Users shouldn't have to wonder whether different words, situations, or actions mean the same thing.
-
-**Dune context:** The design system exists to enforce this. Deviation must be intentional and documented.
-
-- One pattern per interaction type (one drawer pattern, one wizard pattern, one empty state pattern).
-- Terminology is locked: "simulation" not "test," "group" not "cohort," "risk score" not "risk rating."
-- Action button placement follows the same left/right convention across all flows.
-
-### 5. Error Prevention
-Better to prevent errors than to recover from them.
-
-**Dune context:** Misconfigured simulations and agent triggers can have real organizational impact — surface constraints early.
-
-- Validate schedule conflicts before the wizard's final step, not at submission.
-- Surface RBAC permission gaps at the start of a flow, not at the point of action.
-- Warn before targeting a group that was recently simulated (cooldown awareness).
-
-### 6. Recognition Over Recall
-Minimize the user's memory load. Make options, actions, and objects visible.
-
-**Dune context:** Admins configure infrequently used features. Don't make them remember syntax or IDs.
-
-- Exclusion windows should be selectable from a calendar/list, not typed as date strings.
-- Group selection uses a searchable dropdown with member count — not a raw ID field.
-- Agent configuration surfaces affected users in context, not in a separate lookup.
-
-### 7. Flexibility and Efficiency of Use
-Accelerators for experts; defaults for novices.
-
-**Dune context:** Power admins manage hundreds of simulations. New admins need guardrails.
-
-- Smart defaults everywhere (suggested schedule, recommended group, pre-filled cadence).
-- Bulk actions for campaign and group management.
-- Advanced options (custom RBAC, snapshot diffing, fine-grained triggers) are available but not front-and-center.
-
-### 8. Aesthetic and Minimalist Design
-Every extra unit of information competes with relevant information and diminishes its relative visibility.
-
-**Dune context:** Dashboard overload is a real failure mode. Risk scores, campaign stats, and training completion compete for attention.
-
-- One primary metric per card. Supporting metrics are secondary.
-- Empty states are clean — not a list of possible next actions.
-- Settings pages are organized by task, not by data model.
-
-### 9. Help Users Recognize, Diagnose, and Recover from Errors
-Error messages should be in plain language, indicate the problem, and suggest a solution.
-
-**Dune context:** Configuration errors (scheduling conflicts, invalid group targets, agent trigger failures) need actionable resolution paths.
-
-- Error messages: what happened + why + what to do. Never just "Something went wrong."
-- Inline validation (below the field) for form errors. Toast/banner for system-level errors.
-- Failed simulations surface in the campaign detail view, not just in a log.
-
-### 10. Help and Documentation
-Even though it's better if the system doesn't need explanation, it's sometimes necessary.
-
-**Dune context:** Security concepts (spear phishing, vishing, AI simulation) need contextual education for non-technical admins.
-
-- Tooltip copy for advanced configuration fields.
-- Inline "What is this?" links on first-exposure to simulation types.
-- Empty states include a brief explanation of the feature, not just a CTA.
-
----
+### 10. Help and guidance
+Check whether users get the support they need at the right time.
+Look for:
+- helper text where ambiguity exists
+- good empty states
+- setup cues
+- contextual guidance for risky, unfamiliar, or enterprise-heavy workflows
 
 ## Dune-Specific Heuristics
 
-**D1. Earn Trust Before Surprising**
-Simulated attacks land in employee inboxes. Anything that could alarm or confuse must be followed immediately by a debrief. No simulation ends without a safe landing page explaining what just happened and what to do next.
+### 11. Trust and risk communication
+Check whether the design builds confidence in security-sensitive workflows.
+Look for:
+- consequences explained clearly
+- calm, actionable warning language
+- no ambiguity around risky actions
+- enough context for admins to trust the action they are taking
 
-**D2. Show the Why, Not Just the What**
-Risk scores and compliance stats without context breed confusion. Always explain what drives the number and what action it implies. "72 — above average risk. Recent click on phishing simulation." is better than "72."
+### 12. RBAC and permission boundary clarity
+Check whether access boundaries are legible and predictable.
+Look for:
+- clear distinction between visible vs actionable states
+- disabled states for restricted users
+- explanation of why access is limited
+- no hidden permission traps
 
-**D3. Design to the Permission Boundary**
-Every feature that surfaces user data or triggers actions must be designed for the least-permissioned user who might access it. RBAC is a design constraint, not an engineering afterthought.
+### 13. State completeness for enterprise workflows
+Check whether the flow accounts for the full state surface.
+Look for:
+- loading, empty, success, error, partial success
+- permission-restricted states
+- interrupted, retry, stale-data, and async states
+- multi-item and bulk-action edge cases where relevant
 
-**D4. Respect the Learner's Time**
-Employee-facing training must be completable in one focused session. No module should require more cognitive context than the average employee has available in a 5-minute break. Respect cognitive load as a real constraint.
+### 14. System-pattern compliance
+Check whether the design fits the Dune product and design system.
+Look for:
+- proper component usage
+- reuse of known workflows and interaction patterns
+- no ad hoc structure where a system pattern exists
+- consistency with product-wide hierarchy and behavior
 
-**D5. Failure States Are Data, Not Punishment**
-When a user clicks a phishing link or fails a quiz, the system reacts with education — not shame. Copy, visual design, and flow must reinforce this. Remediation is a feature, not a consequence.
+### 15. Operator efficiency without ambiguity
+Check whether the design supports fast action without sacrificing understanding.
+Look for:
+- efficient admin workflows
+- progressive disclosure rather than overwhelming density
+- bulk or expert actions that remain understandable
+- no speed optimization that creates costly mistakes
+
+## Quality Bar Overlay
+
+In addition to the heuristics above, review the design against a Stripe-level craft standard.
+
+This is not a request to copy Stripe’s visual style.
+It is a benchmark for:
+- clarity
+- polish
+- restraint
+- interaction quality
+- trustworthiness
+- state handling
+- precision of feedback
+
+A design can technically satisfy heuristics and still fall short on quality if:
+- hierarchy feels muddy
+- actions are understandable but not obvious
+- states exist but feel underdesigned
+- risky workflows are functional but not confidence-inspiring
+- the overall experience feels merely acceptable rather than thoughtfully crafted

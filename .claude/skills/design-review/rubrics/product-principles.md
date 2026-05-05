@@ -1,62 +1,88 @@
-# Dune Security — Product UX Principles
+# Product Principles
 
-## 1. Tone of Interaction
+Use these principles alongside the heuristics when reviewing Dune product work.
 
-Calm authority, not alarm.
+## 1. Clarity before cleverness
+The interface should be immediately understandable.
+Prefer obvious structure, labels, and actions over novelty or clever interaction patterns.
 
-The platform trains users on high-stakes topics (phishing, social engineering, deepfakes) without inducing paranoia. Language is direct, accessible, and non-technical by default — written for a Wells Fargo branch employee, not a security analyst.
+Review for:
+- obvious next actions
+- understandable labels
+- low ambiguity at key moments
+- minimal interpretation burden on the user
 
-- Use plain English. Avoid jargon unless the audience is explicitly technical.
-- Confidence over hedging. The product should feel like a trusted advisor, not a warning label.
-- Brevity wins. If/then formatting for actionable guidance. Short sentences. No em dashes. No ellipses.
-- Tone scales with context: informational content is matter-of-fact; risk alerts are serious but not catastrophic.
+## 2. Trust is part of the UX
+Security products must feel calm, precise, and dependable.
+When actions affect risk, automation, permissions, or remediation, the design must explain what will happen and why.
 
+Review for:
+- clear consequences
+- understandable warnings
+- explicit risky actions
+- no hidden assumptions in high-stakes workflows
 
-## 2. Error Handling Philosophy
+## 3. Reduce cognitive load
+Enterprise workflows can be dense, but they should never feel mentally expensive without reason.
+The design should simplify choices, reveal complexity progressively, and preserve context.
 
-Errors inform, they don't punish.
+Review for:
+- manageable information density
+- progressive disclosure
+- preserved context across steps
+- reduced need to remember hidden rules
 
-The platform surfaces mistakes (missed phishing simulations, failed assessments) as learning moments, not failures.
+## 4. Reuse system patterns before inventing new ones
+Consistency makes the product easier to learn and trust.
+Use known component patterns, flows, and interaction models unless there is a strong reason not to.
 
-- Error states explain what happened and what to do next — never a dead end.
-- Simulation outcomes (e.g., a user clicked a phishing link) are framed as data, not judgment.
-- Admin-facing errors (misconfigured flows, edge cases in scheduling) should surface the specific constraint, not a generic failure message.
-- RBAC edge cases and permission gaps should be caught early in a workflow, not at the point of action.
-- System errors visible to end users should be minimal, recoverable, and unthreatening.
+Review for:
+- appropriate component reuse
+- familiar workflow structures
+- no unnecessary novelty
+- pattern consistency across the product
 
+## 5. State completeness matters
+A design is not complete if it only covers the happy path.
+All meaningful states should be designed clearly and intentionally.
 
-## 3. Trust & Safety Expectations
+Review for:
+- loading, empty, success, error, partial success
+- permission states
+- destructive and recovery states
+- interrupted or async states where relevant
 
-The platform must earn trust at every layer.
+## 6. Fast for experts, safe for everyone
+Experienced users should move quickly, but never at the cost of hidden risk or ambiguity.
+Efficiency should coexist with clarity.
 
-Dune Security sells to enterprise security teams who are themselves skeptical buyers. The product's credibility depends on behaving exactly as it claims.
+Review for:
+- efficient repeat actions
+- smart defaults
+- bulk-action safety
+- support for high-frequency workflows without confusion
 
-- Simulated attacks (phishing, vishing, spear phishing) must feel real but debrief safely and immediately after interaction.
-- User data (risk scores, behavior history) is handled with the assumption that employees are being evaluated — transparency in what is tracked and why is a product value, not just a compliance checkpoint.
-- Client-branded modules must maintain the fidelity of the brand. White-label quality is a trust signal.
-- Admin controls (exclusion windows, group targeting, agent triggers) must behave predictably. Surprises erode trust faster than missing features.
-- The "Pause, Verify, Report" framework is the behavioral north star — the product should model the same deliberateness it teaches.
+## 7. Accessibility is a product-quality requirement
+Accessibility is not an extra layer added at the end.
+A strong design should support clear structure, readability, keyboard use, and non-visual comprehension from the start. Accessibility heuristics are useful early in design because they surface issues before implementation becomes expensive. [web:155][web:153][web:187]
 
+Review for:
+- readable hierarchy and language
+- likely keyboard accessibility
+- non-color-dependent meaning
+- understandable errors and status changes
+- touch and focus considerations where relevant
 
-## 4. Speed vs. Control
+## 8. Polish supports trust
+Craft is not just aesthetics.
+Polish shows up in hierarchy, spacing, feedback, edge cases, and interaction detail.
 
-Default to speed; expose control progressively.
+Use Stripe as a benchmark for craft quality:
+- high clarity
+- restrained but precise interface decisions
+- thoughtful state design
+- high trust in consequential flows
+- feedback that feels intentional and complete
 
-Most users (employees receiving training) need zero configuration. Most admins need meaningful control without being overwhelmed.
-
-- Guided flows (wizards, step-by-step setup) for complex configurations like spear phishing campaigns or agent triggers.
-- Smart defaults everywhere — pre-filled schedules, recommended group targets, suggested exclusion windows.
-- Power controls (custom RBAC, snapshot diffing, advanced scheduling) are available but not front-and-center.
-- Bulk actions and automation (the SAT module factory, ElevenLabs Flows integration) prioritize throughput for content and campaign production.
-- When in doubt: launch fast, surface edge cases inline, and let admins adjust — don't gate deployment on perfect configuration.
-
-
-## 5. Prioritization Heuristics
-
-| Scenario | Default |
-|---|---|
-| New feature with unclear scope | Design for the most common enterprise persona first |
-| Admin flow vs. employee flow | Employee simplicity > admin flexibility |
-| Speed of simulation delivery | Prefer scheduled/async over real-time where architecture allows |
-| Localization | English-first; localization as a structured second pass |
-| Risk score surfacing | Show scores in context of action, not as raw data |
+Do not copy Stripe visually.
+Use it as a benchmark for the level of care and coherence expected.
