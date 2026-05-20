@@ -1,0 +1,163 @@
+{
+  "feature_name": "AEP Library — Custom Adversary Emulation Pathway Builder",
+  "feature_slug": "aep-library",
+  "analyzed_at": "2026-05-20",
+  "direct_competitors": ["KnowBe4", "Adaptive Security", "Hoxhunt"],
+  "adjacent_competitors": ["Breacher.ai"],
+  "workflow_stages": [
+    "Entry to library",
+    "Browse pre-built scenarios",
+    "Initiate custom creation",
+    "Author behavior (prompt/form/guided)",
+    "Preview or test behavior",
+    "Publish and make available for campaigns"
+  ],
+  "competitors": [
+    {
+      "name": "KnowBe4",
+      "url": "knowbe4.com",
+      "tier": "direct",
+      "entry_point": "Phishing > Phishing Templates > My Templates",
+      "setup_friction": "None beyond admin login — template creation is immediately accessible",
+      "core_flow": [
+        "Navigate to Phishing Templates",
+        "Browse System Templates (managed, read-only) or My Templates (custom)",
+        "Clone a system template OR create new via WYSIWYG editor OR use AIDA AI generator",
+        "AIDA path: write plain-language description, select attack vector type, set difficulty 1–5 stars",
+        "AI generates template; admin reviews and edits",
+        "Save to My Templates",
+        "Preview renders email as recipient would see it",
+        "Optional: send test email to self before campaign"
+      ],
+      "feedback_states": [
+        "Template preview rendered on save",
+        "Test send confirmation",
+        "AIDA generation loading state (inferred)"
+      ],
+      "error_prevention": "Difficulty slider with NIST Phish Scale SEI mapping prevents admins from accidentally creating templates that are too obvious or too deceptive",
+      "trust_model": "Managed vs. custom separation is clear; clone path ensures custom work starts from a validated baseline",
+      "rbac_notes": "Admin role required; all admins have equal template authoring access; no per-template ownership or reviewer role",
+      "repeat_use_efficiency": "Clone is fast; AIDA Quick Create mode reduces visible fields; saved templates are reusable across campaigns",
+      "ai_personalization": "AIDA generates templates from plain-language description + structured parameters; AI selects social engineering indicators based on difficulty level",
+      "risk_score_surface": "Not present in template library",
+      "remediation_path": "Not connected to template authoring — separate training assignment flow",
+      "confidence": "high",
+      "source_notes": "Based on public KnowBe4 Knowledge Base docs: template creation guide, AIDA guide, advanced features guide — authoritative for admin UX"
+    },
+    {
+      "name": "Adaptive Security",
+      "url": "adaptivesecurity.com",
+      "tier": "direct",
+      "entry_point": "Admin platform → Personas section (exact nav inferred from blog)",
+      "setup_friction": "Executive deepfake requires executive name/role to be registered; OSINT-driven personas require no setup",
+      "core_flow": [
+        "Admin selects an executive to impersonate (for deepfake persona) or selects OSINT auto-generation",
+        "Platform generates AI voice clone and video avatar from available data",
+        "Admin does not write a behavior prompt — persona is derived from the real person being impersonated",
+        "Custom persona is available for use in vishing/video simulations"
+      ],
+      "feedback_states": [
+        "Deepfake generation progress (inferred)",
+        "Preview of generated voice/video (inferred from deepfake demo product)"
+      ],
+      "error_prevention": "Not documented",
+      "trust_model": "Deepfake generation from real executives implies strong consent and governance — not publicly documented",
+      "rbac_notes": "Not documented — inferred admin-only access",
+      "repeat_use_efficiency": "Personas are reusable once generated",
+      "ai_personalization": "Core product — AI generates all attack content including OSINT-personalized emails and deepfake video/voice",
+      "risk_score_surface": "Not observed in persona builder context",
+      "remediation_path": "Not connected to persona builder",
+      "confidence": "medium",
+      "source_notes": "Based on product blog post about Custom AI Deepfake Personas and marketing landing pages — admin UX internals are inferred, not directly observed"
+    },
+    {
+      "name": "Hoxhunt",
+      "url": "hoxhunt.com",
+      "tier": "direct",
+      "entry_point": "Admin dashboard → Simulation settings",
+      "setup_friction": "No custom scenario authoring — admin only configures which Hoxhunt-managed scenarios are active",
+      "core_flow": [
+        "Admin enables/disables threat types (email, Slack, Teams, SMS, deepfake video)",
+        "Admin sets difficulty range per group",
+        "Platform adaptively delivers scenarios based on individual employee performance history",
+        "Admin cannot author new scenarios or personas"
+      ],
+      "feedback_states": [
+        "Real-time dashboard updates as simulations are delivered and reported",
+        "Per-user difficulty trajectory visible in reporting"
+      ],
+      "error_prevention": "No authoring = no authoring errors; admin controls are configuration, not creation",
+      "trust_model": "All scenarios are Hoxhunt-managed and validated — admin trust is implicit in the platform's content curation",
+      "rbac_notes": "Admin role controls simulation settings; employees see only their own training",
+      "repeat_use_efficiency": "Fully automated after setup — no per-campaign template selection required",
+      "ai_personalization": "AI adapts difficulty per employee; scenarios are personalized by language, role, department",
+      "risk_score_surface": "Behavioral signals tracked; not a named risk score in the same way as Dune",
+      "remediation_path": "Automated training follows failed simulations",
+      "confidence": "medium",
+      "source_notes": "Based on public product pages, help docs, and blog articles — admin console access not directly observed"
+    },
+    {
+      "name": "Breacher.ai",
+      "url": "breacher.ai",
+      "tier": "adjacent",
+      "entry_point": "Platform admin → Simulation campaigns",
+      "setup_friction": "Playbook mode requires minimal setup; custom campaign mode requires selecting attack chain steps",
+      "core_flow": [
+        "Admin selects a ready-made playbook (e.g. BEC Wire Transfer, IT Help Desk Impersonation) OR builds a custom attack chain",
+        "Custom chain: selects attack types to sequence (email + voice + deepfake video) and configures targeting",
+        "AI generates conversation content at runtime — admin does not author behavioral prompts",
+        "Campaign is deployed; AI agents conduct conversations adaptively"
+      ],
+      "feedback_states": [
+        "Campaign progress tracking (inferred)",
+        "Conversation outcome reporting (inferred)"
+      ],
+      "error_prevention": "Not documented",
+      "trust_model": "Playbooks are pre-validated by Breacher; custom campaigns rely on admin judgment for attack chain configuration",
+      "rbac_notes": "Not documented",
+      "repeat_use_efficiency": "Playbooks are reusable; custom chains can likely be saved as templates (inferred)",
+      "ai_personalization": "AI generates adaptive conversation content at runtime — not admin-authored",
+      "risk_score_surface": "Not observed",
+      "remediation_path": "Not connected to simulation builder",
+      "confidence": "medium",
+      "source_notes": "Based on product marketing pages and press release — admin campaign builder UX not directly documented"
+    }
+  ],
+  "observed_patterns": [
+    "Clone-and-customize is the primary path from managed library to custom artifact (KnowBe4)",
+    "Guided AI generation (plain-language brief + structured parameters) is more admin-friendly than raw prompt entry (KnowBe4 AIDA)",
+    "Difficulty as a slider or star rating abstracts behavioral complexity into an admin-legible control (KnowBe4 AIDA)",
+    "Visual and navigational separation between managed (vendor) and custom (tenant) artifacts is essential (KnowBe4)",
+    "Attack categorization by channel is the market default — psychological technique taxonomy is an open differentiator (all competitors)",
+    "No competitor exposes a raw system prompt editor as the default authoring interface",
+    "No competitor offers a live conversational simulator for testing AI agent behavior before deployment"
+  ],
+  "anti_patterns": [
+    "Raw system prompt box as default authoring interface — too high cognitive load for non-technical admins; produces low-quality artifacts",
+    "No behavioral preview before deployment — all competitors have this gap; do not repeat it",
+    "Attack type classified by channel only — limits analytics to delivery mechanism, not cognitive vulnerability",
+    "No version-locking for deployed templates — safe for static email artifacts but dangerous for live conversational AI agents",
+    "Template name collisions in large libraries — enforce unique names and display metadata (method, created date) on cards"
+  ],
+  "differentiation_opportunities": [
+    "Live conversational simulator — genuine market gap; no competitor offers admin-interactive AEP behavior testing",
+    "Adversary Method as psychological technique taxonomy (Authority, Urgency, Reciprocity, Curiosity, Scarcity, Familiarity) — enables risk reporting on cognitive vulnerability, not just channel",
+    "AI-assisted AEP generation from plain-language scenario brief — makes builder accessible to non-technical admins",
+    "Outcome criteria tied to risk scoring — connects AEP definition to downstream employee risk score calculation (unique to Dune)",
+    "Dune-seeded AEPs as quality benchmarks and teaching templates — clone-and-customize from expert-authored examples"
+  ],
+  "design_implications": [
+    "Default builder flow: plain-language scenario brief + Adversary Method select + behavior parameters → AI generates starting prompt and workflow → admin refines",
+    "Advanced mode: expose raw system prompt for technical admins who want direct control",
+    "Duplicate from Dune-seeded AEP should be a first-class CTA on seeded cards, not a secondary option",
+    "Library grid must visually distinguish Dune-seeded (read-only, reference quality) from Custom (editable, admin-owned) with more than a label",
+    "Simulator must be a visible progress step in the builder flow, not optional — AEP card should show simulator test status",
+    "Adversary Method must be a controlled vocabulary select populated before design begins — not free-form text"
+  ],
+  "confidence_notes": [
+    "No competitor was directly observed operating a conversational AI agent persona builder — market gap claim is well-supported",
+    "KnowBe4 AIDA observations are based on public KB docs — high confidence for admin workflow details",
+    "Adaptive Security persona builder internals are inferred from product blog and marketing — medium confidence",
+    "Breacher.ai admin UX is not publicly documented — observations are based on marketing pages only"
+  ]
+}
