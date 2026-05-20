@@ -1,0 +1,87 @@
+{
+  "feature_name": "Red Team Platform",
+  "feature_slug": "red-team-platform",
+  "design_goal": "Give security admins a structured, five-section Red Team workspace — with a composable attack builder, conversation review surface, and approval-gated campaign flow — that makes active social engineering simulation as accessible as passive phishing simulation.",
+  "user_segments": [
+    "Security admin / red team operator (primary)",
+    "SOC/IR lead (secondary)",
+    "Compliance owner (secondary)"
+  ],
+  "constraints": [
+    "Node-based editor scoped to linear sequences only in v1 — no branching attack paths",
+    "Complicity marking requires a confirmation step — not single-click due to HR implications",
+    "Request-start model requires a configurable Red Team Approver RBAC role",
+    "AEP library must be Dune-seeded from day one — empty library hard-blocks campaign creation",
+    "Channel availability is tenant-scoped — unconfigured channels shown as locked, not hidden",
+    "Existing Simulations → Smishing nav path must not be disrupted"
+  ],
+  "selected_strategy": "Option A — Dedicated top-level Red Team nav section with five sub-sections",
+  "selected_strategy_rationale": "Red team (active adversarial) and passive simulation are distinct operational contexts requiring different admin mindsets. Top-level nav makes this distinction clear, avoids polluting the Simulations section with red team complexity, and accommodates five sub-sections cleanly under a tab bar without exceeding DS-recommended nav depth.",
+  "alternative_strategies": [
+    {
+      "name": "Option B — Red Team as sub-section under Simulations",
+      "summary": "Add Red Team as a sub-nav item under Simulations alongside Email Phishing and Smishing",
+      "rejected_because": "Five nested sub-sections under Simulations → Red Team creates three nav levels, exceeding DS-recommended depth. Conflates active and passive simulation operational contexts."
+    },
+    {
+      "name": "Option C — Red Team as a campaign type in existing Simulations wizard",
+      "summary": "Add a Red Team campaign type at wizard step 1; VEP and attack selection become wizard steps",
+      "rejected_because": "Does not accommodate AEP Library and Attack Library as standalone management sections. Undersells the product and creates an unmaintainable wizard with excessive conditional paths."
+    }
+  ],
+  "tradeoffs": [
+    "Admins cannot see all simulation types (email + smishing + red team) in a single campaign list without a future cross-type reporting view",
+    "Top-level nav addition requires product/design alignment on global nav IA",
+    "Red team campaigns produce conversation threads, not click rates — cross-type comparisons must be built as explicit future features"
+  ],
+  "assumptions": [
+    "VEPs are linear sequences in v1 (not branching decision trees)",
+    "Complicity marking is manually performed by admin with optional system-suggested flags",
+    "Voice channel in v1 is human-executed — platform provides operator script guide, does not initiate/record calls",
+    "A configurable Red Team Approver RBAC role exists or will be created",
+    "Dune ships a library of pre-built VEPs covering common social engineering scenarios at launch",
+    "Channel availability (WhatsApp, Viber) is tenant-scoped and gated in the attack editor"
+  ],
+  "open_issues": [
+    "VEP branching scope — linear vs. branching for v1 must be confirmed before VEP creation form is designed",
+    "Approver RBAC model — new permission level must be confirmed with Eng before campaign wizard Step 6 is finalized",
+    "Voice channel automation scope — human-logged vs. automated for v1 determines node configuration design",
+    "Complicity auto-suggestion — NLP/keyword detection scope must be confirmed before thread detail is designed",
+    "Dashboard data contracts — time window, metrics, and refresh cadence must be confirmed before handoff",
+    "Channel provider provisioning flow — how admins enable WhatsApp/Viber is a Settings-level dependency"
+  ],
+  "risks": [
+    "VEP cold-start — if Dune does not seed VEPs at launch, campaign creation is immediately blocked",
+    "Node editor scope creep — branching paths require stateful orchestration engine not scoped for v1",
+    "Complicity marking inconsistency — judgment-based outcome requires inline guidance to improve inter-admin consistency",
+    "Approval dead-end — if no approver is configured, Request Start CTA becomes a dead end",
+    "Channel availability gaps — admins can build attacks using channels their tenant cannot send through"
+  ],
+  "ds_patterns_used": [
+    "wizard",
+    "drawer",
+    "modal",
+    "table",
+    "badge",
+    "tab bar",
+    "side-nav expandable section",
+    "empty state with CTA",
+    "rule-builder card (from smishing remediation step)"
+  ],
+  "new_patterns_required": [
+    "Conversation script editor (sequential attacker/response node pairs) — no DS equivalent; requires DS review",
+    "Node-based canvas editor (linear attack sequence builder with channel nodes) — no DS equivalent; requires DS review",
+    "VEP preview drawer (shows conversation script as a simulated exchange thread) — extension of existing drawer pattern; DS review recommended"
+  ],
+  "next_actions": [
+    "Resolve VEP branching scope with PM before designing VEP creation form",
+    "Confirm approver RBAC model with Eng before designing campaign wizard Step 6",
+    "Design AEP Library section first — fewest unresolved dependencies, establishes pattern for Attack Library",
+    "Design conversation thread detail and complicity marking — highest-risk novel UI pattern",
+    "Scope node-based editor linearity constraint with Eng before opening Figma on Attack Library",
+    "Review Stillsuit DS v2 token set for complicity outcome state — new semantic tokens may be needed"
+  ],
+  "predecessor_feature": "sms-phishing",
+  "predecessor_strategy_path": "knowledge/features/sms-phishing/design-strategy.md",
+  "last_updated": "2026-05-13"
+}
