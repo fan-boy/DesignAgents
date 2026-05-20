@@ -1,0 +1,92 @@
+flowchart TD
+    A([Admin: Simulations → Red Team]) --> B[Click Create Campaign]
+    B --> C[Step 1: Channel Selection]
+
+    C --> D{Channels selected?}
+    D -- SMS only --> E1[Single-channel mode]
+    D -- WhatsApp only --> E2[Single-channel mode]
+    D -- SMS + WhatsApp --> E3[Multi-channel mode]
+    D -- WhatsApp API template-only --> E4[WhatsApp constrained to pre-approved templates]
+
+    E1 & E2 & E3 & E4 --> F[Step 2: Audience]
+
+    F --> G{Targeting mode?}
+    G -- Groups --> H[Group picker + per-channel coverage breakdown]
+    G -- Individuals --> I[People-search + per-user channel chips]
+    G -- Both --> J[Group picker + people-search + overlap detection]
+
+    H & I & J --> K{Coverage: any channel?}
+    K -- 0% all channels for full audience --> L[Hard block: 0% coverage\nContinue disabled\nShow resolution path]
+    L --> F
+    K -- Partial coverage --> M[Warning callout: N targets unreachable\nAdmin can proceed]
+    K -- Full coverage --> N[Continue]
+    M --> N
+
+    N --> O[Step 3: Template + Message]
+    O --> P{Multi-channel?}
+    P -- Yes --> Q[SMS tab + WhatsApp tab in preview panel]
+    P -- No --> R[Single-channel preview panel]
+    Q & R --> S{WhatsApp link detected?}
+    S -- Yes --> T[Link preview warning callout\nAdmin acknowledges]
+    S -- No --> U[Continue]
+    T --> U
+
+    U --> V[Step 4: Compliance Pre-flight]
+    V --> W{All items ✓?}
+    W -- Any item ✗ unresolved --> X[Block: show resolution CTA per item\nContinue disabled]
+    X --> V
+    W -- Any item ⚠ Pending --> Y[Soft warning: setup in progress\nContinue enabled\nCampaign saved as draft on launch attempt]
+    W -- All ✓ --> Z[Ready to proceed]
+    Y & Z --> AA[Step 5: Delivery]
+
+    AA --> AB{Multi-channel?}
+    AB -- Yes --> AC[Configure fallback routing:\nFall back to SMS /\nSurface error only /\nSilent exclude]
+    AB -- No --> AD[Schedule + spread only]
+    AC & AD --> AE[Step 6: Remediation]
+
+    AE --> AF{Suppress remediation?}
+    AF -- ON default --> AG[Suppression confirmed\nNo automation fires]
+    AF -- Admin toggles OFF --> AH[Configure if/then rules per channel event]
+    AG & AH --> AI[Step 7: Test Send]
+
+    AI --> AJ{Multi-channel?}
+    AJ -- Yes --> AK[Test SMS: send + confirm\nTest WhatsApp: send + confirm]
+    AJ -- No --> AL[Test single channel: send + confirm]
+
+    AK --> AM{All channel checkboxes confirmed?}
+    AL --> AM
+    AM -- No --> AN[Admin skips with strong warning modal]
+    AM -- Yes --> AO[Continue]
+    AN --> AO
+
+    AO --> AP[Step 8: Review + Launch]
+    AP --> AQ{Hard blocks present?}
+    AQ -- Yes: 0% coverage or compliance ✗ --> AR[Launch disabled\nInline error + back to blocking step]
+    AQ -- No --> AS{Compliance acknowledgment checked?}
+    AS -- No --> AT[Launch disabled\nTooltip: confirm before launching]
+    AS -- Yes --> AU[Launch Campaign]
+
+    AU --> AV[Campaign detail: Sending status\nPer-channel delivery counts populate]
+
+    AV --> AW{Delivery events}
+    AW -- SMS delivered + clicked --> AX[red_team_sms_link_clicked recorded\nDebrief page served]
+    AW -- WhatsApp delivered + clicked --> AY[red_team_whatsapp_link_clicked recorded\nDebrief served in WhatsApp in-app browser]
+    AW -- WhatsApp failed + fallback ON --> AZ[SMS fallback send triggered\nFallback event recorded separately]
+    AW -- WhatsApp failed + surface error --> BA[Per-user error row: WhatsApp failed — reason]
+    AW -- WhatsApp failed + silent exclude --> BB[User excluded from delivery count silently]
+
+    AX & AY & AZ --> BC{Remediation suppressed?}
+    BA & BB --> BC
+    BC -- Yes --> BD[No automation fires\nTarget not notified]
+    BC -- No --> BE[Remediation rule evaluated\nTraining assigned or manager notified per rule]
+
+    BD & BE --> BF([Campaign Completed\nPer-channel stats finalized\nPer-user results table fully populated])
+
+    style L fill:#fee2e2,stroke:#dc2626,color:#7f1d1d
+    style AR fill:#fee2e2,stroke:#dc2626,color:#7f1d1d
+    style X fill:#fef3c7,stroke:#d97706,color:#78350f
+    style Y fill:#fef3c7,stroke:#d97706,color:#78350f
+    style AN fill:#fef3c7,stroke:#d97706,color:#78350f
+    style AT fill:#fef3c7,stroke:#d97706,color:#78350f
+    style BF fill:#dcfce7,stroke:#16a34a,color:#14532d
+    style A fill:#f1f5f9,stroke:#64748b

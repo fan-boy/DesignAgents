@@ -1,0 +1,171 @@
+{
+  "feature_name": "Red Team Campaign Launcher",
+  "feature_slug": "red-team-campaign-launcher",
+  "design_goal": "Give a security admin a guided, trustworthy, and operationally complete flow to configure and launch a multi-channel red team campaign — with no compliance surprises, no ambiguous delivery outcomes, and full visibility into who was reached, on which channel, and what happened next.",
+  "user_segments": [
+    "security admin / red team operator (primary)",
+    "security leadership / CISO (approver, if dual-auth confirmed)",
+    "compliance viewer / sub-admin (read-only, TBD)"
+  ],
+  "constraints": [
+    "v1 channels: SMS and WhatsApp only; vishing excluded from v1 design scope",
+    "Vishing architecture (self-serve vs. managed service) unresolved — no vishing UI designed",
+    "WhatsApp Business API feasibility for custom messages unconfirmed — design channel card with both states",
+    "Stillsuit DS v2 wizard pattern — 8 steps, back navigation preserves form state",
+    "Three new DS component patterns required: Compliance Pre-flight step, per-channel coverage indicator, individual targeting people-search",
+    "Individual targeting is net-new UX not present in simulation flows",
+    "Risk pipeline isolation vs. integration unresolved — strategy assumes isolated by default",
+    "Template library model (shared vs. separate) unconfirmed",
+    "Legal review required for compliance acknowledgment copy in Step 8"
+  ],
+  "selected_strategy": "Option B — Dedicated Red Team section with purpose-built 8-step wizard",
+  "selected_strategy_rationale": "Red team campaigns are adversarially distinct from training simulations — different compliance model, different remediation defaults, potentially different risk pipeline. A shared wizard produces ambiguity at every step (Lucy's Expert Mode anti-pattern). A dedicated section enables clean RBAC separation, purpose-built compliance gating as a first-class wizard step, and remediation suppression as a natural default. Mirrors the SMS phishing architecture decision (Option B won there for the same reasons). Extensible to Viber, Telegram, vishing by adding channel cards in Step 1 without rewiring the wizard.",
+  "alternative_strategies": [
+    {
+      "name": "Option A — Red Team as extension of existing campaign types",
+      "summary": "Add a Red Team type selector to the existing Simulations wizard. All campaign types share one wizard and one campaign list.",
+      "rejected_because": "Compliance model for red team is materially different from simulations — shared wizard creates ambiguity. Individual targeting and per-channel coverage indicator require wizard step surgery. Mixed campaign lists create reporting confusion. Lucy's implementation of this approach (smishing behind Expert Mode) is the canonical anti-pattern in competitor research."
+    },
+    {
+      "name": "Option C — Unified Campaign Launcher with channel/type selector at step 0",
+      "summary": "Redesign the entire campaign creation experience to unify Email, Smishing, and Red Team under one entry point.",
+      "rejected_because": "Correct long-term direction but wrong v1 scope. Red team and simulation compliance models are different enough that a unified wizard requires conditional branching at nearly every step. Requires all channel types to be production-ready simultaneously."
+    }
+  ],
+  "tradeoffs": [
+    "Separate navigation adds a surface — admins cannot see red team campaigns alongside simulations in one unified list without a future cross-type campaign view (Should priority, same tradeoff accepted for SMS phishing section)",
+    "8-step wizard with conditional branching (single vs. multi-channel) is more complex than the 7-step SMS phishing wizard — each step needs both variants",
+    "Risk pipeline isolation assumption may need to be revisited if PM confirms integrated pipeline — detail view design forks on this answer",
+    "Three new DS component patterns required before Figma work can begin on Steps 2 and 4 — creates a design dependency on DS review"
+  ],
+  "assumptions": [
+    "Red team results are isolated from the simulation risk score pipeline (no risk delta column in detail view) — verify with PM",
+    "WhatsApp Business API supports custom message sends for red team lures — verify with Eng before designing Step 3",
+    "Remediation default should be suppressed for red team campaigns to preserve adversarial exercise integrity",
+    "Vishing is out of v1 scope — channel card shows Coming soon state",
+    "Individual targeting (named user list) is in v1 scope alongside group targeting"
+  ],
+  "open_issues": [
+    "Risk score pipeline: isolated or integrated with simulations? Strategy branches on this answer — confirm with PM",
+    "WhatsApp Business API feasibility for arbitrary custom messages — confirm with Eng before designing Step 3",
+    "Template library model: shared with simulations or red-team-specific? Confirm before designing Screen 0 and Step 3",
+    "Individual targeting max user count — confirm with Eng before DS component spec",
+    "Compliance Pre-flight step pattern requires DS review and component definition — do not begin Figma on Step 4 until approved",
+    "Per-channel coverage indicator (multi-row breakdown) requires DS review",
+    "Individual targeting people-search component requires DS review — net-new component",
+    "Compliance acknowledgment copy in Step 8 requires legal review before finalization",
+    "Sub-role RBAC visibility into red team results — confirm who can see results beyond the launching admin",
+    "IDP SCIM integration required for geo/site filter and geo-breakdown chart — confirm availability and timeline with Eng",
+    "Domo API integration for automated reporting (Concentrix request) — confirm v3 reporting suite scope with PM",
+    "Historical data load (1 year) for repeat-offender tracking — confirm data retention policy and Eng feasibility",
+    "Employee ID source — currently placeholder '000' in PDF reports until Workday integration complete; confirm ETA",
+    "Daily email alert system architecture — N8N automations built but AWS API connection pending (Concentrix #25, TaskUs #9)"
+  ],
+  "risks": [
+    "WhatsApp API constraints may force template-only sends — reduces adversarial realism; must be communicated clearly in channel selection and template steps",
+    "Compliance Pre-flight as a new DS pattern creates a design dependency — cannot Figma Step 4 until DS approves the pattern",
+    "Individual targeting people-search component is net-new — scope and complexity unknown until DS component definition is complete",
+    "Suppression default for remediation may conflict with customers who want integrated risk scoring — must be configurable, not hardcoded",
+    "8-step wizard is longer than SMS phishing 7-step wizard — test admin completion time; consider if Steps 4 and 5 can be collapsed if compliance pre-flight has no pending items"
+  ],
+  "ds_patterns_used": [
+    "wizard",
+    "drawer",
+    "modal",
+    "table",
+    "badge",
+    "segmented control",
+    "empty state",
+    "callout / inline warning"
+  ],
+  "new_patterns_required": [
+    "Compliance Pre-flight wizard step — readiness checklist with third-party status cards (carrier, API, legal docs); requires DS review",
+    "Per-channel coverage indicator — multi-row breakdown (SMS / WhatsApp / neither) instead of single percentage; requires DS review as new variant",
+    "Individual targeting people-search component — search input + results table with per-user channel coverage chips + selected-list panel + overlap detection; requires DS review as net-new component"
+  ],
+  "conversation_states": {
+    "states": [
+      { "label": "Awaiting Response", "classification": "Ignored", "color": "gray", "description": "Message delivered; no reply yet" },
+      { "label": "Curious", "classification": "Complicit", "color": "amber", "description": "Target replied with exploratory question" },
+      { "label": "Engaged", "classification": "Complicit", "color": "orange", "description": "Target actively following the lure" },
+      { "label": "Hesitant", "classification": "Complicit", "color": "yellow", "description": "Target engaged but expressed doubt" },
+      { "label": "Compromised", "classification": "Complicit", "color": "red", "description": "Target clicked link, submitted credentials, or took target action" },
+      { "label": "Declined", "classification": "Non-Complicit", "color": "green", "description": "Target refused or reported the message" }
+    ],
+    "susceptibility_rate_includes": ["Curious", "Engaged", "Hesitant", "Compromised"],
+    "retag_rule": "Red Team admin can move Non-Complicit → Complicit only. Cannot reverse post-launch.",
+    "in_progress_dashboard": {
+      "stats_row": ["Total Targets", "Delivered (% of total)", "Awaiting Response", "Complicit (susceptibility %)", "Non-Complicit", "Not Reached"],
+      "table_columns": ["Employee Name", "Phone", "State (badge)", "Channel", "Last Activity", "Denials", "Nudge action"],
+      "nudge_rbac": "Red Team admin only",
+      "refresh_cadence": "30s auto-refresh",
+      "row_click": "Opens conversation transcript drawer (480px right-anchored)",
+      "campaign_actions": ["Pause campaign", "Cancel campaign (confirmation modal required)"]
+    }
+  },
+  "reporting_dashboard": {
+    "trigger": "33 feedback items from TaskUs and Concentrix (Feb–Apr 2026) confirmed that customers are building reporting dashboards manually from raw data exports. The campaign detail view must replace these external workarounds natively.",
+    "two_tab_structure": ["Overview (charts + daily breakdown)", "Conversations (per-user table)"],
+    "overview_tab_components": [
+      "Stats row: Total targets | SMS delivered | WhatsApp delivered | Total clicked (click rate %) | Not reached",
+      "Filter bar: calendar date range picker (not presets) + geo/site filter + campaign AEP filter + Export CSV",
+      "Daily activity stacked bar chart: Messages Sent / Ignored / Complicit by day of week",
+      "Complicit by campaign horizontal bar chart (human-readable campaign names)",
+      "Complicit by site/geo horizontal bar chart (blocked on IDP SCIM — show unavailable state if not integrated)",
+      "Channel breakdown: % by SMS / WhatsApp / Viber per geography"
+    ],
+    "conversations_tab_columns": [
+      "Employee Name", "Employee ID", "Email", "Start Date", "Geo/Site", "Campaign (human-readable)", "Channel", "Delivery Status", "Complicit? (re-taggable, RBAC-gated)", "Transcript (link)", "Reporting Status"
+    ],
+    "rbac_gates": [
+      "Re-tag Non-Complicit → Complicit: Red Team admin only; standard admin sees disabled control + tooltip",
+      "Export CSV: admin roles only; read-only viewer cannot export",
+      "Cancel campaign: Red Team admin only",
+      "Email alert configuration: Red Team admin only"
+    ],
+    "email_alert_flow": "Set up alerts drawer: recipients (multi-email), frequency (daily / per-event), format (summary count / full list). Daily digest sent at configured window. Alert email links back to Conversations tab.",
+    "customer_feedback_source": "Red_Teaming_Dashboard_Feedback_Tracker — 33 items, TaskUs + Concentrix, Feb–Apr 2026",
+    "actionable_items_incorporated": [
+      "#3 Human-readable campaign names (not slugs)",
+      "#4 Calendar date range picker for date filter",
+      "#6 Employee ID + Email + Start Date in table and export",
+      "#8 RBAC gate on Non-Complicit → Complicit re-tagging",
+      "#9 Email alert button and configuration flow",
+      "#10 Geo/site filter (blocked on IDP SCIM)",
+      "#13 Transcript link per row in table and export",
+      "#14/#30 Red Team as dedicated section/tab (not embedded in Org Insights)",
+      "#17 Column selection (future enhancement noted)",
+      "#20 Employee ID placeholder state while Workday integration pending",
+      "#23 Campaign status clarity — 'Completed with no data' explained inline",
+      "#24 Historical data view — 1-year range in date picker",
+      "#25 Automated daily email alerts for complicit users",
+      "#26 Channel breakdown % by geography"
+    ],
+    "deferred_items": [
+      "#1 Removed by customer",
+      "#5 Export CSV — already shipped",
+      "#7 Chat bubble layout — Won't Fix (historical data issue)",
+      "#11 Scam report integration — Deferred (requires OCR)",
+      "#15 TaskUs flag missing — Completed (infra fix)",
+      "#16 QA process — Internal process, not product design",
+      "#19 Concentrix access — Completed",
+      "#22 Domo API integration — v3 scope, not current design",
+      "#27 Complicit calc bug — Completed",
+      "#28 Complicit tag explanation — Completed",
+      "#32 Self-service AEP creation — separate feature scope"
+    ]
+  },
+  "next_actions": [
+    "Schedule DS sync: bring this strategy doc; align on Compliance Pre-flight pattern, per-channel coverage indicator variant, and individual targeting component before any Figma work begins",
+    "Get Eng confirmation on WhatsApp Business API custom message feasibility — design Channel Selection card (Step 1) with both states regardless",
+    "Design Screen 1 (Channel Selection) first — simplest new screen, highest downstream impact",
+    "Design Screen 2 (Audience) in single-channel + group-targeting variant first (closest to existing SMS phishing patterns), then layer individual targeting and multi-channel coverage",
+    "Design Screen 4 (Compliance Pre-flight) as a standalone component before embedding in the wizard — validate DS pattern in isolation",
+    "Open SMS phishing Figma file as structural reference for Steps 5–8 — adapt, do not recreate",
+    "Design campaign detail as two-tab view (Overview + Conversations) per reporting dashboard requirements from customer feedback",
+    "Confirm IDP SCIM integration status with Eng before designing geo/site chart — design unavailable state as fallback",
+    "Confirm Workday integration ETA with PM — design Employee ID placeholder state while pending",
+    "Get PM sign-off on email alert configuration UX before building alert drawer component"
+  ],
+  "last_updated": "2026-05-11"
+}

@@ -1,0 +1,222 @@
+{
+  "feature_name": "Red Team Campaign Launcher",
+  "feature_slug": "red-team-campaign-launcher",
+  "analyzed_at": "2026-05-08",
+  "direct_competitors": ["KnowBe4", "Hoxhunt", "Proofpoint SAT", "Cofense"],
+  "adjacent_competitors": ["Lucy Security (Proofpoint)", "Gophish"],
+  "workflow_stages": [
+    "Channel / campaign type selection",
+    "Audience + coverage check",
+    "Template selection and message configuration",
+    "Compliance pre-flight",
+    "Delivery scheduling",
+    "Test send",
+    "Review + launch",
+    "Post-campaign monitoring and reporting"
+  ],
+  "competitors": [
+    {
+      "name": "KnowBe4",
+      "url": "knowbe4.com",
+      "tier": "direct",
+      "entry_point": "Phishing > Campaigns > +Create Phishing Campaign (email). Callback Phishing is a separate navigation area. No SMS campaign type exists.",
+      "setup_friction": "Minimal for email — single-page form, no prerequisites. Callback Phishing requires Diamond tier. SMS simulation does not exist as a native feature.",
+      "core_flow": [
+        "Select campaign name",
+        "Choose audience: All Users or Specific Groups",
+        "Filter and select template by topic and difficulty",
+        "Set frequency (one-time, bi-weekly, monthly)",
+        "Set send timing window and business hours preference",
+        "Set start date, time, and timezone",
+        "Set tracking duration",
+        "Launch"
+      ],
+      "feedback_states": [
+        "Campaign dashboard: Phish-prone Percentage, click count by day, bounced count",
+        "Top 50 Clickers table",
+        "Bounced count with CSV download for failure diagnosis"
+      ],
+      "error_prevention": "None documented for standard campaigns. No pre-launch validation gates. Bounce handling is post-hoc (CSV download).",
+      "trust_model": "No pre-launch compliance acknowledgment. No admin confirmation of impact before launch. Trust is implicit — admins are expected to configure correctly.",
+      "rbac_notes": "Full admin or nothing below Platinum. Granular security roles (view-only campaign results without launch permission) are Platinum/Diamond only.",
+      "repeat_use_efficiency": "Single-page form allows fast repeat creation. Smart Groups (Platinum/Diamond) enable behavioral auto-enrollment for follow-up campaigns.",
+      "ai_personalization": "AI PhishFlip converts real-world phishing emails to simulation templates. No per-user AI targeting in standard phishing.",
+      "risk_score_surface": "Phish-prone Percentage (PPP) is the primary risk metric — click rate, not a behavioral risk score.",
+      "remediation_path": "Automated training enrollment on click/failure is configurable. Training assigned from the ModStore catalog.",
+      "vishing_notes": "Direct outbound vishing (Vishing Security Tests) discontinued January 1, 2023 due to carrier compliance risk. Replacement: Callback Phishing (Diamond only) — email-initiated, employee calls inbound IVR. Not true adversarial vishing.",
+      "smishing_notes": "No native SMS simulation feature. Not listed in Types of Simulated Phishing Tests. Blog covers smishing as a threat topic but this does not correspond to a product capability.",
+      "multi_channel_model": "Implicit per-campaign-type. Each channel (email, callback, QR, USB) is a separate nav area. No unified multi-channel campaign. No per-user or per-group channel assignment.",
+      "confidence": "high",
+      "source_notes": "All findings from official KnowBe4 support documentation, changelogs, and KB articles. Vishing discontinuation confirmed via official KB article with specific January 2023 date."
+    },
+    {
+      "name": "Hoxhunt",
+      "url": "hoxhunt.com",
+      "tier": "direct",
+      "entry_point": "Two modes: Adaptive (program config, AI runs continuously) and Manual (per-campaign wizard). Channel enrollment is part of program setup, not per-campaign selection.",
+      "setup_friction": "High initial compliance friction for SMS: requires signed legal amendment, documented opt-in proof (US/Canada), and works council documentation (EU). Enforced out-of-band. Once cleared, adaptive campaigns run without per-campaign admin input.",
+      "core_flow": [
+        "Configure program: define risk cohorts by role, department, location",
+        "Enroll channels: email, SMS, Teams (each requires prerequisites)",
+        "Set frequency tiers by cohort (high-risk: weekly; baseline: monthly; new hire: 30/60/90-day track)",
+        "AI runs simulations continuously within configured parameters",
+        "Manual mode: select template, target group, frequency, launch"
+      ],
+      "feedback_states": [
+        "Unified Human Risk Dashboard: reporting rate, fail rate, time-to-report across all channels",
+        "SMS reporting integrates with native iOS Report Message functionality",
+        "Post-click micro-training fires immediately on click (30-60 second push notification)"
+      ],
+      "error_prevention": "Carrier-aware geographic distribution for SMS (suggests routing logic exists). Pre-enrollment compliance gate prevents launch until consent documentation is confirmed out-of-band.",
+      "trust_model": "Compliance requirements (legal amendment, opt-in proof, works council docs) communicated as prerequisites before SMS enrollment. Trust model is front-loaded into the onboarding process, not the per-campaign wizard.",
+      "rbac_notes": "Enterprise RBAC with delegated admin, multi-entity (region/BU) structures, and audit logs. Key split: who can modify program parameters (cohort rules, channel enrollment, frequency) vs. who can view the Human Risk Dashboard.",
+      "repeat_use_efficiency": "Adaptive model removes per-campaign decisions entirely after initial setup. Program runs and adjusts automatically. Manual mode supports repeat campaign creation with template library.",
+      "ai_personalization": "Adaptive targeting driven by AI inference — cohort rules + behavioral history drive simulation frequency and channel selection per user. Most sophisticated targeting model reviewed.",
+      "risk_score_surface": "Human Risk Dashboard tracks behavioral trend over time across channels. Fail rate, reporting rate, and time-to-report are the primary signals — not a single composite risk score.",
+      "remediation_path": "Post-click micro-training (30-60 second push notification) fires immediately on click. Full training module assignment is also available. Reporting integrates with the threat intelligence feed.",
+      "vishing_notes": "Two modes: (a) Callback simulations — email-initiated inbound IVR, similar to KnowBe4 Callback Phishing. (b) AI deepfake voice/video targeting executive-support roles — custom managed engagement, not self-serve.",
+      "smishing_notes": "Real SMS to devices confirmed. Phone number provisioning via SCIM or CSV import required. Carrier-aware geographic distribution documented. iOS Report Message integration confirmed.",
+      "whatsapp_notes": "Not confirmed in reviewed sources.",
+      "multi_channel_model": "Channel enrollment is at program level. Per-user cross-channel routing (user A gets SMS, user B gets Teams based on role) is inferred to be AI-driven, not explicit admin configuration.",
+      "confidence": "high",
+      "source_notes": "Product pages, help docs, and changelog for SMS and compliance framework. Deepfake vishing engagement model from product pages — terms less precise, labeled as inference."
+    },
+    {
+      "name": "Proofpoint SAT",
+      "url": "proofpoint.com/us/products/security-awareness-training",
+      "tier": "direct",
+      "entry_point": "SMS/smishing listed as a named campaign type alongside email — channel selection is a top-level campaign-type decision. Lucy (acquired) adds WhatsApp support but in Expert Mode only.",
+      "setup_friction": "Lucy SMS requires: Expert Mode (simplified wizard excluded), formal written consent document submitted to SMS carrier, 4-week carrier whitelisting lead time (range: 4 days to 4 weeks by jurisdiction), CSM or Solutions Engineer involvement recommended before first SMS campaign.",
+      "core_flow": [
+        "Select campaign type (email, smishing, QR, USB)",
+        "Select or configure template",
+        "Define target audience by group/cohort",
+        "Set delivery schedule",
+        "Launch"
+      ],
+      "feedback_states": [
+        "Threat intelligence integration: real-world lure conversion via AI ThreatFlip (email only)",
+        "Auto-enrollment of high-risk users into training documented",
+        "Per-user delivery failure: not documented"
+      ],
+      "error_prevention": "No in-product pre-launch compliance gate documented. Lucy's 4-week whitelisting is framed as failure prevention — a prerequisite step, not an in-wizard guardrail.",
+      "trust_model": "No in-product compliance acknowledgment. Carrier whitelisting and consent are handled out-of-band at the MSA/contract layer. No admin-facing confirmation of impact before launch.",
+      "rbac_notes": "Not detailed in reviewed public sources.",
+      "repeat_use_efficiency": "Satori AI provides threat-informed simulation recommendations by group/cohort, reducing manual template selection for repeat campaigns.",
+      "ai_personalization": "AI ThreatFlip converts real-world phishing emails to simulation templates in one click — email only. Satori AI recommends simulations by cohort.",
+      "risk_score_surface": "Not confirmed in reviewed sources.",
+      "remediation_path": "Auto-enrollment of high-risk users into training is documented.",
+      "vishing_notes": "Not confirmed in Proofpoint's main product documentation.",
+      "smishing_notes": "Confirmed as first-class campaign type with thousands of templates based on real-world lures. Lucy adds WhatsApp (v5.5) but Expert Mode only.",
+      "multi_channel_model": "Parallel single-channel campaigns. Picking smishing templates is a top-level campaign-type choice. No unified multi-channel orchestration documented.",
+      "confidence": "medium",
+      "source_notes": "Main product page confirms SMS as campaign type but depth is unclear from public docs. LUCY integration status inferred — WhatsApp support is from Lucy's own pre-acquisition changelog, not confirmed in Proofpoint's current product marketing."
+    },
+    {
+      "name": "Cofense",
+      "url": "cofense.com",
+      "tier": "direct",
+      "entry_point": "PhishMe Playbooks — a guided wizard configuring a 12-month email simulation program. Azure AD sync provisions targets automatically. Non-email channels have no self-serve wizard entry point.",
+      "setup_friction": "Email: low (Playbook wizard, AD sync). SMS/WhatsApp: zero real-device sends — in-platform LMS simulation only. Vishing: full managed-service engagement (scope call, target list, script review, scheduling).",
+      "core_flow": [
+        "Email: Configure Playbook (12-month program in a few clicks)",
+        "SMS/WhatsApp: Create LMS module showing mock SMS/WhatsApp interface",
+        "Vishing: Submit engagement request to Cofense services team; joint scope call; target list submission; script review; Cofense callers execute"
+      ],
+      "feedback_states": [
+        "Email: Campaign dashboard in admin console",
+        "Vishing: Post-engagement report delivered as PDF/presentation by Cofense services team — not in dashboard",
+        "Reporter button: Flagged emails feed into Cofense Triage for SOC analysis"
+      ],
+      "error_prevention": "Explicit policy decision: avoids real-device SMS simulation to prevent TCPA/GDPR/PECR exposure. Compliance for vishing handled by Cofense services team during intake.",
+      "trust_model": "Cofense publishes an explicit blog post warning customers against real-device SMS simulation ('Thinking of Smishing Your Employees? Think Twice') citing TCPA, GDPR, and UK PECR. Trust model: Cofense takes liability off the customer by not sending real SMS.",
+      "rbac_notes": "Access controls and AD group sync documented. Vishing RBAC: customer admin initiates and views, Cofense services team executes. No 'launch voice campaign' button for admins.",
+      "repeat_use_efficiency": "Playbooks enable multi-scenario programs configured once. Reporter button creates ongoing feedback loop for email. No efficiency mechanisms documented for non-email channels.",
+      "ai_personalization": "Not prominently featured in reviewed sources.",
+      "risk_score_surface": "Not prominently featured in reviewed sources.",
+      "remediation_path": "Reporter button integration with Cofense Triage for SOC response. Training assignment via the LMS after simulation failure.",
+      "vishing_notes": "Fully managed service launched December 2023. Trained Cofense callers with IVR scripts. Employees are informed the call is part of sanctioned training — not fully deceptive. Not self-serve.",
+      "smishing_notes": "In-platform LMS simulation only. No real SMS to employee devices. Explicitly avoids real-device SMS due to TCPA/GDPR/UK PECR exposure.",
+      "multi_channel_model": "Multi-channel is marketed but each channel uses a different delivery model: email (self-serve), SMS/WhatsApp (LMS module, no real send), vishing (managed service). No unified campaign orchestration.",
+      "confidence": "high",
+      "source_notes": "In-platform SMS simulation stance from official Cofense blog post with explicit TCPA/GDPR reasoning. Vishing as managed service from product pages and December 2023 press release."
+    },
+    {
+      "name": "Gophish",
+      "url": "getgophish.com",
+      "tier": "adjacent",
+      "entry_point": "Direct campaign creation from dashboard. 3-step flow: name + template + targets + launch.",
+      "setup_friction": "None. Open source, no prerequisites, no compliance gates.",
+      "core_flow": [
+        "Name the campaign",
+        "Select or create an HTML email template",
+        "Select a target group (CSV import or manual)",
+        "Set SMTP sending profile",
+        "Launch"
+      ],
+      "feedback_states": [
+        "Real-time dashboard: opens, clicks, credential submissions",
+        "No per-user delivery failure states",
+        "No remediation path"
+      ],
+      "error_prevention": "None. No validation gates, no compliance acknowledgment, no coverage preview.",
+      "trust_model": "None — open tool, operator is fully responsible.",
+      "rbac_notes": "None — single admin model.",
+      "repeat_use_efficiency": "Template library enables fast reuse. Campaign clone is standard.",
+      "ai_personalization": "Absent.",
+      "risk_score_surface": "Absent.",
+      "remediation_path": "Absent.",
+      "vishing_notes": "Not supported. Red teamers extend Gophish with external SMS tooling (Twilio, custom scripts).",
+      "smishing_notes": "Not supported natively. The gap between Gophish's clean UX and the operational complexity of real-device SMS is the design opportunity.",
+      "multi_channel_model": "Email only.",
+      "confidence": "high",
+      "source_notes": "Open source — fully observable. All findings are direct observations."
+    }
+  ],
+  "observed_patterns": [
+    "Channel selection is a campaign-type decision (top-level), not a wizard-step toggle — seen in KnowBe4, Proofpoint, Lucy",
+    "Per-campaign-type separate navigation areas prevent multi-channel single-campaign orchestration — all reviewed platforms",
+    "Behavioral cohort targeting with AI-driven frequency tiers — Hoxhunt",
+    "Unified behavioral dashboard across channels with consistent metrics — Hoxhunt",
+    "Post-click micro-training firing immediately on click (30-60 second push) — Hoxhunt",
+    "Smart Groups / dynamic behavioral groups for auto-targeting repeat failures — KnowBe4 Platinum/Diamond",
+    "In-platform LMS simulation as an alternative to real-device SMS sends — Cofense",
+    "Playbook model (configure 12-month program once) for email simulation — Cofense",
+    "Carrier whitelisting as a prerequisite step handled out-of-band before SMS launch — Lucy",
+    "Vishing as managed professional service with intake process — Cofense, Hoxhunt deepfake mode"
+  ],
+  "anti_patterns": [
+    "Smishing locked to Expert Mode / power-user flow — prevents simplified wizard from handling SMS compliance guardrails (Lucy)",
+    "Compliance gates handled out-of-band with no in-product status visibility — all reviewed platforms",
+    "No per-user delivery failure surface or fallback routing — all reviewed platforms",
+    "Post-campaign failure diagnosis via CSV download only — KnowBe4",
+    "Multi-channel reporting siloed by channel (email in dashboard, vishing as PDF deliverable) — Cofense",
+    "Vishing discontinued due to carrier compliance risk without a clear self-serve successor — KnowBe4",
+    "Real-device SMS avoided via in-platform LMS simulation — reduces adversarial realism to near zero (Cofense)",
+    "No pre-launch compliance acknowledgment for email campaigns — all reviewed platforms except Hoxhunt (out-of-band)"
+  ],
+  "differentiation_opportunities": [
+    "Unified multi-channel campaign orchestration — single campaign that routes different users to different channels based on role, device profile, or risk score; no platform currently supports this",
+    "Embedded pre-flight compliance checklist — carrier whitelist status, consent documentation state, and works council clearance surfaced inline in the campaign review step; currently handled out-of-band by all competitors",
+    "Per-user delivery failure surface with fallback routing — channel-specific failure reasons and an explicit fallback decision (retry on alternate channel, exclude, notify admin); absent across all reviewed platforms",
+    "Self-serve vishing with carrier-compliant architecture — KnowBe4 discontinued, Cofense and Hoxhunt moved to managed service; the gap is real but requires solving carrier compliance first",
+    "Behavioral risk score as a targeting input for red team campaigns — target users above a risk score threshold rather than broad group targeting; uses Dune's existing risk model as a campaign input",
+    "Unified behavioral reporting across all channels in one view — Hoxhunt does this best but Dune's risk score integration with training and remediation creates a richer signal set"
+  ],
+  "design_implications": [
+    "Channel selection should be a top-level campaign-type decision before entering the wizard — pre-filters templates, compliance steps, and targeting options to what's relevant for that channel",
+    "Coverage indicator must be per-channel (X have SMS, Y have WhatsApp, Z have both, W have neither) — a single aggregate percentage is insufficient for multi-channel targeting",
+    "Design a compliance pre-flight panel as a first-class wizard step — surface carrier whitelist status, consent documentation state, and any works council flags inline with a 'not ready to launch' state if unresolved",
+    "The vishing architecture question must be resolved before any vishing UI is designed — KnowBe4's discontinuation demonstrates that self-serve outbound vishing has carrier compliance exposure that has forced a major vendor to shut the feature down",
+    "Design per-user delivery failure states explicitly in the campaign detail view — channel-specific failure reasons (carrier rejection, invalid number, not on WhatsApp) with fallback action available at the row level",
+    "Do not neuter real-device delivery to simplify compliance — Cofense's in-platform SMS simulation is not red teaming; the compliance model must be rigorous, but messages must actually reach employee devices"
+  ],
+  "confidence_notes": [
+    "KnowBe4 vishing discontinuation confirmed via official KB article with January 2023 date — high confidence",
+    "Hoxhunt SMS compliance requirements (legal amendment, opt-in proof, works council docs) confirmed from product pages and help documentation — high confidence; enforcement mechanism (out-of-band) is an inference",
+    "Proofpoint WhatsApp support inferred from Lucy v5.5 changelog pre-acquisition — not confirmed in current Proofpoint product marketing; treat as medium confidence",
+    "Cofense in-platform SMS simulation stance confirmed from official blog post with explicit TCPA/GDPR reasoning — high confidence",
+    "Lucy 4-week carrier whitelisting and Expert Mode constraint confirmed from official Lucy wiki documentation — high confidence",
+    "Gophish findings are direct observations from open source codebase and product site — high confidence"
+  ]
+}
