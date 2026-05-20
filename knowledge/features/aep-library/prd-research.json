@@ -1,0 +1,81 @@
+{
+  "feature_name": "AEP Library — Custom Adversary Emulation Pathway Builder",
+  "feature_slug": "aep-library",
+  "goal": "Let org admins create, configure, and test custom Adversary Emulation Pathways within the Red Teaming workspace, so security teams can run social engineering simulations with scenarios tailored to their organization.",
+  "user_segments": [
+    "Org admin (primary — creates and manages custom AEPs)",
+    "Campaign manager (secondary — selects AEPs when building campaigns, no edit access)",
+    "Red team operator (secondary — reviews AEP behavior via conversation outcomes)"
+  ],
+  "success_metrics": [
+    "Org admin can create a custom AEP without engineering support",
+    "Custom AEP can be validated via live simulator before campaign deployment",
+    "Custom AEP is available for selection in the campaign builder immediately after save",
+    "AEP Library is non-empty at feature launch (Dune-seeded AEPs ship simultaneously)"
+  ],
+  "constraints": [
+    "RBAC: only org admins can create or edit custom AEPs",
+    "Custom AEP limit per tenant: 4–5 (exact number TBD)",
+    "Dune ships 3–4 seeded AEPs that are read-only for all tenants",
+    "Lives in: Agentic Simulation > Red Teaming > AEP Library",
+    "AEP behavior is LLM-driven — branching is emergent, not scripted",
+    "Builder UX approach not yet decided — design recommendation required"
+  ],
+  "assumptions": [
+    "Custom AEP creation is prompt-based — admin writes a natural language instruction",
+    "A live chat simulator is part of the creation/editing flow for testing behavior",
+    "Dune-seeded AEPs are read-only and cannot be edited by any tenant user",
+    "Custom AEPs can be used in campaigns immediately after creation (no approval gate — unconfirmed)",
+    "Adversary Method is a controlled taxonomy, not free-form text"
+  ],
+  "gaps": [
+    "Relationship between free-text prompt and structured sections (Workflow Steps, Branching Logic) is undefined — generated vs. manually authored",
+    "Whether Adversary Method is a fixed taxonomy or free-form label is unconfirmed",
+    "Outcome criteria authoring model is unclear — per-AEP custom, Dune-global, or generated from prompt",
+    "Live simulator scope undefined — admin plays target, or AI-vs-AI test loop",
+    "Recovery path when custom AEP limit is reached is not defined",
+    "Versioning policy for AEPs used in active campaigns is not stated",
+    "Duplication from Dune-seeded AEPs as templates is not confirmed",
+    "Review/approval gate before custom AEP becomes campaign-eligible is not defined",
+    "Character/token limit on the AEP system prompt is not specified"
+  ],
+  "edge_cases": [
+    "Custom AEP limit reached — create button state and recovery path",
+    "Deleting a custom AEP referenced in an active campaign",
+    "Editing a custom AEP mid-campaign — behavior change risk for in-flight conversations",
+    "AEP name collision between two custom AEPs",
+    "Simulator unavailable or timing out — loading and error states",
+    "Admin without prompt engineering experience creates a nonsensical or unsafe AEP",
+    "First-time empty state: tenant has created zero custom AEPs",
+    "Dune-seeded library fails to load",
+    "Campaign manager views the AEP Library (read-only, no edit/create affordance)",
+    "Very long prompt approaching token limit — counter and guard",
+    "AEP used in a completed (historical) campaign is deleted — reference integrity"
+  ],
+  "critical_questions": [
+    { "owner": "Both", "question": "Is AEP behavior defined by a single system prompt, or are Workflow Steps and Branching Logic independently authored fields that feed the LLM separately?" },
+    { "owner": "PM", "question": "Is Adversary Method a fixed taxonomy with a known list, or a free-form label? Does the selection affect LLM behavior?" },
+    { "owner": "PM", "question": "Are outcome criteria (Complicit, Non Complicit, Undetermined, No Response) defined globally by Dune or authored per AEP in the builder?" },
+    { "owner": "Eng", "question": "In the live simulator, does the admin play the target role manually, or does a second AI model simulate employee responses?" },
+    { "owner": "PM", "question": "When the custom AEP limit is reached, what is the intended recovery path — delete, request increase, or upgrade?" },
+    { "owner": "Both", "question": "If a custom AEP is edited after being referenced in an active campaign, does the campaign use the locked version at creation time or the live edited version?" },
+    { "owner": "PM", "question": "Can an org admin duplicate a Dune-seeded AEP as a starting point for a custom one?" },
+    { "owner": "PM", "question": "Is there a review or approval step before a custom AEP becomes available in the campaign builder?" },
+    { "owner": "Eng", "question": "Is there a character or token limit on the AEP system prompt field?" }
+  ],
+  "design_risks": [
+    "Prompt quality variance — free-text prompt gives admins without prompt engineering experience the ability to create unreliable or unsafe AEPs; simulator is the only quality gate but it's subjective",
+    "No automated validation — a bad AEP prompt may behave well in simulator and fail unpredictably in production, triggering HR-sensitive conversations",
+    "Editing mid-campaign creates data integrity risk — behavior changes for in-flight conversations may invalidate outcome classification",
+    "Custom limit (4–5) is very low — admins may be reluctant to experiment if the limit feels permanent; drafts vs. published distinction would help",
+    "Empty library blocks the whole feature — if Dune-seeded AEPs don't ship simultaneously, the library launches unusable"
+  ],
+  "teaching_notes": [
+    "AEPs are live LLM system prompts, not decision trees — branching is emergent model behavior, not a wired node graph; avoid flowchart or node editor metaphors in the builder UI",
+    "Outcome classification (Complicit/Non Complicit) feeds directly into employee risk scoring — outcome criteria fields are high-stakes data inputs, not display labels",
+    "Adversary Method taxonomy likely maps to influence science categories (Authority, Urgency, Scarcity, Reciprocity, Social Proof, Liking) used across the platform for vulnerability reporting",
+    "Closest Dune precedent for prompt editor: remediation agent instruction field — use Stillsuit DS v2 TextArea or CodeEditor component as the design baseline",
+    "Library must visually distinguish Dune-seeded (read-only) from Custom (editable) AEPs — not just a label, but distinct card affordance"
+  ],
+  "last_updated": "2026-05-20"
+}
