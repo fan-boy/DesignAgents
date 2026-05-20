@@ -1,0 +1,86 @@
+{
+  "feature_name": "Red Team Campaign Launcher",
+  "feature_slug": "red-team-campaign-launcher",
+  "goal": "Let security admins launch adversarial red team campaigns via SMS and WhatsApp (v1), targeting individual users, groups, or both, with architecture designed to expand to Viber, Telegram, and vishing.",
+  "user_segments": [
+    "security admin / red team operator (primary)",
+    "security leadership / CISO (approver, if dual-auth required)",
+    "compliance viewer / sub-admin (read-only, TBD)",
+    "department manager (notified, TBD)"
+  ],
+  "success_metrics": [
+    "Not defined in brief — must be established before design begins"
+  ],
+  "constraints": [
+    "v1 channels: SMS + WhatsApp only",
+    "Architecture must support Viber, Telegram, and vishing from day one",
+    "Launch flow lives inside or alongside existing campaign scheduler",
+    "Base UI pattern: SMS phishing wizard — inherit what applies, flag what changes",
+    "RBAC: Admin-initiated; sub-role read-only visibility TBD",
+    "WhatsApp Business API requires template pre-approval for bulk sends — may limit arbitrary custom lures",
+    "Individual user targeting is a net-new targeting model not present in simulations"
+  ],
+  "assumptions": [
+    "Red team campaigns are adversarial exercises distinct from simulations in purpose and compliance stakes",
+    "SMS phishing wizard patterns are directly reusable for the wizard skeleton and component patterns",
+    "WhatsApp delivery is feasible under WhatsApp Business API — not yet validated by Eng",
+    "Vishing architecture (Dune-managed VOIP vs. manual outcome recording) is undecided",
+    "Compliance model for red team campaigns is at least as strict as simulations — may be stricter"
+  ],
+  "gaps": [
+    "Separate campaign type vs. extension of existing types — foundational decision not made",
+    "Risk score pipeline: isolated vs. integrated with simulation pipeline — not decided",
+    "Compliance/consent requirements for red team campaigns not defined",
+    "WhatsApp Business API feasibility for arbitrary custom lures not validated by Eng",
+    "Multi-channel targeting model not selected (campaign-level, group-level, or user-level)",
+    "Individual user targeting scope and RBAC requirements not defined",
+    "Delivery failure fallback behavior (WhatsApp fails → SMS, or error, or silent exclude) not decided",
+    "Remediation automation suppression model for adversarial exercises not addressed",
+    "RBAC sub-role visibility into red team results not confirmed",
+    "Success metrics absent from brief",
+    "Template library model not confirmed (shared with simulations or red-team-specific)",
+    "Vishing architecture not selected"
+  ],
+  "edge_cases": [
+    "WhatsApp delivery failure for a target: fallback, error, or silent exclude — undefined",
+    "Target appears in both individual list and a targeted group — duplicate contact risk",
+    "Zero targets with WhatsApp accounts in selected audience — 0% channel coverage equivalent",
+    "WhatsApp message template pending API approval at launch time",
+    "Admin cancels mid-execution with mixed delivery state (some SMS sent, some WhatsApp sent)",
+    "Target has opted out of SMS — WhatsApp opt-out is platform-level, not Dune-level",
+    "Remediation auto-fires on red team click — alerts target before debrief, breaks adversarial exercise",
+    "WhatsApp link preview exposes debrief page title/URL before target taps link",
+    "Vishing call not answered — no outcome recorded unless admin manually logs it",
+    "Debrief page rendered in WhatsApp in-app browser — different rendering constraints than native mobile browser",
+    "Multi-channel campaign results table: per-channel columns may exceed readable width on 1024px breakpoint"
+  ],
+  "critical_questions": [
+    { "owner": "Both", "question": "Is red team a separate campaign type with its own nav, data model, and reporting — or an extension of existing simulation types with additional channel and targeting options?" },
+    { "owner": "PM", "question": "Do red team campaign results feed the same risk score pipeline as simulations, or are they isolated to a separate red team reporting surface?" },
+    { "owner": "PM", "question": "Is the existing SMS phishing compliance acknowledgment (customer confirms lawful basis) sufficient for red team, or do red team campaigns require a higher-level approval step?" },
+    { "owner": "Eng", "question": "Can Dune send arbitrary custom red team messages via WhatsApp Business API, or are bulk sends restricted to pre-registered templates? Does this limit v1 WhatsApp scope?" },
+    { "owner": "PM", "question": "When WhatsApp delivery fails: fall back to SMS, surface per-user error, or silently exclude? This decision drives the multi-channel delivery status model." },
+    { "owner": "PM", "question": "Should red team campaigns suppress remediation automation (training assignment, manager notification) to avoid alerting the target that they were tested?" },
+    { "owner": "PM", "question": "What does 'individual user' targeting mean exactly — single named user, ad-hoc list, or any non-group subset? Does individual targeting require a second admin to approve?" },
+    { "owner": "Both", "question": "If a user appears in both the individual list and a targeted group in the same campaign, are they contacted once or twice? Who resolves the deduplication?" },
+    { "owner": "PM", "question": "Do sub-admin roles get read-only visibility into red team campaign results, or are results restricted to the launching admin and security leadership?" },
+    { "owner": "Eng", "question": "What is the vishing architecture — Dune-managed outbound VOIP with auto-recorded outcomes, or manual operator calls with Dune as an outcome-recording tool? These produce completely different design surfaces." }
+  ],
+  "design_risks": [
+    "WhatsApp Business API bulk-send constraints (template pre-approval, opt-in) may prevent arbitrary custom lures — must validate before any WhatsApp UI is designed",
+    "Remediation auto-trigger alerts target that they were tested, breaking the adversarial exercise — suppression must be a first-class option in the wizard's remediation step",
+    "Multi-channel targeting model (campaign-level, group-level, user-level) produces three different interaction patterns — cannot begin wizard design without a decision",
+    "Individual + group overlap creates duplicate contact risk — audience step must surface and resolve overlaps explicitly",
+    "Compliance acknowledgment at campaign level may be insufficient for red team — customers may launch without appropriate internal authorization if the bar is too low",
+    "Navigation ambiguity (inside or alongside campaign scheduler) risks mixing red team and simulation campaigns in the same list, creating confusion about purpose and results"
+  ],
+  "teaching_notes": [
+    "Inherit from sms-phishing: wizard skeleton (7-step, Stillsuit DS v2), audience selector, coverage indicator, compliance acknowledgment, test send step, delivery spread, campaign list + detail view layout",
+    "Change vs. sms-phishing: channel selector (new pattern), multi-dimensional coverage indicator (per channel), remediation suppression option, campaign type badge (Red Team vs. Simulation), risk pipeline routing, template library model",
+    "WhatsApp opens links in in-app browser — rendering differs from native mobile browser; link previews before tap may expose debrief page meta data",
+    "Vishing requires architecture clarification before design: Dune-managed VOIP vs. manual outcome recording are different surfaces",
+    "Run /competitor-intelligence on KnowBe4 and Proofpoint before designing multi-channel targeting — no Dune precedent exists",
+    "Red team campaigns are adversarial assessments, not educational exercises — this distinction drives compliance, RBAC, remediation, and risk pipeline design"
+  ],
+  "last_updated": "2026-05-08"
+}
