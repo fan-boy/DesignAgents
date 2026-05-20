@@ -1,123 +1,135 @@
-# PRD Research — AEP Library (Custom AEP Builder)
-Dune Security · Design Research · Last updated: 2026-05-20
+# PRD Research Summary — AEP Builder + AEP Library
+Dune Security · PRD Research · Last updated: 2026-05-20 (v2 update — PRD v0.2)
 
 ---
 
 ## Feature summary
 
-The AEP Library is one of five sections in Dune's Red Teaming workspace (Agentic Simulation > Red Teaming). It holds Adversary Emulation Pathways — AI-powered chatbot personas that conduct live social engineering conversations autonomously, adapting in real time to how an employee responds.
+The AEP Builder + Library gives enterprise security managers a self-serve platform to create, test, and manage Adversary Emulation Pathways — AI-powered chatbot personas that conduct live social engineering simulations against employees ("game changers"). Today the entire process is manual: customers fill Word/Excel forms outside the platform, email them to Dune operators, who then generate a JSON persona by hand and load it directly into the backend. One AEP takes approximately one full day.
 
-The feature has two layers:
-1. **Dune-seeded library** — 3–4 pre-built AEPs (e.g. "Impersonated IT Support") that ship with the platform and are available to all tenants, read-only.
-2. **Custom AEP builder** — org admins can create up to 4–5 custom AEPs by authoring a persona prompt and configuring structured metadata (adversary method, outcome criteria). This is the primary design surface being shaped.
+The PRD replaces this entirely with a three-stage in-platform flow: **Stage 1** (guided 6-section intake form + optional example upload → AI generation), **Stage 2** (live chat test where the customer plays the employee role against the generated persona), and **Stage 3** (natural-language refinement prompts that make targeted field-level edits). Customers cycle between Stage 2 and Stage 3 until satisfied, then publish. Published AEPs are immutable — edits require cloning to a new version.
 
-**Primary user:** Org admin (security team lead, red team operator). **Trigger:** Admin needs a social engineering scenario that doesn't exist in Dune's seeded library — an industry-specific persona, a company-branded attacker, or a scenario targeting a known internal vector. **Success:** Admin creates a custom AEP, validates its behavior in a simulator, and successfully deploys it in a red team campaign without Dune engineering involvement.
+The AEP Library is a searchable catalog of all customer AEPs with status management, version history, campaign linkage, and a Dune-curated template system as starting points.
 
-**What is not defined in the brief:** The exact authoring model (what the admin writes vs. what the system infers), the role of the live simulator in the creation flow, outcome definition methodology, and what happens when the custom limit is reached.
+**Primary user:** Customer — Security Manager (CISO, security manager, or Red Teaming owner). **Secondary:** Customer — Reviewer (optional sign-off), Dune Operator (internal support), Dune Admin (platform-level).
+
+**Success metrics:** AEP creation < 2 hours (vs. ~1 day today), 0 Dune operator touchpoints for standard cases, > 95% structural validation pass rate on first publish, < 3 refinement rounds avg, > 30% clone/reuse rate.
 
 ---
 
 ## Gaps and ambiguities
 
-1. **The relationship between the prompt and structured metadata is undefined.** An AEP has named sections — Workflow Steps, Branching Logic, Outcome criteria. It's unclear whether these are manually authored by the admin, generated from the prompt, or a combination. If the prompt is the single source of truth and the sections are generated/parsed from it, the UX is a prompt editor with AI-assisted preview. If sections are manually authored, the UX is a structured form with a prompt field for overall behavior. The answer changes the entire builder layout and complexity.
+1. **Mandatory reviewer gate vs. optional Reviewer role.** The PRD says publishing "triggers a notification to the Reviewer" if one is configured, and the AEP goes to "Pending Review." But it does not say whether a Reviewer is ever mandatory. If it is, the publish flow needs a blocking "Pending Review" state and a Reviewer approval surface. This changes the end-to-end flow.
 
-2. **"Adversary Method" appears to be a taxonomy, not free-form.** The screenshot shows "Authority-Based" as the adversary method for AEP-001. It's unclear whether this is a fixed list (Authority-Based, Urgency-Based, Curiosity-Based, Bribe, Reciprocity…), a free-text label, or a controlled vocabulary that maps to LLM behavior. If it maps to model behavior, it's a meaningful selection; if it's a label, it's metadata.
+2. **Multi-channel deployment model.** Open question #4: does one AEP support simultaneous deployment across multiple channels in one campaign, or is it one channel per campaign per deployment? The data model allows `channels[]`, but the campaign integration section does not define how multi-channel deployment works operationally.
 
-3. **Outcome definitions — authored or generated?** The screenshot shows outcome tabs (Complicit, Non Complicit, Undetermined, No Response) each with criteria bullets. It's unclear whether the admin writes these criteria or whether Dune defines them globally per outcome type, or whether they're generated from the scenario prompt. Outcome definitions directly affect how conversation analysis works downstream — this is not just a display decision.
+3. **Library scoped per organization or per account/program.** Open question #3: a customer like Concentrix has 10+ account programs (Meta, Google, United Airlines, AT&T). Do they share one library or have one per program? Affects filtering, search, and whether the library counter is per-org or per-program.
 
-4. **Live simulator scope is undefined.** The prior strategy describes "prompt editor + live chat simulator test loop" as the creation flow. The simulator presumably runs the AEP's LLM against a test target. Open questions: Does the admin play the role of the target, or is it AI vs. AI? Does simulator behavior count toward any quota or logging? Is it a modal, a split pane, or a separate step?
+4. **AEP hard limit not in PRD.** The initial brief mentioned 4–5 custom AEPs per tenant. The PRD does not specify a hard limit — it describes a searchable library with archive functionality. Unclear if a count cap still applies or if archiving is the management mechanism.
 
-5. **Custom AEP limit (4–5) has no stated enforcement UX.** When a company has created 4 or 5 custom AEPs, what happens? Can they delete one to make room? Can they request a limit increase? Is the CTA for "New AEP" disabled, hidden, or does it surface an upgrade prompt? Unanswered limits create blocked states with no recovery path.
+5. **Test LLM cost model is undefined.** Stage 2 uses the full production persona runtime, and there is no limit on test sessions. Open question #5: full production LLM or a lighter model? Cost per session has significant implications for how the unlimited session model is positioned.
 
-6. **Editing and versioning are not addressed.** If a custom AEP is edited after being used in a campaign, does the campaign continue using the old version or the new one? AEPs are live LLM prompts — a mid-campaign edit could change agent behavior for in-flight conversations. This is a data integrity question with real HR implications.
+6. **Instigation threshold enum may be too coarse.** Three values (none / soft_stop / hard_stop) may not capture real variation. AT&T uses hard stop on first resistance, BUZZ uses "assess but don't overcome," Qantas uses "continue on curiosity." Open question #6.
 
-7. **Dune-seeded AEPs as templates — is duplication supported?** Admins may want to start from a Dune AEP and customize it. If duplication from a seeded AEP is not supported, admins must recreate similar scenarios from scratch. If it is, the seeded AEPs function as templates, which changes how the library is presented.
+7. **Refinement prompt cross-field cascading.** Open question #7: can a single prompt cascade changes across dependent field groups (e.g., updating opening message also updates the 1_INITIAL state script)? Affects diff view complexity.
 
-8. **There is no stated review or approval flow for custom AEPs.** The campaign builder has a request-start model (requires approval before activation). Does a custom AEP require internal review before it can be used in campaigns? Or is creation and use immediate for org admins?
+8. **Reviewer notification surface undefined.** PRD mentions notification but does not specify channel (email, in-platform) or what the Reviewer's approval surface looks like.
 
 ---
 
 ## Missing states
 
 ### System states
-- AEP creation save fails (LLM validation error, network timeout, server error)
-- Live simulator fails to start (model unavailable, quota exceeded, latency timeout)
-- Simulator response takes >5 seconds — loading/typing indicator state
-- Dune-seeded library fails to load (skeleton vs. empty state handling)
-- AEP creation in progress — is there an autosave draft state?
+- Generation failure (partial): some sections succeed, others fail — per-section retry required (REQ-SS-05); all form inputs preserved
+- Generation in progress: 15–45s (up to 90s with image OCR); labeled stages: "Analyzing your scenario", "Building the conversation flow", "Configuring guardrails", "Finalizing"
+- OCR extraction in progress or failed on image upload (image files require OCR per REQ-SS-03)
+- Refinement in progress (< 20s P95) — should the prompt input be disabled until the round completes?
+- Form auto-save / resume: can customers close the browser mid-Stage-1 and resume?
+- Stage 2 persona response timeout (P95 < 3s; what happens at 4s, 10s?)
+- Validation running on demand from Stage 3 ("Check AEP" button)
 
 ### Permission states
-- User is not an org admin but can view the AEP library — what is the read-only state of the builder?
-- User is an org admin but their tenant hasn't been granted custom AEP access yet — is this a feature gate?
-- Campaign manager can use AEPs in campaigns but cannot edit them — the card/list view must reflect this distinction
+- Reviewer: read-only AEP detail + approve/request-changes CTA; no Builder access
+- Dune Operator: same UI as customer with operator overlay — raw JSON panel, validation override, operator refinement, Operator Assist flag
+- Dune Admin: all Operator permissions + global template promotion, global ban list management
+- Customer without Red Teaming access: no AEP Library visibility (nav-level RBAC)
+- Non-owner customer viewing teammate's draft: visible or private?
 
 ### Content states
-- Zero custom AEPs created yet — first-time empty state for the "Custom" section
-- Custom AEP limit reached (4 or 5) — create button behavior
-- Zero Dune-seeded AEPs loaded — fallback if seeded library is empty (shouldn't happen but must be handled)
-- AEP name collision — can two custom AEPs have the same name?
-- Very long AEP name — truncation rules in the library card view
-- Very long prompt (system instruction) — character limit, scroll behavior, or wrapping
+- Empty library (no AEPs): first-use empty state with "New AEP" + "Start from Template" CTAs
+- Draft with 0 test sessions: Publish blocked
+- Draft with 1 test session: Publish allowed with acknowledgment warning
+- AEP in active/scheduled campaign: Archive blocked; must show blocking campaign names (REQ-LIB-04)
+- AEP in completed campaign: Archive allowed with confirmation; version history retains linkage
+- Template picker unavailable: graceful error state with retry
+- No Active AEPs when creating a campaign: prompt links to AEP Builder
 
 ### Action states
-- Deleting a custom AEP that is currently used in an active campaign — block or warn?
-- Deleting a custom AEP that was used in a completed campaign — historical reference integrity
-- Editing a custom AEP that is mid-campaign — block or warn?
-- Publishing a custom AEP (if there's a draft → published state)
-- Duplicating a Dune-seeded AEP as the starting point for a custom one
+- Archive blocked: must name the blocking campaigns in the error message
+- Refinement blocked by guardrail: prompt attempts to remove hate speech, violence, or PII patterns — blocked with plain-language explanation (REQ-SS-11)
+- Publish blocked: blocking validation failure — customer directed to specific section and field (REQ-VAL-02)
+- Publish with warnings: checkbox acknowledgment required per warning before proceeding (REQ-VAL-03)
+- Clone: new Draft at incremented version; lineage tracked in metadata.templateLineage
+- Operator Assist: customer notification with diff summary of operator changes
 
 ### Responsive / Accessibility
-- The prompt editor on smaller viewports — a full-screen text area may need special handling
-- The live simulator (two-pane chat) will need a responsive layout decision
-- Screen reader handling of the simulator — each message must be announced in order
-- Keyboard navigation through AEP cards in the library grid
+- Generation progress screen (up to 90s): labeled stages must visually progress; static spinner would feel broken
+- Diff view in Stage 3: accept/reject per field; must be keyboard navigable
+- Example upload: drag-and-drop + file picker; per-example OCR feedback on image uploads
+- Library table: sort, filter, search must be keyboard accessible
 
 ---
 
 ## Questions for PM / Eng
 
-1. **[Both]** Is the AEP's behavior defined entirely by a system prompt, or are the structured sections (Workflow Steps, Branching Logic) independently authored fields that feed the LLM separately? The answer is the most fundamental architectural question for the builder UX.
+1. **[PM]** Is there a scenario where a Dune operator must approve an AEP before it goes live? Or is the optional Reviewer role + validation layer sufficient for all standard cases?
 
-2. **[PM]** Is "Adversary Method" a fixed taxonomy (list of types like Authority-Based, Urgency, Curiosity, Bribe, Reciprocity) or a free-form label? If fixed, what is the full list? Does the selection affect LLM behavior or is it purely display/categorization?
+2. **[Both]** Does one AEP support simultaneous deployment across multiple channels in one campaign, or is it one channel per campaign per deployment?
 
-3. **[PM]** Are outcome criteria (Complicit, Non Complicit, Undetermined, No Response) universally defined by Dune, or does each AEP define its own criteria per outcome type? If per-AEP, do admins write these in the builder?
+3. **[PM]** Is the AEP library scoped per customer organization or per account/program? (Concentrix has 10+ programs.)
 
-4. **[Eng]** In the live simulator: who plays the "target" role — the admin manually types responses, or a second AI model simulates a target employee? What infrastructure does this require, and does it run against the same model as production?
+4. **[Eng]** Does Stage 2 use the full production LLM or a lighter model? What is the assumed cost per test session and is there a guardrail on excessive testing?
 
-5. **[PM]** When the custom AEP limit is reached, what is the intended recovery path — delete an existing AEP, request a limit increase, or upgrade plan?
+5. **[Both]** Can a single refinement prompt cascade changes across dependent field groups? How does the diff view surface cross-field dependencies?
 
-6. **[Both]** If a custom AEP is edited after being referenced in an active campaign, does the campaign use the locked version at the time of creation, or the live edited version? This needs an explicit policy before any versioning UI is designed.
+6. **[PM]** Is the three-value instigation threshold (none / soft_stop / hard_stop) sufficient, or do we need a richer model given the observed variation across AT&T, BUZZ, and Qantas?
 
-7. **[PM]** Can an org admin duplicate a Dune-seeded AEP as a starting point for a custom one? This would significantly reduce authoring friction for admins unfamiliar with prompt engineering.
+7. **[PM]** Is there a hard limit on Active AEPs per tenant, or is archiving the management mechanism?
 
-8. **[PM]** Is there a review or approval step before a custom AEP can be used in campaigns, or is it immediately available upon save?
+8. **[PM]** What is the Reviewer's notification and approval surface? Email, in-platform, or both?
 
-9. **[Eng]** Is there a character limit or token limit on the AEP system prompt? This affects the editor UI (counter, truncation warning, submit guard).
+9. **[Eng]** What is the auto-save behavior for Stage 1 form data? Can customers close and resume mid-form?
 
 ---
 
 ## Design risks
 
-**Prompt quality variance will be high.** Unlike a structured form, a free-text prompt gives admins creative control but produces wildly inconsistent AEP quality. An admin who doesn't understand prompt engineering may create an AEP that behaves unpredictably — escalating inappropriately, breaking persona, or failing to classify outcomes correctly. Risk: poor custom AEPs damage the reliability of the entire red team program. Mitigation: the live simulator must be prominent in the creation flow, not optional.
+- **Generation wait time + bad feedback = trust failure.** At P95 45s (90s with OCR), a static spinner will feel broken. Labeled stages must visibly progress. If a stage stalls, it should surface an estimated wait, not silence.
 
-**The simulator is the only quality gate, but it's subjective.** There is no automated validation that an AEP prompt produces reliable, legal, or on-brand behavior. The simulator shows the admin one or two test conversations. A bad prompt may behave well in a test and fail in production. Risk: admin marks the AEP as good, it ships in a campaign, and produces a problematic conversation that requires HR intervention. Mitigation: consider a structured checklist or validation prompt that runs behind the scenes and surfaces warnings ("This AEP may escalate to profanity" / "This persona references company names — confirm this is intentional").
+- **Stage 3 diff view is the most consequential screen.** Customers accept/reject individual field changes here. If the diff is hard to parse, they will either rubber-stamp everything (negating refinement value) or reject everything (blocking the workflow). Diff legibility needs dedicated design work — not a developer default.
 
-**Editing mid-campaign is a data integrity risk.** If the system does not version-lock AEPs at campaign creation, an edit during an active campaign changes the behavior of in-flight conversations. An employee who has been compliant might be re-evaluated differently. Risk: unfair or inconsistent outcome classification. Mitigation: version-lock at campaign creation; surface the locked version in the campaign detail.
+- **Refinement loop without exit signal.** No limit on refinement rounds; customers cycle Stage 2 → Stage 3 indefinitely. Without a quality indicator or completion nudge, customers may publish too early or never publish. Consider a "test coverage" signal based on archetype completion.
 
-**The custom limit (4–5) is very low.** If a company fills their limit with experimental or poorly-tested AEPs, they have no room for production-quality ones without deleting existing work. Risk: admins are reluctant to experiment because the limit feels permanent. Mitigation: drafts don't count toward the limit — only published AEPs do.
+- **Templates misrepresented as finished AEPs.** If templates look like deployable AEPs, customers may skip Stage 1 customization and deploy a generic persona without their org's crown jewels or cultural context. Templates must be clearly framed as starting points.
 
-**Empty Dune library blocks the whole feature.** If Dune-seeded AEPs are not shipped simultaneously with the builder, the library launches empty. An empty AEP library means campaigns cannot be started. Risk: feature ships but is unusable. Mitigation: seed library is a hard dependency for launch; custom AEP builder is a layer on top.
+- **Validation warnings becoming click-through.** If warnings fire frequently (especially "only 1 test session completed"), customers will learn to dismiss them. Reserve warnings for genuinely high-risk states and review the threshold for what counts as a warning vs. a UX nudge.
+
+- **Operator Assist trust asymmetry.** An operator modifying a customer's AEP without prior consent (even with notification) creates a trust issue. The Operator Assist notification must be prominent, include a clear diff, and offer the customer a rejection path.
 
 ---
 
 ## Teaching notes
 
-**AEPs are live LLM system prompts, not scripts.** The branching logic shown in the screenshot is a description of emergent behavior, not a programmatic decision tree. When an admin writes an AEP, they're writing a system prompt that instructs the model how to behave — the "branching" is the model adapting to context, not a wired node graph. Designers should not introduce visual metaphors (node editors, flowcharts) that imply scripted branching. The interaction model is closer to writing a character brief for a conversational AI.
+- **AEP is not a single prompt.** The PRD reveals the full data model: system prompt, classifier prompt, 6-state state machine with scripts per state, detection arrays (denial phrases, interest patterns, guardrail patterns, jailbreak patterns), cultural nuance packages, termination logic, and bot name lists. The Builder form abstracts all of this — customers never interact with JSON — but the designer must understand the complexity to make good decisions about progressive disclosure.
 
-**The closest existing Dune reference for prompt-based configuration is the remediation agent instruction field.** Use that as a design system precedent for a large text editor in an admin form context. Stillsuit DS v2 may have a `TextArea` or `CodeEditor` component that fits.
+- **6 fixed conversation states.** The state machine has 6 required states: 1_INITIAL through 6_VULNERABILITY. These are fixed in the platform schema; customers configure scripts and transitions, not the states. The state label visible in Stage 2 ("2 — Slight Interest") references this machine.
 
-**Outcome classification drives downstream analytics.** The Complicit / Non Complicit / Undetermined / No Response tabs in the AEP detail are not just labels — they define how the system classifies the outcome of each conversation in Conversation Management and feeds into employee risk scoring. Outcome criteria authored in the AEP builder directly affect risk score delta calculations. This is a high-stakes field, not a display preference.
+- **Published AEPs are immutable by design (REQ-SS-12).** Once published, an AEP cannot be edited. Changes require cloning. This means the library accumulates versions over time, and version history is load-bearing UX.
 
-**Adversary Method taxonomy is likely tied to attack vector classification.** In security awareness training, attack method taxonomies (Authority, Urgency, Scarcity, Reciprocity, Social Proof, Liking/Familiarity) come from influence science (Cialdini) and are used to categorize phishing and social engineering simulations. Dune likely uses this taxonomy for reporting ("your employees are most vulnerable to Authority-based attacks"). The Adversary Method field should be a controlled select, not a free-text field, so reports can aggregate across AEPs.
+- **Example upload grounds the generation quality.** The PRD Appendix notes that example conversations (real WhatsApp screenshots, forwarded messages) are "the most reliable signal for generating accurate opening messages and cultural register." The upload UI should feel prominent and helpful, not buried or daunting.
 
-**The AEP library has two distinct card types: Dune-seeded (read-only) and Custom (editable).** The visual distinction between these must be clear in the library view — not just a label, but enough affordance that admins understand they can only edit custom ones. This is the same read-only/editable pattern used in Dune's SAT module catalog.
+- **Template lineage tracked in metadata.** Clones from templates record `metadata.templateLineage`. This powers the reuse rate success metric. Surface lineage in the library (e.g., "Based on: BPO Refund Fraud template") to make templates feel valuable rather than invisible.
+
+- **"Game changers" = employees.** Dune's internal term for the employees being targeted. The customer-facing UI should use "employee" — confirm with PM.
+
+- **Phase 1 target is Q3 2026.** Phase 2 (cross-AEP analytics, multi-version comparison, webhook reviewer flow) is Q4 2026. Phase 3 (marketplace, bot-vs-bot testing, compliance export) is 2027. Design must not scope for Phase 2 features in Phase 1 UI.

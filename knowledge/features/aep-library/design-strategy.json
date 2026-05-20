@@ -1,84 +1,91 @@
 {
-  "feature_name": "AEP Library — Custom Adversary Emulation Pathway Builder",
+  "feature_name": "AEP Builder + AEP Library",
   "feature_slug": "aep-library",
-  "design_goal": "Give org admins a guided AEP builder that generates a well-structured adversary persona from a plain-language scenario description, lets them refine it in structured fields, and requires them to test it in a live simulator before publishing — making the quality bar clear without requiring prompt engineering expertise.",
+  "design_goal": "Build a three-stage AEP creation flow (structured form + AI generation, live chat test, natural-language refinement) that abstracts a complex AI persona data model so a non-technical security manager can produce a structurally complete, behaviorally validated, compliance-enforced persona in under 2 hours without seeing JSON.",
   "user_segments": [
-    "Org admin (primary — creates, edits, publishes custom AEPs)",
-    "Campaign manager (secondary — views and selects AEPs; no edit access)"
+    "Customer — Security Manager (primary: creates, tests, refines, publishes)",
+    "Customer — Reviewer (secondary: read-only + approve/reject)",
+    "Dune Operator (internal: full access including raw JSON, validation override, operator refinement)",
+    "Dune Admin (platform-level: operator permissions + template management, global ban list)"
   ],
   "constraints": [
-    "RBAC: org admins only can create, edit, or delete custom AEPs",
-    "Campaign managers can view and use AEPs but see no edit/create affordance",
-    "No flowchart or node editor metaphors — AEP branching is emergent LLM behavior, not wired logic",
-    "Outcome Criteria fields feed employee risk score calculations — treat as consequential data inputs",
-    "Simulator must be a required step before Publish is activated",
-    "Draft AEPs should not count toward the custom limit; only Published AEPs count",
-    "Version-lock AEPs at campaign creation time — edit must be blocked while referenced in active campaign",
-    "Dune-seeded AEPs are globally read-only — no tenant can edit them"
+    "No raw JSON visible to customers — only Dune Operators see raw JSON in a dedicated technical panel",
+    "Stage 2 must use the full production persona runtime — identical to live campaign behavior",
+    "Generation: P95 45s without examples, 90s with OCR — labeled progress stages required, static spinner not acceptable",
+    "Stage 3 diff view is consequential — per-field accept/reject must be clearly legible",
+    "Published AEPs are immutable — editing requires cloning to new version",
+    "Validation is a hard gate — blocking errors prevent publish; warnings require explicit per-item acknowledgment",
+    "Compliance fields (instigation threshold, frameworks, termination triggers) are consequential and must be treated accordingly",
+    "Templates must be clearly framed as starting points requiring customization before generation",
+    "Phase 1 target: Q3 2026 — do not design for Phase 2 features"
   ],
-  "selected_strategy": "Guided AI-Assist with progressive disclosure (three-step wizard: Define → Configure → Test)",
-  "selected_strategy_rationale": "Meets admins at their level (describe the scenario in plain language rather than write a system prompt), teaches AEP structure via AI-generated examples, gives advanced users raw prompt access without making it the default, requires simulator testing as a quality gate, and validates the model against KnowBe4 AIDA which uses the same guided-generation pattern.",
+  "selected_strategy": "Structured 6-section form + example upload → AI generation + natural-language refinement loop",
+  "selected_strategy_rationale": "The PRD v0.2 confirms this approach based on analysis of 6 real customer AEP requirements. The structured form ensures completeness of capture. Example upload is the highest-quality signal for persona calibration. AI generation eliminates manual JSON authoring. Live test with full production runtime is a genuine market differentiator. Natural-language refinement with per-field diff review keeps customers in control without requiring JSON knowledge.",
   "alternative_strategies": [
     {
-      "name": "Pure free-text prompt editor",
-      "summary": "Admin writes a system prompt directly; structured sections auto-parse or are manually filled",
-      "rejected_because": "Too high cognitive load for non-technical admins; produces inconsistent AEP quality; no competitor uses raw prompt as default; risk of unsafe or nonsensical AEPs entering the library"
+      "name": "Pure plain-language brief → AI generates",
+      "summary": "Admin writes a free-text scenario description; AI generates the full AEP from the brief",
+      "rejected_because": "Insufficient for the structural complexity of AEP requirements. Real accounts require capture of crown jewels, compliance frameworks, cultural nuances, termination triggers, and more. A free-text brief produces incomplete personas requiring many correction loops — the problem the product is trying to solve."
     },
     {
-      "name": "Fully structured form, no prompt visible",
-      "summary": "Admin fills named fields for each AEP section; system assembles an internal prompt the admin never sees",
-      "rejected_because": "Too rigid for novel scenarios; advanced security teams need raw prompt access; inconsistent with 'prompt editor' language in prior strategy doc"
+      "name": "Fully structured form, no AI",
+      "summary": "Admin fills every field manually; system assembles AEP from form data without LLM generation",
+      "rejected_because": "The AEP schema has 20+ field groups including a full 6-state state machine, detection arrays, and cultural nuance packages. Manual authoring is what the current paper process does and takes ~1 day per AEP. This eliminates the product value proposition."
     }
   ],
   "tradeoffs": [
-    "Three-step wizard is slower than a single-page form for experienced admins creating their second or third AEP — Duplicate path mitigates this",
-    "AI-generated content may not accurately reflect underlying system prompt behavior if structured fields are cosmetic summaries — must confirm with Eng that fields are authoritative",
-    "Simulator as a required step adds friction; admins may do a minimal exchange to unlock Publish rather than genuinely validating behavior"
+    "Six-section form is thorough but long — experienced users may find it slow for repeat AEPs; Clone + Template paths mitigate this",
+    "Generation quality is load-bearing — if the generated persona is poor, Stage 2 and Stage 3 are fighting an uphill battle; generation prompt quality is critical",
+    "Stage 3 diff complexity — a single refinement may cascade across many fields; flat diff list may be overwhelming; consider section grouping",
+    "Template adoption depends on template quality — generic templates that don't reflect target customer segments will be skipped"
   ],
   "assumptions": [
-    "Workflow Steps and Branching Logic are AI-generated from the scenario description and editable by admin (not manually authored from scratch)",
-    "Outcome Criteria are authored per AEP by the admin in the builder (not globally defined by Dune)",
-    "Admin plays the target role manually in the simulator (not AI-vs-AI)",
-    "Duplication from Dune-seeded AEPs is a confirmed entry path into the builder",
-    "Draft AEPs do not count toward the custom limit — only Published AEPs count",
-    "AEP version is locked at campaign creation time"
+    "Stage 1 form is the authoritative source for all AEP content — no separately authored raw prompts by customers",
+    "Stage 2 is a manual customer-plays-employee test, not AI-vs-AI",
+    "6 fixed conversation states (1_INITIAL through 6_VULNERABILITY) — customers configure scripts, not states",
+    "Published AEPs are locked to version at campaign creation — no hot-swap mid-campaign",
+    "Library is per-org scope (one library per tenant) pending PRD clarification",
+    "No hard cap on Active AEPs per tenant — archiving is the management mechanism"
   ],
   "open_issues": [
-    "[Critical — Both] Are Workflow Steps and Branching Logic AI-generated from the description, or manually authored? Determines whether Configure step starts pre-filled or empty.",
-    "[Critical — PM] Are Outcome Criteria defined globally by Dune or authored per AEP? If global, Configure step collapses significantly.",
-    "[Critical — Eng] Does admin play target manually in simulator, or is it AI-vs-AI? Determines whether simulator is a chat interface (admin types) or an observation interface (admin watches).",
-    "[Medium — Both] Version-locking policy — strategy assumes campaign creation locks AEP version; needs Eng confirmation.",
-    "[Medium — PM] Exact custom AEP limit: 4 or 5?",
-    "[Medium — PM] Is duplication from Dune-seeded AEPs a confirmed supported path?"
+    "[Critical — PM] Is a Reviewer ever mandatory (blocking gate) or always optional? Affects publish flow and Pending Review state",
+    "[Critical — Both] Multi-channel deployment model — simultaneous channels in one campaign, or one-channel-per-campaign?",
+    "[Medium — Eng] Stage 2 LLM model — full production vs. lighter model; affects unlimited session positioning",
+    "[Medium — PM] Instigation threshold enum — three values sufficient given real account variation?",
+    "[Medium — Eng] Auto-save behavior for Stage 1 form — background auto-save or explicit Save Draft CTA?"
   ],
   "risks": [
-    "Structured fields in Configure step may be decorative if they don't map directly to the system prompt — would erode admin trust in the builder",
-    "Simulator as a checkbox: admins do one exchange to unlock Publish without genuine validation — consider minimum exchange count (3 turns) before Publish activates",
-    "Outcome Criteria ambiguity: if this is answered as 'globally defined,' the Configure step changes shape and may need a redesign pass"
+    "Generation quality is the product's core promise — form structure, example upload, and generation prompt quality are all load-bearing",
+    "Stage 3 diff legibility — if hard to parse, customers bypass review; needs dedicated design work",
+    "Refinement loop without exit signal — customers may publish too early without a quality/completion indicator",
+    "Template quality mismatch — templates not reflecting target customer segments will undermine reuse metric"
   ],
   "ds_patterns_used": [
-    "wizard (three-step: Define, Configure, Test)",
-    "drawer (AEP detail view, right-anchored 480px)",
-    "modal (publish confirmation, destructive action confirmation for delete)",
-    "badge (Adversary Method, Status: Draft/Published, Simulator: Tested/Not tested)",
-    "table (not primary — grid/card view for library)",
-    "empty state (Your AEPs section — zero custom AEPs)",
-    "CodeEditor or TextArea (system prompt in Advanced mode)"
+    "wizard (three-stage: Form+Examples, Live Chat Test, Prompt Refinement)",
+    "table (AEP Library list view with sort, filter, search)",
+    "modal (publish confirmation, archive confirmation, validation warning acknowledgment)",
+    "badge (Status: Draft / Pending Review / Active / Archived; Channel; Compliance Framework)",
+    "drawer (AEP detail — may be full-page detail rather than drawer given content volume)",
+    "empty state (AEP Library first visit, no Active AEPs in campaign creation)",
+    "CodeEditor or TextArea (operator raw JSON panel — Advanced mode only)"
   ],
   "new_patterns_required": [
-    "Split-pane simulator layout (editor summary left + chat interface right) — requires DS review for responsive handling",
-    "Outcome preview strip in simulator (real-time outcome classification indicator) — new pattern, requires DS review",
-    "Inline generation loading state (skeleton on structured form fields while AI generates content) — may require DS pattern definition"
+    "Generation progress screen with labeled stages (15–90s wait with advancing stage labels) — requires DS review",
+    "Split-pane layout for Stage 2 (AEP summary left + live chat right) and Stage 3 (AEP summary left + refinement/diff right) — requires DS review for responsive handling",
+    "Stage 3 diff view with per-field accept/reject — new pattern; requires DS review",
+    "Archetype starter buttons in Stage 2 (one-click first-response injection) — new micro-interaction",
+    "Conversation state label indicator in Stage 2 chat (real-time state display) — new pattern",
+    "Repeatable row input for Systems at Risk (add/remove application rows) — may need DS pattern definition",
+    "Example upload with per-file OCR status (uploading → OCR processing → ready / failed) — new pattern"
   ],
   "next_actions": [
-    "Resolve open issues: confirm Workflow Steps / Branching Logic authoring model with Eng (critical)",
-    "Confirm Outcome Criteria scope with PM — per-AEP authored vs. Dune-global (critical)",
-    "Confirm simulator interaction model with Eng — admin plays target vs. AI-vs-AI (critical)",
-    "Get full Adversary Method taxonomy list from PM (Authority, Urgency, Reciprocity, Curiosity, Scarcity, Familiarity — confirm and finalize)",
-    "Audit Stillsuit DS v2 for: wizard step bar, CodeEditor/TextArea, card grid, badge variants, split pane layout, drawer — flag gaps for DS review",
-    "Design library grid first (Dune Library + Your AEPs sections + card states)",
-    "Design AEP detail drawer second",
-    "Design builder wizard third (Define → Configure → Test happy path)"
+    "Resolve critical open issues: mandatory reviewer gate (PM) and multi-channel deployment model (Both) before finalizing the publish flow",
+    "Design AEP Library table first — status model, row actions, filter/search, empty state",
+    "Design Stage 1 form — progressive disclosure strategy for 6 sections, help text approach, template pre-fill path",
+    "Design generation progress screen — labeled stages, partial failure handling",
+    "Design Stage 2 (Live Chat Test) — state label panel, archetype starters, session controls, split-pane",
+    "Design Stage 3 (diff view) — per-field accept/reject, section grouping, guardrail block messaging",
+    "Audit Stillsuit DS v2 for: table pattern, wizard step bar, split-pane, diff view, repeatable row input"
   ],
   "last_updated": "2026-05-20"
 }

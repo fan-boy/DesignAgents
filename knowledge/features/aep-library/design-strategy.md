@@ -1,179 +1,257 @@
-# Design Strategy — AEP Library (Custom AEP Builder)
-Dune Security · Design Strategy · Last updated: 2026-05-20
+# Design Strategy — AEP Builder + AEP Library
+Dune Security · Design Strategy · Last updated: 2026-05-20 (v2 update — PRD v0.2)
 
 ---
 
 ## Feature context
 
-**Goal:** Let org admins create, configure, and test custom Adversary Emulation Pathways within the Red Teaming workspace, so security teams can run social engineering simulations with scenarios tailored to their organization.
+**Goal:** Eliminate the manual Dune-operator-as-middleman AEP creation process. Give enterprise security managers a self-serve three-stage builder — guided form + example upload, live chat test, natural-language refinement — so they can create, validate, and publish custom Adversary Emulation Pathways in under 2 hours without Dune involvement.
 
-**Primary user:** Org admin (security team lead or red team operator). Secondary: Campaign manager (selects AEPs; no edit access).
+**Primary user:** Security Manager (CISO, security manager, or Red Teaming owner). Secondary: Reviewer (optional sign-off), Dune Operator (internal support), Dune Admin (platform-level).
 
-**Trigger:** Admin needs a social engineering scenario not covered by Dune's seeded library — an industry-specific persona, a company-branded impersonation, or a scenario targeting a known internal attack vector.
+**Trigger:** Admin needs to create a social engineering simulation persona tailored to their organization's specific environment, employees, compliance constraints, and cultural context.
 
-**Success:** Admin creates a custom AEP, validates its behavior in a live simulator, and the AEP is available for selection in the campaign builder — without engineering support.
+**Success:** Security Manager creates an AEP, tests it against multiple employee archetypes, refines its behavior via natural-language prompts, and publishes it — available for campaign selection, meeting the organization's compliance and cultural requirements, with a structural validation pass rate above 95%.
 
-**What's confirmed:**
-- 3–4 Dune-seeded AEPs (read-only, ships at launch)
-- 4–5 custom AEP limit per tenant (exact number TBD)
-- RBAC: org admins create/edit; campaign managers use but don't edit
-- Live chat simulator is part of the creation flow
-- Adversary Method should be a controlled taxonomy
+**What's confirmed (PRD v0.2):**
+- Three-stage non-linear flow: Stage 1 (Form + Examples) → Stage 2 (Live Chat Test) → Stage 3 (Prompt Refinement) → Publish
+- Stage 1 has 6 structured sections: Account Context, Attack Scenario, Systems at Risk, Rules & Compliance, Cultural Context, Termination Logic
+- Example upload: 1–5 files (.txt, .docx, .png/.jpg with OCR) — optional but strongly recommended
+- Channel multi-select: WhatsApp, Telegram, Viber, Facebook Messenger, SMS, Instagram, Microsoft Teams, Signal
+- Generation time: P95 45s without examples, 90s with OCR; labeled progress stages required
+- Stage 2 uses the full production persona runtime with state label visible to customer only
+- 4 archetype starter responses (Curious, Skeptical, Hostile, Compliant) as one-click injections
+- Stage 3: targeted field-level edits only, diff view with per-field accept/reject; cannot remove global guardrails
+- Published AEPs are immutable; changes require cloning
+- AEP Library: table view, search < 500ms, filter by status/channel/compliance/date/campaign, version history, clone, archive
+- Template system: 6 Dune-curated templates at launch
+- Dune Operator view: special permission overlay with raw JSON, validation override, Operator Assist
+- Phase 1 target: Q3 2026
 
-**What's not yet confirmed:** Whether Workflow Steps and Branching Logic are generated or manually authored; outcome criteria authoring model; versioning policy for AEPs in active campaigns. Strategy assumes AI-generated content that admin owns and can edit — this assumption should be validated before Figma work begins.
+**What's not yet confirmed:**
+- Whether a Reviewer is ever mandatory (blocking gate) or always optional
+- Multi-channel simultaneous deployment vs. one channel per campaign
+- AEP library scope: per-org vs. per-account/program
+- Instigation threshold enum granularity
+- Auto-save behavior for Stage 1 form
 
 ---
 
 ## Design goal
 
-Give org admins a guided AEP builder that generates a well-structured adversary persona from a plain-language scenario description, lets them refine it in structured fields, and requires them to test it in a live simulator before publishing — making the quality bar clear without requiring prompt engineering expertise.
+Build a three-stage AEP creation flow that abstracts a highly complex AI persona data model into a guided form + test + refine loop — so a non-technical security manager can produce a structurally complete, behaviorally validated, compliance-enforced persona in under 2 hours, without seeing JSON.
 
 ---
 
 ## Key constraints
 
-- **No flowchart or node editor metaphors.** AEP branching is emergent LLM behavior, not wired logic. The UI must not imply that admins are programming a decision tree.
-- **Structured output sections must be authoritative.** Workflow Steps, Branching Logic, and Outcome Criteria shown in the library detail view are the source of truth for how the AEP behaves. They should be accurate, not cosmetic summaries.
-- **Outcome Criteria are data inputs, not labels.** Complicit / Non Complicit / Undetermined / No Response criteria feed employee risk score calculations. Their fields are consequential; the UI must treat them as such.
-- **Simulator must be required, not optional.** It is the only quality gate. AEP should not be publishable without at least one simulator exchange.
-- **Draft-vs-published distinction is needed.** The custom limit (4–5) applies to published AEPs. Drafts should not count against the limit, or admins will be reluctant to experiment.
-- **Version-lock at campaign creation.** If an AEP is edited after being referenced in an active campaign, the campaign must use the version locked at creation. Design for this even if Eng hasn't confirmed the architecture — surface the constraint to Eng before handoff.
+- **No raw JSON visible to customers.** The AEP data model (system prompt, classifier prompt, 6-state machine, detection arrays, scripts, nuance packages) is only visible to Dune Operators in a dedicated technical panel. Customers interact exclusively via form fields and natural-language prompts.
+- **Stage 2 must use the full production runtime.** Not a preview or simplified simulation — "what the customer sees is exactly what game changers will see." This is the product's key differentiator.
+- **Generation must be non-blocking but informative.** At P95 45–90 seconds, a static spinner will destroy trust. Labeled progress stages must visibly advance.
+- **Stage 3 diff view is consequential, not cosmetic.** Customers accept/reject individual field changes. If the diff is opaque, they will bypass the review. This screen needs the same design attention as a payment confirmation.
+- **Published AEPs are immutable.** Cloning is the edit mechanism. This must be clearly communicated at publish time to prevent customer confusion.
+- **Validation is a hard gate, not a suggestion.** Blocking errors prevent publish; warnings require explicit acknowledgment per item.
+- **Compliance fields are consequential.** The instigation threshold, compliance frameworks, and termination triggers feed AEP behavior and risk scoring. They must be treated with appropriate weight and help text, not as optional form noise.
+- **Templates are starting points, not finished AEPs.** Must be clearly framed as requiring customization before generation.
 
 ---
 
-## Strategy options
+## Strategy options considered
 
-### Option A: Pure free-text prompt editor
-Admin writes a system prompt directly in a large text area. Structured sections (Workflow Steps, Branching Logic, Outcomes) are either auto-parsed from the prompt or manually typed in separate fields.
+### Option A: Pure plain-language brief → AI generates (original recommendation)
+Admin writes a scenario description in free text. AI generates the full AEP from the brief. Rejected by the PRD — the AT&T, Concentrix, and Qantas accounts demonstrated that the structural complexity of AEP requirements (crown jewels, compliance frameworks, cultural nuances, termination triggers) requires structured capture. A plain-language brief produces incomplete personas and requires multiple expensive correction loops.
 
-**Rejected because:** Most security admins are not prompt engineers. A blank prompt box produces wildly inconsistent AEP quality — ineffective personas, escaped tone, and outcome criteria that don't map to the platform's classification model. No competitor uses raw prompt as the default interface for good reason. The risk of unsafe or nonsensical AEPs entering the library is too high.
+### Option B: Fully structured form, no AI
+Admin fills every field manually — no AI generation. Rejected: the AEP JSON schema has 20+ field groups including a full state machine with 6 states, detection arrays, and cultural nuance packages. Manual authoring is what the current paper process does and takes ~1 day per AEP. This eliminates the entire product value proposition.
 
----
+### Option C (Recommended and confirmed by PRD): Structured 6-section form + example upload → AI generation + natural-language refinement
 
-### Option B: Fully structured form, no prompt visible
-Admin fills named fields: Persona Name, Role, Attack Goal, Workflow Steps (bullet list editor), Branching Logic description, Outcome Criteria per tab. System assembles an internal prompt the admin never sees.
+Stage 1: Structured form with 6 sections captures all the context the LLM needs. Optional example upload grounds tone, vocabulary, and cultural register. Generation produces a complete AEP JSON automatically.
 
-**Rejected because:** Overly rigid. Advanced security teams will want raw prompt access for novel scenarios that don't fit the field structure. Also contradicts the "prompt editor" language in the prior strategy doc and loses the flexibility that makes AEPs powerful.
+Stage 2: Customer plays the employee role in a live chat test using the full production persona runtime. No limit on test sessions. Archetype starters (Curious, Skeptical, Hostile, Compliant) guide systematic testing.
 
----
+Stage 3: Customer describes issues in plain English. LLM makes targeted field-level edits. Diff view shows old vs. new per field. Customer accepts/rejects per field. Cycle repeats as needed.
 
-### Option C (Recommended): Guided AI-Assist with progressive disclosure
-
-Three-step wizard: **Define → Configure → Test**
-
-1. **Define (Step 1):** Admin writes a plain-language scenario description, selects Adversary Method from a taxonomy, and optionally adjusts behavior parameters (escalation tendency, formality). Clicks "Generate" → system produces a structured AEP draft: Workflow Steps, Branching Logic, and Outcome Criteria stubs.
-
-2. **Configure (Step 2):** Admin reviews and edits all generated content in structured fields. Every section is editable. An "Advanced" toggle reveals the underlying system prompt for technical admins who want direct control. Outcome Criteria are authored per tab (Complicit / Non Complicit / Undetermined / No Response) with bullet list input.
-
-3. **Test (Step 3):** Live simulator. Admin plays the target role — types responses, sees the AEP adapt in real time. Publish button activates only after at least one simulator exchange. Admin can loop back to Configure from the simulator.
-
-**Why this wins:**
-- Meets admins at their level (scenario description, not system prompt)
-- Teaches AEP structure via AI-generated examples — good generated content shows what good looks like
-- Gives advanced users raw prompt access without making it the default
-- AI-generation model is validated by KnowBe4 AIDA and is the direction of the market
-- Structured form output keeps Outcome Criteria auditable for risk scoring
-- Simulator as a required step enforces a quality gate that no competitor has
+**Why this is right:**
+- Structured form capture ensures nothing is missed (required field validation enforces completeness)
+- AI generation from form inputs eliminates the manual JSON authoring step
+- Example upload is the highest-quality signal for realistic persona behavior
+- Live test with production runtime is a genuine market differentiator — no competitor offers this
+- Natural-language refinement is accessible to non-technical security managers
+- Per-field diff preserves customer agency without requiring JSON knowledge
+- Publish gate with validation enforces structural completeness before deployment
 
 ---
 
 ## Recommended strategy
 
-**Option C — Guided AI-Assist with progressive disclosure**
+**Option C — Structured Form + AI Generation + Natural-Language Refinement Loop**
 
-### Library view structure
+### AEP Library — management surface
 
-Two distinct sections on the AEP Library page:
+**Table view** (primary) with:
+- Columns: AEP Name, Account / Business Unit, Channels, Status (Draft / Pending Review / Active / Archived), Last Modified, Complicit Rate (if deployed), Actions
+- Filter bar: status, channel, compliance framework, date range, linked campaign
+- Search: full-text on name + scenario description, results < 500ms
+- "New AEP" button (top right, primary action)
+- "Start from Template" button (adjacent to New AEP)
 
-**Dune Library** (top section)
-- 3–4 seeded AEP cards in a grid
-- Read-only treatment: no edit affordance on cards
-- Each card: AEP ID, Name, Adversary Method badge, a one-line description
-- Card actions: "View details" (opens detail drawer) and "Duplicate" (opens builder pre-filled)
-- Section label: "Dune Library — managed by Dune Security"
+**Row actions:** View detail, Clone, Archive (if not in active campaign)
 
-**Your AEPs** (bottom section)
-- Section header includes usage counter: "3 of 5 custom AEPs"
-- "New AEP" button at section header level (disabled if limit reached, with tooltip)
-- Custom AEP cards: AEP ID, Name, Adversary Method badge, Status badge (Draft / Published), Simulator status chip ("Tested" / "Not tested"), Created date, Last used in campaign (if applicable)
-- Card actions: Edit, Duplicate, Delete
-- Empty state: "No custom AEPs yet. Duplicate a Dune AEP to start from a proven template, or create one from scratch."
+**AEP Detail Page** (full-page read view):
+- Six-section layout mirroring Stage 1 form — human-readable, not raw JSON
+- Right panel: version history, linked campaigns
+- Actions: Edit (Draft only), Clone (any status), Archive (if not in active campaign)
+- Version history: timestamp, author, refinement prompt that produced each version; field-level diff between any two versions
 
-### Builder flow — three-step wizard (full-page)
+**Status flow:** Draft → (if Reviewer configured) Pending Review → Active → Archived
 
-**Step 1: Define**
-- AEP Name (text input — unique validation)
-- Adversary Method (select — controlled vocabulary: Authority, Urgency, Reciprocity, Curiosity, Scarcity, Familiarity)
-- Scenario description (textarea) — placeholder: "Describe the attacker's goal, the persona they're playing, and how they should behave. For example: 'A vendor following up urgently on an overdue invoice, escalating if ignored.'"
-- Behavior parameters (optional expander): Escalation tendency (Low / Medium / High), Tone (Formal / Casual / Technical)
-- CTA: "Generate AEP" — loading state while system generates content
-- Alternative path: "Skip generation — fill manually" → advances to Step 2 with empty structured fields
+---
 
-**Step 2: Configure**
-- AI-generated content pre-fills all fields; each is editable
-- Workflow Steps: editable bullet list (add / reorder / remove steps)
-- Branching Logic: editable textarea with structured helper text ("Describe how the AEP should respond to different employee reactions")
-- Outcome Criteria: four tabs — Complicit / Non Complicit / Undetermined / No Response. Each tab has an editable bullet list for criteria.
-- Contextual note on Outcome Criteria: "These criteria affect how employee responses are classified and scored. Define them specifically."
-- Advanced toggle (visible but secondary): "Edit system prompt directly" — opens underlying prompt in a CodeEditor / large textarea. Changes here update the displayed structured fields on toggle-off. Warning: "Editing the system prompt directly overrides the structured configuration above."
-- CTA: "Continue to Test"
+### Builder — three-stage wizard (full-page)
 
-**Step 3: Test**
-- Split layout: left panel (AEP summary — name, method, key workflow steps, non-editable), right panel (simulator chat)
-- Simulator chat: chronological message thread, admin types at bottom, AEP responds with typing indicator
-- Session controls: "Reset conversation" button, "Change persona" note linking back to Step 2
-- Outcome preview strip: "Based on this conversation, outcome would be: [Undetermined]" — updates as conversation progresses
-- Simulator status indicator: "Not yet tested" → "Test in progress" → "Tested"
-- CTA: "Publish AEP" (activates after first AEP response is received in simulator)
-- Secondary: "Back to Configure" (simulator state is preserved when returning)
-- Simulator error state: "Simulator unavailable — try again in a moment" with retry action
+**Stage 1: Guided Form + Example Upload**
 
-**Publish confirmation modal:**
-- Title: "Publish [AEP Name]?"
-- Body: "This AEP will be available in the campaign builder immediately. Once referenced in an active campaign, it cannot be edited until the campaign concludes."
-- Actions: Cancel (left), Publish AEP (right — primary, green)
+Left nav: stage progress indicator (1 / 2 / 3). Section navigation within Stage 1.
 
-### Entry points into the builder
+Six sections in sequence or via left-nav jump:
 
-1. "New AEP" button (Your AEPs section) → blank Step 1
-2. "Duplicate" on a Dune-seeded card → Step 1 pre-filled with seeded AEP values, Name field cleared and focused (signal: "give this a new name")
-3. "Duplicate" on a custom AEP → same as above, from custom source
-4. "Edit" on a custom AEP in Draft status → returns to whichever step was last active
-5. "Edit" on a Published custom AEP not in active campaign → opens with warning: "This AEP will return to Draft status while you edit it. Re-publish to make it available again."
-6. "Edit" on a Published custom AEP in active campaign → edit is blocked; banner: "This AEP is in use by an active campaign. Editing is locked until the campaign concludes."
+1. **Account Context:** Company name, targeted business unit(s) + headcount, work model (Hybrid / WFO / WFH), network type (Open / Restricted / Highly Restricted). Short text inputs + dropdowns.
+
+2. **Attack Scenario:** Attack type dropdown (Refund Fraud / Credential Theft / SIM Swap / Account Action / Data Exfiltration / Other), opening message (textarea), known attacker aliases (tag input), adaptive resistance toggle. Long text + tag input.
+
+3. **Systems at Risk:** Repeatable row input — each row: application name + what it does. "Add another system" link. Separate section for internal platform apps.
+
+4. **Rules & Compliance:** Multi-select checklist (Data Privacy Act 2012, PCI-DSS, GDPR, ISO 27001 pre-populated), topics to never mention (tag input), instigation threshold radio (None / Soft Stop / Hard Stop on first resistance) with inline contextual help per option.
+
+5. **Cultural Context:** Target timezone(s) multi-select, payment methods multi-select (GCash, Maya, BPay, credit card, etc.), linguistic nuances (Tagalog / Hinglish / Taglish / Arabic / Other + free text notes, sample phrases).
+
+6. **Termination Logic:** Structured list builder for termination triggers (what ends the simulation), continuation phrases (what keeps it going), impact level definitions (Complicit / Non-Complicit / Undetermined / No Response).
+
+**Example Upload section** (below the six sections or in a dedicated card):
+- Drag-and-drop zone + file picker button
+- Up to 5 examples; accepted: .txt, .docx, .png, .jpg
+- Each example: optional channel label (WhatsApp, Telegram, etc.) + language code
+- Per-file state: uploading → OCR processing (for images) → ready / failed
+- Optional "Paste text instead" inline option per example slot
+- Section label: "These examples help calibrate tone and cultural register. Recommended but not required."
+
+**Channel Selection** (prominent, near top or after Attack Scenario):
+- Multi-select: WhatsApp, Telegram, Viber, Facebook Messenger, SMS, Instagram, Microsoft Teams, Signal
+- Help text: "Channels affect persona register and deployment targets."
+
+**Primary CTA:** "Generate My AEP" — triggers generation with labeled progress screen.
+**Secondary CTA:** "Save draft" — preserves form state without generating.
+
+**Generation progress screen:**
+- Full-page overlay or dedicated step
+- Labeled stages: "Analyzing your scenario" → "Building the conversation flow" → "Configuring guardrails" → "Finalizing"
+- Estimated time indicator
+- On partial failure: inline error per failed section with per-section retry option; preserved form inputs
+
+---
+
+**Stage 2: Live Chat Test**
+
+Split layout:
+- Left panel: AEP summary (name, attack type, channels, key workflow states — non-editable read view)
+- Right panel: live chat simulator
+
+Chat simulator:
+- Persona sends opening message automatically when test begins
+- Customer types in message input field as the employee
+- Typing indicator while persona is responding
+- Conversation state label shown in a sidebar or header strip: "Current state: 2 — Slight Interest" (visible to customer only, never in live campaign)
+- Confidence indicator per state (real-time)
+
+Archetype starters:
+- 4 one-click options: Curious Employee, Skeptical Employee, Immediately Hostile, Gradually Compliant
+- Each injects a pre-written opening response into the message field with a single click
+
+Controls:
+- "Reset conversation" — clears chat, starts a new session
+- "Refine this AEP" — navigates to Stage 3
+
+Session history:
+- All test sessions preserved in draft (for operator review)
+- Session count indicator: "2 test sessions completed"
+
+**Publish pathway:** After at least 1 completed test session, "Publish AEP" CTA activates. Publish with 1 session triggers a warning acknowledgment.
+
+---
+
+**Stage 3: Prompt-Based Refinement**
+
+Layout:
+- Left panel: AEP field summary (same read view as Stage 2 left panel)
+- Right panel: refinement interface
+
+Refinement interface:
+- Text input: "Describe what you'd like to change..." with example prompts (hint text rotates)
+- "Submit" → processing state (< 20s P95)
+- Diff view below: list of changed fields, each showing old value → new value
+  - Each field row: field name, section label (e.g., "Attack Scenario > Opening Message"), old value (struck-through), new value (highlighted)
+  - Per-field action: "Accept" / "Reject" buttons
+  - "Accept all" / "Reject all" bulk actions at top
+- After accepting changes: "Back to Stage 2" to re-test; or "Publish AEP" if satisfied
+- "Check AEP" button triggers on-demand validation run, results inline with section highlighting
+
+**Blocked refinement:**
+- Guardrail removal attempt: inline blocked message above diff, prompt input persists for editing
+- Compliance framework removal: redirect message pointing to Stage 1 Rules & Compliance section
+
+**Version sub-history:** Refinement rounds create sub-versions (v0.1 → v0.1.1). Visible in version panel labeled by timestamp + refinement prompt, not version numbers.
+
+---
+
+**Publish confirmation:**
+- Modal: "Publish [AEP Name]?"
+- Body: "This AEP will be available in the campaign builder immediately. Once referenced in an active campaign, it cannot be edited until the campaign concludes. To make changes later, you'll need to clone this AEP."
+- Validation warnings (if any): shown as checklist items requiring acknowledgment
+- Actions: Cancel, Publish AEP (primary)
+
+---
+
+### Dune Operator view
+
+Same UI as customer with an "Operator mode" indicator. Additional panels:
+- Raw JSON panel (collapsible technical debug view)
+- Validation warning override toggle (logged)
+- Operator refinement prompt (submitted as operator-authored, logged)
+- Operator Assist flag — triggers customer notification with diff summary
+- Test session transcript access (not visible to customer users)
 
 ---
 
 ## Risks and tradeoffs
 
 **What this strategy gives up:**
-- Speed. The three-step wizard is slower than a single-page form. Admins creating their second or third AEP may find the step structure overhead. Mitigation: the "Duplicate" path skips Step 1 effectively and pre-fills everything.
-- Transparency. The AI-generated content may not accurately reflect what the underlying system prompt does. If Workflow Steps and Branching Logic are cosmetic summaries (not literal LLM instructions), admins may be misled about what the AEP will actually do. Mitigation: this must be resolved with Eng before Figma work — the structured fields need to be authoritative, not decorative.
+- Speed for experienced users. The six-section form is thorough but long. The Clone + edit path mitigates this for repeat users. Templates pre-fill Stage 1 for common account types.
+- Simplicity. Six sections with 30+ fields plus example upload is substantial. Help text and sensible defaults must carry a lot of weight. Consider whether sections 3–6 can be collapsed by default with "Advanced" disclosure.
 
 **Risks that persist:**
-- Simulator as a checkbox, not a real test. Admins may do one quick simulator exchange to unlock Publish, not genuinely validate behavior. This is a behavior design problem, not a UI problem — but consider adding a minimum exchange count (e.g., 3 turns) before Publish activates.
-- Open questions on outcome criteria authoring could change Step 2 significantly. If Dune defines outcome criteria globally (not per AEP), the Outcome Criteria tabs in Configure become display-only, and Step 2 collapses significantly.
+- **Generation quality is the product's core promise.** If the generated persona is poor quality, every subsequent stage is fighting an uphill battle. The form structure, example upload, and generation prompt quality are all load-bearing.
+- **Stage 3 diff complexity.** A single refinement prompt may cascade changes across many field groups (e.g., opening message update → 1_INITIAL state script update → detection pattern update). A flat list of changed fields may be overwhelming. Consider grouping by section.
+- **Template adoption vs. template quality.** If templates don't accurately reflect the targeted customer segment (e.g., BPO Philippines template doesn't feel realistic to a telecom in India), customers will skip templates entirely and the reuse metric will underperform.
 
 ---
 
 ## Open issues
 
-These unresolved questions would materially change the strategy if answered differently. Do not advance to Figma without resolving at least #1 and #3.
-
-1. **[Critical — Both]** Are Workflow Steps and Branching Logic AI-generated from the scenario description, or manually authored by the admin? This determines whether Step 2 starts pre-filled or empty.
-2. **[Critical — PM]** Are Outcome Criteria (Complicit / Non Complicit / Undetermined / No Response) defined globally by Dune, or authored per AEP? If global, Step 2 collapses; Outcome tabs become display-only.
-3. **[Critical — Eng]** In the simulator, does the admin play the target manually, or is it AI-vs-AI? If AI-vs-AI, the simulator UI is an observation interface, not a chat interface — a fundamentally different screen.
-4. **[Medium — Both]** Version-locking policy. Strategy assumes campaign creation locks the AEP version. If Eng cannot implement this, "Edit" on published AEPs must be more restrictively gated.
-5. **[Medium — PM]** Exact custom AEP limit (4 or 5). Affects the counter display in the library header.
-6. **[Medium — PM]** Is duplication from Dune-seeded AEPs confirmed as an intended path? Strategy depends on it as the primary onboarding path for new admins.
+1. **[Critical — PM]** Is a Reviewer ever mandatory? If yes, the publish flow needs a blocking Pending Review state and a Reviewer approval surface — a materially different screen.
+2. **[Critical — Both]** Multi-channel deployment model — one AEP / multiple channels in one campaign, or one-channel-per-campaign? Affects channel field design and campaign integration.
+3. **[Medium — Eng]** Stage 2 LLM model — full production vs. lighter model for test sessions. Affects how "unlimited sessions" is positioned.
+4. **[Medium — PM]** Instigation threshold enum — three values sufficient? Affects Stage 1 field design and help text.
+5. **[Medium — Eng]** Auto-save behavior for Stage 1 form. Affects whether a "save draft" CTA is needed or if background save is sufficient.
 
 ---
 
 ## Next design actions
 
-1. **Resolve open issues #1, #2, and #3 with PM and Eng** — these three answers determine the shape of the Configure step and the Simulator screen. Don't open Figma until they're answered.
-2. **Confirm the Adversary Method taxonomy list** — get the full controlled vocabulary from PM (expected: Authority, Urgency, Reciprocity, Curiosity, Scarcity, Familiarity — confirm and finalize).
-3. **Audit Stillsuit DS v2 for:** wizard step bar, textarea / CodeEditor, split pane layout, card grid, badge variants, drawer (for AEP detail view). Flag any gaps for DS review.
-4. **Design the library grid first** — it's the entry and return point for all flows. Dune Library section + Your AEPs section + card states is a self-contained deliverable that can be validated independently.
-5. **Design the AEP detail drawer second** — this is how both admins and campaign managers read an AEP. It's also how the existing AEPs in the seeded library communicate quality and structure to new admins.
-6. **Design the wizard third** — Step 1 → 2 → 3, starting with the happy path. Use the detail drawer visual language for the AEP summary panel in the simulator.
+1. **Resolve critical open issues #1 and #2** before finalizing the Builder flow — mandatory reviewer gate and multi-channel model both change screens materially.
+2. **Design the AEP Library table first** — entry, return point, and management surface for all AEPs. Status model (Draft / Pending Review / Active / Archived) and row actions are self-contained deliverables.
+3. **Design Stage 1 form second** — six sections is a lot; work through progressive disclosure strategy and help text approach. Template pre-fill path and "Start from Template" entry point are part of this screen.
+4. **Design the generation progress screen** — P95 90s wait with labeled stages is a trust-critical moment. This screen needs dedicated attention.
+5. **Design Stage 2 (Live Chat Test) third** — state label panel, archetype starters, session controls. Validate split-pane layout against DS for responsive handling.
+6. **Design Stage 3 (diff view) fourth** — this is the most consequential screen for product quality. Spend design cycles on diff legibility, per-field accept/reject, and guardrail block messaging.
+7. **Audit Stillsuit DS v2 for:** table pattern, wizard step bar, drawer, modal, badge variants, split-pane layout, diff view — flag gaps for DS review.

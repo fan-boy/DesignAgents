@@ -1,57 +1,82 @@
 flowchart TD
-    A([AEP Library Page]) --> B{User action}
+    A([AEP Library]) --> B{Entry path}
 
-    B -- New AEP --> C[Step 1: Define\nBlank form]
-    B -- Duplicate Dune AEP --> D[Step 1: Define\nPre-filled from seeded AEP\nName cleared + focused]
-    B -- Duplicate custom AEP --> D
-    B -- Edit Draft AEP --> F[Step 2: Configure\nLast saved state]
-    B -- Edit Published AEP --> E{In active campaign?}
-    B -- View AEP card --> Z[Detail Drawer\nWorkflow + Branching + Outcomes]
-    B -- Delete AEP --> DEL{In active campaign?}
+    B -- New AEP --> S1[Stage 1: Guided Form\nBlank sections]
+    B -- Start from Template --> TPL[Template Picker Modal\n6 Dune-curated templates]
+    TPL --> S1T[Stage 1: Guided Form\nPre-filled from template\nBanner: update and regenerate]
+    S1T --> S1SEC
 
-    E -- Yes --> EDITBLOCK[Edit blocked\nBanner: Locked until campaign ends]
-    E -- No --> EDITWARN[Warning: AEP returns to Draft\nConfirm to continue]
-    EDITWARN --> F
+    B -- Edit Draft --> S1[Stage 1: Guided Form\nLast saved state]
+    B -- Clone AEP --> S1C[Stage 1: Guided Form\nPre-filled from source\nNew version, lineage tracked]
+    S1C --> S1SEC
+    B -- View AEP row --> DET[AEP Detail Page\n6-section read view\nVersion history + Linked campaigns]
 
-    DEL -- Yes --> DELBLOCK[Delete blocked\nTooltip: Used in active campaign]
-    DEL -- No --> DELCONFIRM[Delete confirmation modal\nNote historical record impact]
-    DELCONFIRM -- Confirm --> DELETED([AEP deleted\nCounter decrements])
-    DELCONFIRM -- Cancel --> A
+    S1 --> S1SEC[Section Navigation\n1: Account Context\n2: Attack Scenario\n3: Systems at Risk\n4: Rules and Compliance\n5: Cultural Context\n6: Termination Logic]
+    S1SEC --> EX[Example Upload\nOptional: 1-5 files\n.txt .docx .png .jpg with OCR\nPer-file status: uploading / OCR / ready / failed]
+    EX --> CH[Channel Selection\nWhatsApp Telegram Viber\nFB Messenger SMS Instagram\nMS Teams Signal]
+    CH --> GEN{Generate My AEP}
 
-    C --> GENQ{Generate with AI?}
-    D --> GENQ
+    GEN --> GENPROG[Generation Progress Screen\nAnalyzing your scenario\nBuilding conversation flow\nConfiguring guardrails\nFinalizing\n15-90 seconds]
+    GENPROG --> GENRESULT{Generation result}
+    GENRESULT -- Full failure --> GENFAIL[Error state\nRetry or save draft\nForm inputs preserved]
+    GENFAIL --> GEN
+    GENRESULT -- Partial failure --> GENPART[Per-section error\nRetry failed sections only\nSucceeded sections locked]
+    GENPART --> GEN
+    GENRESULT -- Success --> S2
 
-    GENQ -- Yes: Generate AEP --> GEN[AI generation loading\nSkeleton on all fields]
-    GENQ -- No: Fill manually --> F
+    S2[Stage 2: Live Chat Test\nSplit pane\nLeft: AEP summary\nRight: Chat simulator\nState label visible to customer only]
+    S2 --> S2START[Persona sends opening message automatically\nCustomer plays employee role]
+    S2START --> ARCH{Use archetype starter?}
+    ARCH -- Yes --> ARCHINJ[One-click inject\nCurious / Skeptical / Hostile / Compliant]
+    ARCHINJ --> S2CHAT
+    ARCH -- No: type freely --> S2CHAT[Conversation exchange\nState label updates in real time\nTyping indicator on persona responses]
+    S2CHAT --> S2TIMEOUT{Response timeout?}
+    S2TIMEOUT -- Yes --> S2ERR[In-chat timeout message\nRetry + Reset conversation]
+    S2ERR --> S2CHAT
+    S2TIMEOUT -- No --> S2DONE{Session complete?\nTerminal state reached}
+    S2DONE -- No: continue --> S2CHAT
+    S2DONE -- Yes --> S2SUMMARY[Session summary\nStates traversed\nMessages exchanged\nFinal state\nGuardrail events]
+    S2SUMMARY --> S2DEC{Satisfied with behavior?}
+    S2DEC -- No: refine --> S3
+    S2DEC -- Yes: publish --> PUBCHECK
+    S2DEC -- Run another session --> S2START
 
-    GEN --> GENFAIL{Generation succeeded?}
-    GENFAIL -- No --> GENERR[Inline error\nRetry or skip]
-    GENERR --> GENQ
-    GENFAIL -- Yes --> F[Step 2: Configure\nWorkflow Steps editable\nBranching Logic editable\nOutcome Criteria per tab editable\nAdvanced toggle: raw prompt]
+    S3[Stage 3: Prompt-Based Refinement\nSplit pane\nLeft: AEP summary\nRight: Refinement interface]
+    S3 --> S3INPUT[Customer types refinement prompt\nPlain English description of issue]
+    S3INPUT --> S3BLOCK{Prompt blocked?}
+    S3BLOCK -- Guardrail removal --> S3ERR[Inline blocked message\nPrompt editable for retry]
+    S3ERR --> S3INPUT
+    S3BLOCK -- Compliance removal --> S3ERR2[Redirect to Stage 1\nRules and Compliance section]
+    S3BLOCK -- No block --> S3PROC[Processing < 20s\nTargeted field-level edits only]
+    S3PROC --> S3DIFF[Diff view\nChanged fields per section\nOld value vs New value\nPer-field Accept / Reject\nAccept all / Reject all]
+    S3DIFF --> S3ACT{Customer action}
+    S3ACT -- Accept changes --> S3ACCEPT[Draft updated\nSub-version incremented\nTimestamp + prompt logged]
+    S3ACCEPT --> S3LOOP{Continue refining?}
+    S3LOOP -- Yes: another prompt --> S3INPUT
+    S3LOOP -- No: back to test --> S2START
+    S3ACT -- Reject all --> S3REJECT[Draft unchanged\nReturn to test or retry prompt]
+    S3REJECT --> S2DEC
 
-    F --> SIM[Step 3: Test\nSplit pane: AEP summary + chat simulator]
+    PUBCHECK{Validation check}
+    PUBCHECK -- Blocking errors --> VALERR[In-flow error\nSection and field highlighted\nPublish blocked]
+    VALERR --> S1SEC
+    PUBCHECK -- Warnings only --> VALWARN[Warning acknowledgment\nPer-warning checkboxes\nMust check all to proceed]
+    VALWARN --> PUBMODAL
+    PUBCHECK -- All clear --> PUBMODAL
 
-    SIM --> SIMQ{Simulator available?}
-    SIMQ -- No --> SIMERR[Simulator error state\nRetry + Back to Configure]
-    SIMERR --> SIM
-    SIMQ -- Yes --> TESTED{At least one AEP\nresponse received?}
+    PUBMODAL[Publish confirmation modal\nAEP Name\nImmutability notice\nClone required for future edits]
+    PUBMODAL -- Cancel --> S2
+    PUBMODAL -- Confirm Publish --> REVCHECK{Reviewer configured?}
+    REVCHECK -- No --> PUB([AEP Active\nAvailable in campaign builder\nToast: published successfully])
+    REVCHECK -- Yes --> PENDING([AEP Pending Review\nCampaign creation allowed\nCampaign launch blocked\nReviewer notified])
 
-    TESTED -- No --> SIM
-    TESTED -- Yes --> PUBREADY{Admin satisfied\nwith behavior?}
+    DET -- Security Manager: Clone --> S1C
+    DET -- Security Manager: Archive --> ARCCHECK{In active campaign?}
+    ARCCHECK -- Yes --> ARCBLOCK[Archive blocked\nNaming blocking campaigns]
+    ARCCHECK -- No --> ARCCONFIRM[Archive confirmation modal]
+    ARCCONFIRM -- Confirm --> ARCHIVED([AEP Archived\nRemoved from default view])
+    ARCCONFIRM -- Cancel --> DET
 
-    PUBREADY -- No: Back to Configure --> F
-    PUBREADY -- Yes: Publish AEP --> PUBMODAL[Publish confirmation modal\nNote: locked while in active campaign]
-
-    PUBMODAL -- Cancel --> SIM
-    PUBMODAL -- Confirm Publish --> PUB([AEP Library\nNew card: Published + Tested\nCounter increments])
-
-    Z -- Admin: Edit --> E
-    Z -- Admin: Duplicate --> D
-    Z -- Campaign manager: Use in Campaign --> CAMP([Campaign Builder\nAEP pre-selected])
-
-    A --> LIMITQ{Custom limit reached?}
-    LIMITQ -- Yes --> LIMITBLOCK[New AEP button disabled\nTooltip: delete one to make room]
-    LIMITQ -- No --> B
-
-    A --> SEEDFAIL{Dune Library\nloaded?}
-    SEEDFAIL -- No --> LOADERR[Error state on Dune Library section\nRefresh CTA\nYour AEPs loads independently]
+    A --> EMPTYQ{Any AEPs?}
+    EMPTYQ -- No --> EMPTY[Empty state\nNew AEP CTA\nStart from Template CTA]
+    EMPTYQ -- Yes --> TABLE[Table view\nFilter: status channel compliance date campaign\nSearch: name + scenario description]
