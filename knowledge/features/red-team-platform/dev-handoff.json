@@ -1,0 +1,235 @@
+{
+  "feature_name": "Red Team Platform",
+  "feature_slug": "red-team-platform",
+  "summary": "The Red Team Platform enables security admins to run active, multi-channel social engineering campaigns driven by AI-adaptive AEP chatbots. Admins select or build AEPs (Adversary Emulation Pathways — AI-powered scenario chatbots), compose multi-channel attack sequences in a node-based editor, configure approval-gated campaigns, and review employee conversation threads to classify complicit outcomes. Five sections under a new top-level Red Team nav item: Dashboard, AEP Library, Attack Library, Campaigns, Conversations.",
+  "in_scope": [
+    "Top-level Red Team nav item with five sub-sections",
+    "AEP Library: card grid of 2 Dune-seeded AEPs (read-only), detail drawer with Workflow Steps / Branching Logic / Outcome tabs, Request AEP modal form",
+    "Attack Library: node-based editor scoped to linear sequences only (no branching)",
+    "Channel support: SMS (confirmed), Voice (human-logged), WhatsApp (tenant-provisioned), Viber (tenant-provisioned)",
+    "Campaign wizard: 5 steps — Details, Build Attack Flow (inline node editor), Audience, Remediation, Review + Request Start",
+    "Request-start campaign model with Red Team Approver role",
+    "Audience selection and phone coverage model (inherited from smishing)",
+    "Scheduling: start date, allowed days of week, start time, end time, timezone",
+    "Compliance acknowledgment checkbox at campaign submission",
+    "Remediation rule builder extended for complicity outcome trigger",
+    "Conversation management: cross-campaign thread table, thread detail, complicity/non-complicit marking with confirmation, reversal",
+    "Risk score update on complicity marking",
+    "Audit log on every complicity marking and reversal"
+  ],
+  "out_of_scope": [
+    "Customer self-serve AEP authoring (two-panel prompt builder) — not in v1; admins request AEPs from Dune via a form",
+    "AEP clone/edit — not in v1; all AEPs are Dune-managed",
+    "Live demo chat in AEP preview — not in v1; detail drawer is read-only",
+    "Automated voice call initiation and transcription",
+    "System-automated complicity detection (NLP flagging) — not confirmed for v1",
+    "Cross-section campaign view combining red team + smishing + email",
+    "Mobile-first experience",
+    "Test send for red team campaigns",
+    "Approval notifications outside in-app and email"
+  ],
+  "flow_steps": [
+    {
+      "step": "AEP creation (prompt-based builder)",
+      "actor": "user",
+      "behavior": "Admin opens the two-panel AEP builder. Writes a scenario prompt describing the attacker persona, goal, and tactics. Tests the AEP in the live chat simulator by playing the role of target employee. Adds refinement instructions to tune behavior. Iterates until satisfied. Clicks Save & Activate — content safety check runs. If passed, AEP becomes Active and available in campaign wizard.",
+      "states": ["empty-builder", "prompt-written-not-tested", "llm-response-loading", "llm-error", "content-safety-blocked", "content-safety-warning", "draft", "active", "read-only-dune-library"]
+    },
+    {
+      "step": "Attack sequence creation",
+      "actor": "user",
+      "behavior": "Admin opens node-based canvas editor, drags channel nodes from palette, configures each node (message, delay), and saves. Locked nodes shown for unconfigured tenant channels.",
+      "states": ["empty-canvas", "in-progress", "unsaved-changes", "locked-channel", "draft", "active"]
+    },
+    {
+      "step": "Campaign wizard — Step 1: Details",
+      "actor": "user",
+      "behavior": "Admin sets campaign name, start date, allowed sending days (multi-select), start time, end time, timezone.",
+      "states": ["default", "validation-errors (past date, end before start, no days selected)"]
+    },
+    {
+      "step": "Campaign wizard — Step 2: Build Attack Flow",
+      "actor": "user",
+      "behavior": "Admin lands on a node editor canvas with a pre-configured default flow: Initial Contact → (If replied: AEP Active) / (No reply after 3 days: Nudge → AEP Active / End). Admin taps Initial Contact to set channel and write opening message. Taps AEP node to select from available AEPs. Reviews/edits Nudge node delay and message. Can add up to 3 nudges via '+ Add nudge' affordance. Continue is blocked until all required fields are filled and an AEP is selected.",
+      "states": ["default-preloaded-flow", "aep-unselected-blocked", "message-empty-blocked", "nudge-added", "channel-locked-tenant", "no-aep-available-blocked", "all-valid-continue-enabled"]
+    },
+    {
+      "step": "Campaign wizard — Step 3: Audience",
+      "actor": "user",
+      "behavior": "Admin selects groups/departments/cohorts. Phone coverage indicator shown. Hard block at 0% coverage.",
+      "states": ["default", "loading-coverage", "partial-coverage-warning", "zero-coverage-hard-block", "cooldown-warning"]
+    },
+    {
+      "step": "Campaign wizard — Step 4: Remediation",
+      "actor": "user",
+      "behavior": "Admin enables remediation rules triggered by complicity marking. Rules inherited and extended from smishing.",
+      "states": ["default", "servicenow-disabled-if-not-configured"]
+    },
+    {
+      "step": "Campaign wizard — Step 5: Review + Request Start",
+      "actor": "user",
+      "behavior": "Admin reviews summary, checks compliance checkbox, submits Request Campaign Start. Blocked if no approver configured or compliance unchecked.",
+      "states": ["default", "cta-disabled-no-approver", "cta-disabled-unchecked-compliance", "cta-enabled", "submitted-pending-approval"]
+    },
+    {
+      "step": "Approver review",
+      "actor": "user (approver role)",
+      "behavior": "Approver views pending campaign, approves or rejects with optional reason. Admin notified either way.",
+      "states": ["pending-approval", "approved", "rejected-returns-to-draft"]
+    },
+    {
+      "step": "Campaign activation",
+      "actor": "system",
+      "behavior": "On start date, within allowed days and time window, campaign status changes to Active and attack orchestration begins.",
+      "states": ["approved-queued", "active-sending", "start-date-passed-warning"]
+    },
+    {
+      "step": "Conversation review — thread detail",
+      "actor": "user",
+      "behavior": "Admin clicks Review on a Pending Review row. 480px right-anchored drawer opens showing: metadata row (Start Time, End Time, Phone Number, Recommended Status), full conversation transcript with attacker messages labeled 'Attacker · [AEP Name] · timestamp' and employee messages labeled '[Employee Name] · timestamp', AEP step indicators, classify section with radio buttons (Complicit / Non-complicit), reporting checkbox with optional notes, and sticky footer with Cancel + Apply updates. Apply updates is disabled until a radio is selected. No separate confirmation modal — radio selection + primary CTA is the confirmation pattern. Post-apply: drawer closes, table row updates, Reviewed by and Reviewed at columns populate.",
+      "states": ["pending-review", "single-exchange-guidance", "system-suggested-flag", "classify-unselected", "classify-selected-complicit", "classify-selected-noncomplicit", "reporting-expanded", "apply-in-progress", "apply-error", "marked-complicit", "marked-non-complicit", "no-response", "opted-out"]
+    },
+    {
+      "step": "Complicity reversal",
+      "actor": "user",
+      "behavior": "Admin opens an already-classified thread. Drawer shows classification radio pre-selected. Admin changes radio selection and clicks Apply updates. No separate reversal modal — same Apply updates CTA handles reclassification. Change is logged in audit trail. Risk score adjustment triggered if moving from Complicit to Non-Complicit or vice versa.",
+      "states": ["reclassify-radio-changed", "apply-in-progress", "reclassified", "audit-entry-visible"]
+    }
+  ],
+  "components": [
+    { "screen": "AEP Library list", "component": "TabBar", "overrides": "Two tabs: Dune Library / Custom", "notes": "Dune Library tab: read-only actions only (Preview, Clone)" },
+    { "screen": "AEP Library list", "component": "Table", "overrides": "None", "notes": "Action menu differs between Dune Library (Preview/Clone) and Custom (Edit/Clone/Archive)" },
+    { "screen": "AEP creation form", "component": "Two-panel AEP builder", "overrides": "NEW PATTERN — DS review required", "notes": "Left: scenario prompt editor + refinement instructions. Right: live chat simulator (admin as target, AEP as attacker via LLM). See DS review section." },
+    { "screen": "Attack Library list", "component": "Table + Badge strip", "overrides": "Channel icons in sequence order", "notes": "" },
+    { "screen": "Attack node editor", "component": "Node-based canvas", "overrides": "NEW PATTERN — DS review required", "notes": "Linear sequences only v1; drag-to-add, click-to-configure, keyboard reorder" },
+    { "screen": "Attack node editor", "component": "Drawer / 480px", "overrides": "Node configuration content", "notes": "Opens on node click; channel-specific field sets" },
+    { "screen": "Campaign wizard — Step 1", "component": "DatePicker", "overrides": "None", "notes": "Must disable past dates" },
+    { "screen": "Campaign wizard — Step 1", "component": "Day-of-week toggle chips", "overrides": "NEW PATTERN — DS review required", "notes": "Multi-selectable; default Mon-Fri; min 1 required" },
+    { "screen": "Campaign wizard — Step 2", "component": "AEP preview drawer (480px)", "overrides": "NEW PATTERN — DS review required", "notes": "Live demo chat where admin can interact with the AEP to preview behavior before selecting. Not a static script." },
+    { "screen": "Campaign wizard — Step 2 (node canvas)", "component": "Node editor canvas", "overrides": "NEW PATTERN — DS review required", "notes": "Dotted-grid background. Nodes: Initial Contact, AEP, Nudge, End. Arrows connect nodes top-to-bottom. Branches auto-generate from each contact node. Pre-configured default flow on load." },
+    { "screen": "Campaign wizard — Step 2 (Initial Contact node)", "component": "Card + channel pill selector + Textarea", "overrides": "Inline within node", "notes": "Channel chips: SMS / WhatsApp / Telegram. Locked chips for unconfigured tenant channels." },
+    { "screen": "Campaign wizard — Step 2 (AEP node)", "component": "Card + Drawer / 480px (AEP selector)", "overrides": "Tap node to open selector", "notes": "Shows AEP name + method after selection. Green accent border. Always terminal on replied branches." },
+    { "screen": "Campaign wizard — Step 2 (Nudge node)", "component": "Card + number input + channel pill selector + Textarea", "overrides": "Inline within node", "notes": "Delay: number input + 'days' label. Max 3 nudge nodes in v1. '+ Add nudge' dashed card below last nudge." },
+    { "screen": "Campaign wizard — Step 3", "component": "Audience selector + Coverage drawer", "overrides": "Inherited from smishing", "notes": "No redesign needed" },
+    { "screen": "Campaign wizard — Step 4", "component": "Remediation rule builder", "overrides": "Trigger changed to complicity", "notes": "Inherited from smishing; pre-built rule cards extended" },
+    { "screen": "Campaign wizard — Step 5", "component": "Callout / Danger", "overrides": "Approver configuration warning", "notes": "Shown only when no approver is configured" },
+    { "screen": "Campaign wizard — Step 5", "component": "Button / Primary / md", "overrides": "Label: Request Campaign Start (not Launch Campaign)", "notes": "Disabled until compliance + approver both satisfied" },
+    { "screen": "Conversation thread detail", "component": "Drawer / 480px", "overrides": "Right-anchored; triggered from table Review button", "notes": "Header: '[Employee Name] conversation history' + X close. Metadata row below header. Transcript. Classify section with RadioGroup. Reporting section with Checkbox + Textarea. Sticky footer." },
+    { "screen": "Conversation thread detail — metadata row", "component": "LabelValue / inline list", "overrides": "4 fields: Start Time, End Time, Phone Number, Recommended Status", "notes": "Recommended Status shows system-derived FAIL/PASS badge + category tag. Hidden when no system flag." },
+    { "screen": "Conversation thread detail — classify section", "component": "RadioGroup", "overrides": "Two options: Complicit / Non-complicit", "notes": "No default selection for Pending Review threads. Pre-selected to current status for already-classified threads. Enabling 'Apply updates' requires selection or change." },
+    { "screen": "Conversation thread detail — reporting section", "component": "Checkbox + Textarea", "overrides": "Textarea visible only when checkbox checked", "notes": "Helper text: 'Includes conversation, classification, and optional notes.' Max 500 chars." },
+    { "screen": "Conversation thread detail — footer", "component": "Button / Primary / md", "overrides": "Label: Apply updates", "notes": "Disabled until radio is selected (or changed from existing). No separate confirmation modal — this IS the confirmation step." }
+  ],
+  "interactions": [
+    "Node canvas: drag channel chip from palette to canvas to add a step; drag node within canvas to reorder; click node to open config drawer; delete key on focused node triggers confirmation if node has content",
+    "VEP script editor: click Add exchange to append a new node; click delete icon on node to remove (confirmation if has content); drag to reorder nodes (v1: may defer reorder to keyboard-only)",
+    "Compliance checkbox at Step 5: checking enables the Request Campaign Start CTA (if approver also configured)",
+    "Complicity marking: click Review on table row → drawer opens → read transcript → select Complicit or Non-complicit radio → optionally check Send report + add notes → click Apply updates → drawer closes → table row updates, Reviewed by + Reviewed at columns populate, toast shown, risk score queued",
+    "Complicity reclassification (reversal): open classified thread drawer → radio pre-selected → change radio selection → Apply updates enabled → click Apply updates → reclassification saved, audit entry added, risk score adjusted",
+    "Bulk complicity marking: select rows via checkboxes → Mark selected as... dropdown → Complicit/Non-Complicit → confirmation modal with count",
+    "Request Start: click CTA → campaign status → Pending Approval → toast → redirect to campaign detail",
+    "Approval: approver clicks Approve → campaign → Approved status → admin notified",
+    "Rejection: approver clicks Reject → enters reason (optional) → campaign → Draft → admin notified with reason",
+    "Withdraw request: admin clicks Withdraw Request → campaign → Draft → approver notified"
+  ],
+  "rbac": [
+    { "action": "Request Campaign Start", "required_permission": "red_team.campaign.create", "disabled_tooltip": "Confirm the compliance statement before requesting start." },
+    { "action": "Request Campaign Start (no approver)", "required_permission": "red_team.campaign.create", "disabled_tooltip": "No Red Team Approver is configured. Go to Settings → Red Team → Configure Approver." },
+    { "action": "Approve campaign", "required_permission": "red_team.campaign.approve", "disabled_tooltip": "Only designated Red Team Approvers can approve campaigns." },
+    { "action": "Mark Complicit / Non-Complicit", "required_permission": "red_team.conversation.mark", "disabled_tooltip": "You don't have permission to mark conversations. Contact your administrator." },
+    { "action": "Create / edit VEP", "required_permission": "red_team.vep.create", "disabled_tooltip": "You don't have permission to create VEPs. Contact your administrator." },
+    { "action": "Create / edit attack sequence", "required_permission": "red_team.attack.create", "disabled_tooltip": "You don't have permission to create attack sequences. Contact your administrator." },
+    { "action": "View PII in threads", "required_permission": "pii.read", "disabled_tooltip": "You don't have permission to view employee details. Contact your administrator." },
+    { "action": "Archive VEP in active campaign", "required_permission": "red_team.vep.create", "disabled_tooltip": "This VEP is used by [N] active campaigns." },
+    { "action": "Add unconfigured channel node", "required_permission": "N/A — channel availability", "disabled_tooltip": "This channel is not configured for your organization. Contact your admin to enable [Channel]." }
+  ],
+  "accessibility_requirements": [
+    "Node canvas: all operations achievable by keyboard (Tab to focus nodes, Enter to open config, Delete to remove, arrow keys to reorder)",
+    "Conversation thread table: rows announce 'Employee [Name], Campaign [Name], Status [Status]' to screen readers",
+    "Complicity confirmation modal: focus moves to modal on open; Escape = Cancel (not Confirm); Tab order Cancel → Confirm; focus returns correctly on close",
+    "AEP chat simulator: Tab to focus input, Enter to send; new AEP messages announced to screen reader: 'Attacker: [text]'; typing indicator announced as 'AEP is responding'",
+    "Day-of-week toggle chips: role=checkbox; announces selected state per chip ('Monday selected', 'Tuesday not selected')",
+    "AEP preview drawer (live chat): chat messages announced in order; attacker messages as 'Attacker: [text]'; typing indicator announced as 'AEP is responding'",
+    "Status badges: text label always present; color is supplemental only",
+    "Mark as Complicit button (color/feedback/danger): confirm text label maintains ≥4.5:1 contrast ratio against danger background token"
+  ],
+  "analytics_events": [
+    { "event": "red_team_campaign_created", "trigger": "Campaign saved as Draft", "properties": ["campaign_id", "admin_id", "attack_id", "vep_id"] },
+    { "event": "red_team_campaign_start_requested", "trigger": "Admin clicks Request Campaign Start", "properties": ["campaign_id", "admin_id", "approver_id"] },
+    { "event": "red_team_campaign_approved", "trigger": "Approver approves campaign", "properties": ["campaign_id", "approver_id"] },
+    { "event": "red_team_campaign_rejected", "trigger": "Approver rejects campaign", "properties": ["campaign_id", "approver_id", "reason"] },
+    { "event": "red_team_campaign_activated", "trigger": "Campaign start date reached", "properties": ["campaign_id"] },
+    { "event": "red_team_attack_sent", "trigger": "Channel node fires for employee", "properties": ["campaign_id", "employee_id_hashed", "channel", "node_index"] },
+    { "event": "red_team_employee_replied", "trigger": "Employee reply received", "properties": ["campaign_id", "employee_id_hashed", "channel"] },
+    { "event": "red_team_complicit_marked", "trigger": "Admin confirms complicit marking", "properties": ["campaign_id", "thread_id", "employee_id_hashed", "admin_id", "timestamp"] },
+    { "event": "red_team_noncomplicit_marked", "trigger": "Admin marks non-complicit", "properties": ["campaign_id", "thread_id", "employee_id_hashed", "admin_id", "timestamp"] },
+    { "event": "red_team_complicit_reversed", "trigger": "Admin confirms complicity reversal", "properties": ["campaign_id", "thread_id", "employee_id_hashed", "admin_id", "reason", "timestamp"] },
+    { "event": "red_team_campaign_completed", "trigger": "Campaign end date reached", "properties": ["campaign_id", "complicit_count", "non_complicit_count", "no_response_count"] },
+    { "event": "red_team_campaign_cancelled", "trigger": "Admin force-cancels campaign", "properties": ["campaign_id", "admin_id"] }
+  ],
+  "acceptance_criteria": [
+    "Given any page in the app, when the user navigates to Red Team in the side-nav, then Dashboard loads as the default sub-view",
+    "Given threads in Pending Review status, when the user views the Red Team nav, then Conversations sub-nav shows the correct pending count badge",
+    "Given the AEP Library loads, then exactly the Dune-seeded AEPs are shown as cards in a 2-column grid",
+    "Given the admin clicks View details on an AEP card, then the 480px detail drawer opens showing Workflow Steps, Branching Logic, and Outcome tabs",
+    "Given the Outcome tab bar, when the admin clicks Complicit, then the complicit criteria are shown; when they click Non-Complicit, the non-complicit criteria replace them",
+    "Given the admin clicks Request AEP, then a modal opens with the request form; submitting the form shows a success message with a 5-business-day SLA",
+    "Given the AEP Library is empty (no seeded AEPs), then an empty state is shown with contact text — no self-serve creation CTA",
+    "Given a tenant without WhatsApp provisioned, when the user opens the node editor, then the WhatsApp chip is locked and cannot be dragged onto the canvas",
+    "Given an attack sequence with unsaved changes, when the user navigates away, then a confirmation modal appears before navigation proceeds",
+    "Given Step 5 of the campaign wizard with no Red Team Approver configured, then Request Campaign Start is disabled and a warning callout links to Settings",
+    "Given the compliance checkbox is unchecked, when the user attempts Request Campaign Start, then the button remains disabled",
+    "Given 0% phone coverage for the selected audience, when the user reaches Step 3, then Continue is disabled with a resolution path shown",
+    "Given a valid campaign submission, when the user clicks Request Campaign Start, then status → Pending Approval, approver notified, admin sees success toast",
+    "Given a campaign in Pending Approval, when the Approver clicks Approve, then status → Approved and admin receives notification",
+    "Given a campaign in Pending Approval, when the Approver rejects with a reason, then status → Draft and admin receives notification with reason",
+    "Given an employee thread in Pending Review, when the admin opens the drawer, then Apply updates is disabled until a radio selection is made",
+    "Given the admin selects Complicit radio and clicks Apply updates, then thread status → Complicit, Reviewed by and Reviewed at columns populate, risk score updated, remediation triggered, toast shown",
+    "Given the admin selects Non-complicit radio and clicks Apply updates, then thread status → Non-Complicit, Reviewed by and Reviewed at columns populate, no risk score change, toast shown",
+    "Given a Complicit thread, when the admin opens the drawer and changes the radio to Non-complicit and clicks Apply updates, then reclassification is saved, audit entry created, risk score adjusted",
+    "Given a thread with no employee reply, then thread status must be No Response — not Pending Review",
+    "Given an employee who replied STOP, when the system processes the reply, then employee is removed from send queue, opt-out record created, thread status → Opted Out",
+    "Given a view-only admin, when they view a conversation thread, then marking buttons are absent and employee PII is masked"
+  ],
+  "open_questions": [
+    { "question": "Risk score delta for complicity: what is the impact, and does it replace or augment the smishing model?", "owner": "PM", "blocking": true },
+    { "question": "Red Team Approver RBAC: new permission level or flag on existing admin role?", "owner": "Both", "blocking": true },
+    { "question": "Thread model for non-SMS channels: how are inbound replies associated with campaign threads for WhatsApp, Viber, and Voice?", "owner": "Eng", "blocking": true },
+    { "question": "SOC/IR lead PII access in thread view: full PII or redacted?", "owner": "PM", "blocking": true },
+    { "question": "LLM infrastructure for AEP conversations: which model, hosting, latency SLA, prompt injection guardrails?", "owner": "Eng", "blocking": true },
+    { "question": "Customer AEP authoring scope: two-panel builder in initial launch or post-launch? Determines AEP Library build scope.", "owner": "PM", "blocking": true },
+    { "question": "AEP prompt content guardrails: what is blocked, what triggers a warning, what is always permitted?", "owner": "PM", "blocking": true },
+    { "question": "System-suggested complicity detection (NLP flagging): in scope for v1?", "owner": "PM", "blocking": false },
+    { "question": "Dashboard data contracts: time window, metrics, refresh cadence?", "owner": "PM", "blocking": false },
+    { "question": "Allowed sending days + approval timing: if approved on a non-allowed day, does it auto-activate on next allowed day?", "owner": "Both", "blocking": false },
+    { "question": "Channel provider availability at launch: which tenants have WhatsApp/Viber and what is the provisioning flow?", "owner": "Eng", "blocking": false },
+    { "question": "Complicity reversal: available to any Security Admin, or only the admin who made the original marking?", "owner": "PM", "blocking": false },
+    { "question": "Bulk complicity marking: is there a cap on batch size?", "owner": "Both", "blocking": false }
+  ],
+  "dependencies": [
+    "Red Team Approver RBAC role must be created or extended in the Dune permission model",
+    "Risk scoring system must support a new complicity signal from red_team_complicit_marked",
+    "Audit log system must record complicity marking and reversal events",
+    "SMS, WhatsApp, Viber channel provider integrations must be tenant-provisionable",
+    "Voice call logging endpoint (human-executed, v1) must accept operator-submitted transcript/notes",
+    "Dune must seed a AEP library at tenant creation — empty library hard-blocks campaign creation",
+    "Phone number storage and coverage model (from smishing) must be operational before red team campaigns can be targeted"
+  ],
+  "new_ds_patterns": [
+    "Two-panel AEP builder — prompt editor (left) + live LLM chat simulator (right) — requires DS review",
+    "AEP preview drawer (live demo chat) — interactive LLM chat in 480px drawer — requires DS review",
+    "Node-based canvas editor (linear) — drag-to-add, click-to-configure attack sequence — requires DS review",
+    "Day-of-week toggle chip group — multi-selectable days — requires DS review"
+  ],
+  "inherited_components": [
+    "Audience selector (groups/departments/cohorts) — smishing wizard Step 1",
+    "Phone coverage indicator + coverage drawer — smishing wizard Step 1",
+    "CSV upload drawer — smishing wizard Step 1",
+    "Cooldown warning callout — smishing wizard Step 1",
+    "Compliance acknowledgment checkbox — smishing wizard Step 7 (copy updated)",
+    "Remediation rule builder + module selector — smishing wizard Step 5",
+    "Date/time picker + timezone selector — smishing wizard Step 4",
+    "Wizard step bar — smishing wizard (6-step variant)"
+  ],
+  "last_updated": "2026-05-13"
+}

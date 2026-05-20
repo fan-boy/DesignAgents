@@ -1,0 +1,106 @@
+flowchart TD
+    %% ── Entry ──────────────────────────────────────────────────────────────
+    NAV["Red Team (top-level nav)"]
+    NAV --> DASH["Dashboard\n(already designed)"]
+    NAV --> VEPLIB["AEP Library"]
+    NAV --> ATKLIB["Attack Library"]
+    NAV --> CAMPS["Campaigns"]
+    NAV --> CONVS["Conversations"]
+
+    %% ── Flow A: AEP Creation (Prompt-Based Builder) ─────────────────────────
+    VEPLIB --> VEPLIST["AEP Library list\n(Dune Library | Custom tabs)"]
+    VEPLIST --> CREATEAEP["Create AEP"]
+    CREATEAEP --> AEPBUILDER["AEP builder\n(two-panel: scenario editor + chat simulator)"]
+    AEPBUILDER --> WRITEPROMPT["Write scenario prompt\n(who, goal, tactics, escalation)"]
+    WRITEPROMPT --> TESTSIM["Test in chat simulator\n(admin plays target employee)"]
+    TESTSIM --> SATISFIED{"Satisfied with\nAEP behavior?"}
+    SATISFIED -- No --> ADDREFINE["Add refinement instruction\n(tune behavior with additional prompt)"]
+    ADDREFINE --> RESETSIM["Reset simulator\nand test again"]
+    RESETSIM --> TESTSIM
+    SATISFIED -- Yes --> AEPSAVE{"Save & Activate\nor Draft?"}
+    AEPSAVE -- "Save & Activate" --> SAFETYCHECK{"Content safety\ncheck passes?"}
+    SAFETYCHECK -- Yes --> AEPACTIVE["AEP Active\n(available in campaign wizard)"]
+    SAFETYCHECK -- "Blocked" --> SAFETYERROR["Activation blocked\n(inline error on prompt)"]
+    SAFETYERROR --> WRITEPROMPT
+    SAFETYCHECK -- "Warning" --> SAFETYACK["Admin acknowledges\nwarning → activates"]
+    SAFETYACK --> AEPACTIVE
+    AEPSAVE -- "Save Draft" --> AEPDRAFT["AEP Draft\n(not available in wizard)"]
+
+    %% ── Flow B: Attack Sequence Creation ────────────────────────────────────
+    ATKLIB --> ATKLIST["Attack Library list"]
+    ATKLIST --> CREATEATK["Create Attack"]
+    CREATEATK --> CANVAS["Node-based canvas\n(linear sequence editor)"]
+    CANVAS --> ADDNODE["Drag channel node\n(SMS / Voice / WhatsApp / Viber)"]
+    ADDNODE --> NODECONFIG{"Channel\navailable for tenant?"}
+    NODECONFIG -- Yes --> CONFIGDRAWER["Configure node\n(message, script, delay)"]
+    NODECONFIG -- No --> LOCKEDNODE["Node locked\n(tooltip: channel not configured)"]
+    CONFIGDRAWER --> MORENODE{"Add another\nstep?"}
+    MORENODE -- Yes --> ADDNODE
+    MORENODE -- No --> ATKSAVE{"Save & Activate\nor Draft?"}
+    ATKSAVE -- "Save & Activate" --> ATKACTIVE["Attack Active\n(available in campaign wizard)"]
+    ATKSAVE -- "Save Draft" --> ATKDRAFT["Attack Draft\n(not available in wizard)"]
+
+    %% ── Flow C: Campaign Creation & Approval ────────────────────────────────
+    CAMPS --> CAMPLIST["Campaign list"]
+    CAMPLIST --> CREATECAMP["Create Campaign"]
+    CREATECAMP --> STEP1["Step 1: Campaign Details\n(name, start date, days, time window)"]
+    STEP1 --> STEP2["Step 2: Build Attack Flow\n(node editor: AEP + channel + nudges)"]
+    STEP2 --> AEPSEL{"AEP selected\n+ messages filled?"}
+    AEPSEL -- No --> STEP2BLOCK["Continue disabled\n(inline node errors)"]
+    STEP2BLOCK --> STEP2
+    AEPSEL -- Yes --> CHANLOCK{"Channel configured\nfor tenant?"}
+    CHANLOCK -- No --> CHANWARN["Channel chip locked\n(tooltip: contact admin)"]
+    CHANLOCK -- Yes --> STEP3["Step 3: Audience\n(groups, departments, cohorts, CSV)"]
+    STEP3 --> COVERAGE{"Phone coverage\n> 0%?"}
+    COVERAGE -- "0%" --> COVBLOCK["Hard block\n(upload CSV / HRIS sync CTA)"]
+    COVERAGE -- "> 0%" --> STEP4["Step 4: Remediation\n(complicity trigger rules)"]
+    STEP4 --> STEP5["Step 5: Review + Request Start"]
+    STEP5 --> APPROVERCFG{"Red Team Approver\nconfigured?"}
+    APPROVERCFG -- No --> APPROVERBLOCK["Warning: no approver\nRequest Start disabled\n(go to Settings)"]
+    APPROVERCFG -- Yes --> COMPLIANCE{"Compliance\ncheckbox checked?"}
+    COMPLIANCE -- No --> CTADISABLED["Request Start CTA\ndisabled"]
+    COMPLIANCE -- Yes --> REQUESTSTART["Request Campaign Start"]
+    REQUESTSTART --> PENDINGAPPROVAL["Campaign: Pending Approval\nApprover notified"]
+    PENDINGAPPROVAL --> APPROVERREVIEW{"Approver\ndecision?"}
+    APPROVERREVIEW -- Approve --> APPROVED["Campaign: Approved\nQueued for start date"]
+    APPROVERREVIEW -- Reject --> REJECTED["Campaign: Draft\nAdmin notified with reason"]
+    APPROVERREVIEW -- "Admin withdraws" --> WITHDRAWN["Campaign: Draft\nApprover notified"]
+    APPROVED --> STARTDATE{"Start date\nreached?"}
+    STARTDATE -- Yes --> ACTIVE["Campaign: Active\nInitial Contact messages fire"]
+    STARTDATE -- No --> APPROVED
+
+    %% ── Flow C2: Attack flow runtime (after campaign is Active) ─────────────
+    ACTIVE --> INITCONTACT["Initial Contact sent\n(channel node fires)"]
+    INITCONTACT --> EMPRESPONSE{"Employee\nreplies?"}
+    EMPRESPONSE -- Yes --> AEPACTIVE["AEP Active\n(AI handles conversation)"]
+    EMPRESPONSE -- "No reply after N days" --> NUDGEFIRE["Nudge sent\n(next nudge node fires)"]
+    NUDGEFIRE --> NUDGEREPLY{"Employee\nreplies?"}
+    NUDGEREPLY -- Yes --> AEPACTIVE
+    NUDGEREPLY -- "No reply / max nudges" --> SEQEND["Sequence ends\nThread: No Response"]
+
+    %% ── Flow D: Conversation Review & Complicity Marking ────────────────────
+    ACTIVE --> CONTACTS["Employees contacted\n(attack nodes fire)"]
+    CONTACTS --> REPLIES{"Employee\nreplies?"}
+    REPLIES -- Yes --> PENDINGTHREAD["Thread: Pending Review\n(Conversations section notified)"]
+    REPLIES -- No --> NORESPONSE["Thread: No Response\n(surfaced at campaign close)"]
+    PENDINGTHREAD --> CONVS
+    CONVS --> THREADTABLE["Conversations table\n(filter: Pending Review)"]
+    THREADTABLE --> REVIEWTHREAD["Thread detail\n(transcript + AEP context indicator)"]
+    REVIEWTHREAD --> SYSFLAG{"System-suggested\ncomplicity flag?"}
+    SYSFLAG -- Yes --> FLAGSHOWN["Flag shown\n(admin accepts or dismisses)"]
+    SYSFLAG -- No --> ADMINMARK
+    FLAGSHOWN --> ADMINMARK{"Admin marks\nconversation?"}
+    ADMINMARK -- "Mark Complicit" --> CONFIRMMODAL["Confirmation modal\n(explains risk score + remediation impact)"]
+    CONFIRMMODAL -- Confirm --> COMPLICIT["Thread: Complicit\nRisk score updated\nRemediation triggered"]
+    CONFIRMMODAL -- Cancel --> REVIEWTHREAD
+    ADMINMARK -- "Mark Non-Complicit" --> NONCOMPLICIT["Thread: Non-Complicit\nNo risk impact"]
+    ADMINMARK -- "Close without marking" --> PENDINGTHREAD
+    COMPLICIT --> REVERSE{"Admin reverses\nmarking?"}
+    REVERSE -- Yes --> REVERSECONFIRM["Reversal confirmation modal\n(optional reason)"]
+    REVERSECONFIRM --> PENDINGTHREAD
+    REVERSE -- No --> CAMPCLOSE
+
+    %% ── Campaign close ───────────────────────────────────────────────────────
+    CAMPCLOSE{"End date reached\nor force-cancelled?"}
+    CAMPCLOSE -- "End date" --> COMPLETED["Campaign: Completed\nAll threads locked\nFinal stats rendered"]
+    CAMPCLOSE -- "Force cancel" --> CANCELLED["Campaign: Cancelled\nSends stopped\nThreads still reviewable"]

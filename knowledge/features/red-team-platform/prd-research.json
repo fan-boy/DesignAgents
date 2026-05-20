@@ -1,0 +1,105 @@
+{
+  "feature_name": "Red Team Platform",
+  "feature_slug": "red-team-platform",
+  "goal": "Enable security teams to run active, multi-channel social engineering campaigns driven by AI-adaptive AEP chatbots, review employee conversation responses, and classify behavioral outcomes — going beyond passive click/submit simulation to real adversarial tradecraft where the attacker adapts to each employee's behavior in real time.",
+  "aep_definition": "An AEP (Adversary Emulation Pathway) is an AI-driven scenario-based chatbot that conducts social engineering interactions autonomously and adapts its responses based on how the target employee replies. Defined by a scenario prompt (attacker persona, goal, tactics). Example: a bribe-offer AEP escalates if the employee shows curiosity, tries a different angle if they resist. Admins create AEPs by writing a scenario prompt, testing in a live chat simulator, and iterating with refinement prompts until satisfied.",
+  "user_segments": [
+    "Security admin / red team operator (primary)",
+    "SOC/IR lead (secondary)",
+    "Compliance owner (secondary)"
+  ],
+  "success_metrics": [
+    "Admin can build a novel multi-channel attack sequence without engineering support",
+    "Admin can configure and submit a campaign for approval in under 15 minutes",
+    "All employee conversation threads are surfaced and reviewable within the platform",
+    "Complicity classification is completed within 48 hours of campaign close",
+    "Risk scores update within 60 seconds of complicity marking"
+  ],
+  "constraints": [
+    "Multi-channel orchestration (Voice, WhatsApp, Viber) may require external provider integrations not yet confirmed",
+    "AEP is an AI-driven adaptive chatbot (branching/dynamic by nature) — LLM selection, hosting, latency SLA, and prompt injection guardrails are unconfirmed",
+    "AEP builder (prompt editor + chat simulator) is a new product surface with no DS precedent",
+    "Node-based editor complexity must be bounded to linear sequences in v1 (attack sequences, not AEPs)",
+    "Compliance/RBAC for complicity marking must be defined before conversation management UI is built",
+    "'Request start' approval flow requires a new approver role not present in current Dune RBAC model",
+    "Navigation home for the five sections must be resolved before any individual screen is designed",
+    "Existing smishing simulation (sms-phishing feature) must remain functional and not be disrupted"
+  ],
+  "assumptions": [
+    "AEPs are AI chatbots defined by scenario prompts — adaptive, not linear scripts",
+    "AEP authoring uses a prompt editor + live chat simulator (test and iterate loop)",
+    "Dune-seeded AEP library ships at launch (bribe, authority impersonation, urgency, curiosity baiting, reciprocity scenarios)",
+    "Customer AEP authoring is a planned capability — not confirmed for initial launch but architecture must accommodate it",
+    "Attack sequences are multi-channel but the orchestration model (automated vs. human-executed) is unconfirmed",
+    "Complicity marking is a judgment-based admin action, not a fully automated system event",
+    "Red Team Dashboard is already designed and should be documented, not redesigned",
+    "The node-based editor is for the attack library only, not for VEP authoring",
+    "Audience selection, scheduling, phone coverage, and remediation agent patterns carry over from smishing"
+  ],
+  "gaps": [
+    "AEP LLM architecture undefined — which model, hosted where, latency SLA, prompt injection guardrails",
+    "AEP prompt quality guardrails undefined — what prevents admins from writing harmful, discriminatory, or legally risky scenario prompts",
+    "AEP authoring scope unclear — is custom AEP creation available at initial launch or is it a planned future capability?",
+    "Complicity has no operational definition — auto-flagged or manually marked, binary or graduated",
+    "Approver role for campaign start requests is undefined — new RBAC role needed",
+    "Hybrid channel orchestration model (automated vs. operator-executed) is unconfirmed",
+    "Employee reply threading model for Voice and WhatsApp is undefined",
+    "Risk scoring extension for 'complicit' outcome is undefined",
+    "'Allowed sending days' interaction with approval flow timing is unspecified",
+    "Complicity marking reversal — permissions and audit trail requirements not defined"
+  ],
+  "edge_cases": [
+    "Attack node fails mid-sequence — does sequence continue on next channel or abort?",
+    "Campaign approved but start date has passed — activation grace window or auto-cancel?",
+    "Pending approval campaign with no active approvers",
+    "AEP generates a response that is off-script, offensive, or legally risky — guardrail and admin override needed",
+    "AEP enters a conversation loop with no resolution (employee keeps engaging but never tips into complicity signal)",
+    "Hybrid channel unavailable at send time — fallback behavior undefined",
+    "Conversation thread with no employee reply — passive non-engagement data point",
+    "Complicity flag auto-raised but admin has not yet reviewed — pending state visibility",
+    "Bulk complicity review — 50+ conversations with no bulk action defined",
+    "Employee responds in non-English — VEP assumes English",
+    "Admin edits VEP while active campaign is using it",
+    "Admin deletes attack sequence used by a scheduled campaign",
+    "Approver rejects campaign start request — admin notification and draft return",
+    "Admin marks complicit and then reverses — reversal workflow undefined"
+  ],
+  "critical_questions": [
+    { "owner": "Eng", "question": "Which LLM powers AEP conversations, where is it hosted, what is the expected response latency, and how are prompt injections from employee replies prevented?" },
+    { "owner": "PM", "question": "Is customer AEP authoring available at initial launch, or is it a planned post-launch capability? If post-launch, what is the estimated timeline?" },
+    { "owner": "PM", "question": "What guardrails exist for AEP prompt content — how does Dune prevent admins from writing harmful, discriminatory, or legally risky scenario prompts?" },
+    { "owner": "PM", "question": "What is the operational definition of 'complicit'? Auto-flagged by system (keyword/NLP), manually flagged by a human operator, or a combination?" },
+    { "owner": "Both", "question": "Who is the approver for campaign start requests? New RBAC role, designated second admin, or automated compliance gate? What is the approval SLA?" },
+    { "owner": "Eng", "question": "For hybrid channel attacks, does Dune orchestrate channel transitions directly, or does the VEP guide a human operator who executes the steps?" },
+    { "owner": "Both", "question": "How are employee replies threaded back to a campaign for Voice and WhatsApp channels?" },
+    { "owner": "PM", "question": "How does the 'complicit' outcome map to risk scoring? Does it replace or augment the smishing click/submit graduated model?" },
+    { "owner": "PM", "question": "Are VEPs authored by Dune only, by customers, or both? If customer-authored, what are the guardrails for harmful conversation scripts?" },
+    { "owner": "PM", "question": "Is Red Team a separate nav section from Simulations → Smishing, or does it expand Simulations? Navigation architecture must be settled before screen design." },
+    { "owner": "Both", "question": "What does 'allowed sending days' interact with in the approval flow? If approved on Monday but only allowed Tuesday/Thursday, does it auto-start on next allowed day?" },
+    { "owner": "PM", "question": "Can complicity marking be reversed once set? Who has permission to reverse, and what is the audit trail requirement?" },
+    { "owner": "Eng", "question": "For voice channel nodes: does Dune initiate the call, play a script, and transcribe the response? Or is voice a human-executed step that the admin logs manually?" },
+    { "owner": "PM", "question": "What is the long-term relationship between Red Team and the existing smishing simulation — separate products, separate sections, or eventual absorption?" }
+  ],
+  "design_risks": [
+    "AEP prompt authoring is a novel skill — without a live chat simulator for testing, admins cannot assess AEP quality before deployment; simulator is essential, not optional",
+    "AEP off-script risk — AI-generated responses may be offensive, legally risky, or accidentally realistic; content guardrails and admin override mechanism are required",
+    "Node-based editor scope creep — without v1 scope constraint (linear sequences only), editor will consume disproportionate effort",
+    "'Complicit' as legal/HR exposure — label may cause misuse or distress; softer terminology alternatives should be evaluated",
+    "Approval workflow dead-end — no escalation path if approver is inactive creates indefinite pending campaigns",
+    "Conversation management at scale — 200+ threads without bulk actions and smart sorting is unusable",
+    "Multi-channel availability gaps — WhatsApp/Viber require business account setup; admins may build attacks they cannot send"
+  ],
+  "teaching_notes": [
+    "AEP = AI chatbot, not a script. An AEP holds a persona (who), goal (what), and tactics (how it adapts). Admin creates by writing a scenario prompt, not by scripting conversation nodes.",
+    "AEP builder UX = prompt editor + live chat simulator side-by-side. Admin plays the role of target employee in the simulator to validate AEP behavior before activation.",
+    "AEP library (Dune-seeded) follows same browse/create/clone pattern as smishing template library (knowledge/features/sms-phishing/design-strategy.md Screen 1), but preview surface is a live demo chat, not a static script.",
+    "Node-based editor: keep minimal in v1 — nodes are channel steps, edges are sequence order; canvas is read-only in campaign creation",
+    "Request-start campaign model is new — analogous to change request/CAB approval flow; key requirements: clear pending state, approver notification, graceful rejection path",
+    "Complicit marking is judgment-based (admin decides), not event-based (system records) — design for inter-rater clarity with inline guidance at the point of marking",
+    "Graduated risk model must be extended for red team complicit outcome — confirm weighting with PM before designing campaign detail and reporting UI",
+    "Navigation architecture must be resolved first — five sections need a nav home before any individual screen design begins"
+  ],
+  "predecessor_feature": "sms-phishing",
+  "predecessor_path": "knowledge/features/sms-phishing/",
+  "last_updated": "2026-05-13"
+}
