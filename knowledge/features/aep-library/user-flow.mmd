@@ -1,0 +1,57 @@
+flowchart TD
+    A([AEP Library Page]) --> B{User action}
+
+    B -- New AEP --> C[Step 1: Define\nBlank form]
+    B -- Duplicate Dune AEP --> D[Step 1: Define\nPre-filled from seeded AEP\nName cleared + focused]
+    B -- Duplicate custom AEP --> D
+    B -- Edit Draft AEP --> F[Step 2: Configure\nLast saved state]
+    B -- Edit Published AEP --> E{In active campaign?}
+    B -- View AEP card --> Z[Detail Drawer\nWorkflow + Branching + Outcomes]
+    B -- Delete AEP --> DEL{In active campaign?}
+
+    E -- Yes --> EDITBLOCK[Edit blocked\nBanner: Locked until campaign ends]
+    E -- No --> EDITWARN[Warning: AEP returns to Draft\nConfirm to continue]
+    EDITWARN --> F
+
+    DEL -- Yes --> DELBLOCK[Delete blocked\nTooltip: Used in active campaign]
+    DEL -- No --> DELCONFIRM[Delete confirmation modal\nNote historical record impact]
+    DELCONFIRM -- Confirm --> DELETED([AEP deleted\nCounter decrements])
+    DELCONFIRM -- Cancel --> A
+
+    C --> GENQ{Generate with AI?}
+    D --> GENQ
+
+    GENQ -- Yes: Generate AEP --> GEN[AI generation loading\nSkeleton on all fields]
+    GENQ -- No: Fill manually --> F
+
+    GEN --> GENFAIL{Generation succeeded?}
+    GENFAIL -- No --> GENERR[Inline error\nRetry or skip]
+    GENERR --> GENQ
+    GENFAIL -- Yes --> F[Step 2: Configure\nWorkflow Steps editable\nBranching Logic editable\nOutcome Criteria per tab editable\nAdvanced toggle: raw prompt]
+
+    F --> SIM[Step 3: Test\nSplit pane: AEP summary + chat simulator]
+
+    SIM --> SIMQ{Simulator available?}
+    SIMQ -- No --> SIMERR[Simulator error state\nRetry + Back to Configure]
+    SIMERR --> SIM
+    SIMQ -- Yes --> TESTED{At least one AEP\nresponse received?}
+
+    TESTED -- No --> SIM
+    TESTED -- Yes --> PUBREADY{Admin satisfied\nwith behavior?}
+
+    PUBREADY -- No: Back to Configure --> F
+    PUBREADY -- Yes: Publish AEP --> PUBMODAL[Publish confirmation modal\nNote: locked while in active campaign]
+
+    PUBMODAL -- Cancel --> SIM
+    PUBMODAL -- Confirm Publish --> PUB([AEP Library\nNew card: Published + Tested\nCounter increments])
+
+    Z -- Admin: Edit --> E
+    Z -- Admin: Duplicate --> D
+    Z -- Campaign manager: Use in Campaign --> CAMP([Campaign Builder\nAEP pre-selected])
+
+    A --> LIMITQ{Custom limit reached?}
+    LIMITQ -- Yes --> LIMITBLOCK[New AEP button disabled\nTooltip: delete one to make room]
+    LIMITQ -- No --> B
+
+    A --> SEEDFAIL{Dune Library\nloaded?}
+    SEEDFAIL -- No --> LOADERR[Error state on Dune Library section\nRefresh CTA\nYour AEPs loads independently]

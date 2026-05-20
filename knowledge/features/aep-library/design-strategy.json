@@ -1,0 +1,84 @@
+{
+  "feature_name": "AEP Library — Custom Adversary Emulation Pathway Builder",
+  "feature_slug": "aep-library",
+  "design_goal": "Give org admins a guided AEP builder that generates a well-structured adversary persona from a plain-language scenario description, lets them refine it in structured fields, and requires them to test it in a live simulator before publishing — making the quality bar clear without requiring prompt engineering expertise.",
+  "user_segments": [
+    "Org admin (primary — creates, edits, publishes custom AEPs)",
+    "Campaign manager (secondary — views and selects AEPs; no edit access)"
+  ],
+  "constraints": [
+    "RBAC: org admins only can create, edit, or delete custom AEPs",
+    "Campaign managers can view and use AEPs but see no edit/create affordance",
+    "No flowchart or node editor metaphors — AEP branching is emergent LLM behavior, not wired logic",
+    "Outcome Criteria fields feed employee risk score calculations — treat as consequential data inputs",
+    "Simulator must be a required step before Publish is activated",
+    "Draft AEPs should not count toward the custom limit; only Published AEPs count",
+    "Version-lock AEPs at campaign creation time — edit must be blocked while referenced in active campaign",
+    "Dune-seeded AEPs are globally read-only — no tenant can edit them"
+  ],
+  "selected_strategy": "Guided AI-Assist with progressive disclosure (three-step wizard: Define → Configure → Test)",
+  "selected_strategy_rationale": "Meets admins at their level (describe the scenario in plain language rather than write a system prompt), teaches AEP structure via AI-generated examples, gives advanced users raw prompt access without making it the default, requires simulator testing as a quality gate, and validates the model against KnowBe4 AIDA which uses the same guided-generation pattern.",
+  "alternative_strategies": [
+    {
+      "name": "Pure free-text prompt editor",
+      "summary": "Admin writes a system prompt directly; structured sections auto-parse or are manually filled",
+      "rejected_because": "Too high cognitive load for non-technical admins; produces inconsistent AEP quality; no competitor uses raw prompt as default; risk of unsafe or nonsensical AEPs entering the library"
+    },
+    {
+      "name": "Fully structured form, no prompt visible",
+      "summary": "Admin fills named fields for each AEP section; system assembles an internal prompt the admin never sees",
+      "rejected_because": "Too rigid for novel scenarios; advanced security teams need raw prompt access; inconsistent with 'prompt editor' language in prior strategy doc"
+    }
+  ],
+  "tradeoffs": [
+    "Three-step wizard is slower than a single-page form for experienced admins creating their second or third AEP — Duplicate path mitigates this",
+    "AI-generated content may not accurately reflect underlying system prompt behavior if structured fields are cosmetic summaries — must confirm with Eng that fields are authoritative",
+    "Simulator as a required step adds friction; admins may do a minimal exchange to unlock Publish rather than genuinely validating behavior"
+  ],
+  "assumptions": [
+    "Workflow Steps and Branching Logic are AI-generated from the scenario description and editable by admin (not manually authored from scratch)",
+    "Outcome Criteria are authored per AEP by the admin in the builder (not globally defined by Dune)",
+    "Admin plays the target role manually in the simulator (not AI-vs-AI)",
+    "Duplication from Dune-seeded AEPs is a confirmed entry path into the builder",
+    "Draft AEPs do not count toward the custom limit — only Published AEPs count",
+    "AEP version is locked at campaign creation time"
+  ],
+  "open_issues": [
+    "[Critical — Both] Are Workflow Steps and Branching Logic AI-generated from the description, or manually authored? Determines whether Configure step starts pre-filled or empty.",
+    "[Critical — PM] Are Outcome Criteria defined globally by Dune or authored per AEP? If global, Configure step collapses significantly.",
+    "[Critical — Eng] Does admin play target manually in simulator, or is it AI-vs-AI? Determines whether simulator is a chat interface (admin types) or an observation interface (admin watches).",
+    "[Medium — Both] Version-locking policy — strategy assumes campaign creation locks AEP version; needs Eng confirmation.",
+    "[Medium — PM] Exact custom AEP limit: 4 or 5?",
+    "[Medium — PM] Is duplication from Dune-seeded AEPs a confirmed supported path?"
+  ],
+  "risks": [
+    "Structured fields in Configure step may be decorative if they don't map directly to the system prompt — would erode admin trust in the builder",
+    "Simulator as a checkbox: admins do one exchange to unlock Publish without genuine validation — consider minimum exchange count (3 turns) before Publish activates",
+    "Outcome Criteria ambiguity: if this is answered as 'globally defined,' the Configure step changes shape and may need a redesign pass"
+  ],
+  "ds_patterns_used": [
+    "wizard (three-step: Define, Configure, Test)",
+    "drawer (AEP detail view, right-anchored 480px)",
+    "modal (publish confirmation, destructive action confirmation for delete)",
+    "badge (Adversary Method, Status: Draft/Published, Simulator: Tested/Not tested)",
+    "table (not primary — grid/card view for library)",
+    "empty state (Your AEPs section — zero custom AEPs)",
+    "CodeEditor or TextArea (system prompt in Advanced mode)"
+  ],
+  "new_patterns_required": [
+    "Split-pane simulator layout (editor summary left + chat interface right) — requires DS review for responsive handling",
+    "Outcome preview strip in simulator (real-time outcome classification indicator) — new pattern, requires DS review",
+    "Inline generation loading state (skeleton on structured form fields while AI generates content) — may require DS pattern definition"
+  ],
+  "next_actions": [
+    "Resolve open issues: confirm Workflow Steps / Branching Logic authoring model with Eng (critical)",
+    "Confirm Outcome Criteria scope with PM — per-AEP authored vs. Dune-global (critical)",
+    "Confirm simulator interaction model with Eng — admin plays target vs. AI-vs-AI (critical)",
+    "Get full Adversary Method taxonomy list from PM (Authority, Urgency, Reciprocity, Curiosity, Scarcity, Familiarity — confirm and finalize)",
+    "Audit Stillsuit DS v2 for: wizard step bar, CodeEditor/TextArea, card grid, badge variants, split pane layout, drawer — flag gaps for DS review",
+    "Design library grid first (Dune Library + Your AEPs sections + card states)",
+    "Design AEP detail drawer second",
+    "Design builder wizard third (Define → Configure → Test happy path)"
+  ],
+  "last_updated": "2026-05-20"
+}
