@@ -19,8 +19,8 @@
     "Templates must be clearly framed as starting points requiring customization before generation",
     "Phase 1 target: Q3 2026 — do not design for Phase 2 features"
   ],
-  "selected_strategy": "Structured 6-section form + example upload → AI generation + natural-language refinement loop",
-  "selected_strategy_rationale": "The PRD v0.2 confirms this approach based on analysis of 6 real customer AEP requirements. The structured form ensures completeness of capture. Example upload is the highest-quality signal for persona calibration. AI generation eliminates manual JSON authoring. Live test with full production runtime is a genuine market differentiator. Natural-language refinement with per-field diff review keeps customers in control without requiring JSON knowledge.",
+  "selected_strategy": "2-step builder: minimal setup form + chat test with inline per-message feedback and behavior refinement sidebar",
+  "selected_strategy_rationale": "Updated 2026-05-22 based on product feedback and Mobbin research. The previous 3-stage flow (Form → Generate → Test → Separate Refinement stage) was too complex. Industry standard for AI output feedback (Google Gemini, ChatGPT, Claude) is inline thumbs up/down per message with a comment — not a batched diff-review screen. The refinement sidebar (always visible, applies behavior changes and auto-starts new session) replaces Stage 3. This simplifies the mental model: Step 1 = describe your scenario, Step 2 = test and tune inline.",
   "alternative_strategies": [
     {
       "name": "Pure plain-language brief → AI generates",
@@ -61,7 +61,7 @@
     "Template quality mismatch — templates not reflecting target customer segments will undermine reuse metric"
   ],
   "ds_patterns_used": [
-    "wizard (three-stage: Form+Examples, Live Chat Test, Prompt Refinement)",
+    "wizard (two-step: Setup Form, Chat Test with inline feedback)",
     "table (AEP Library list view with sort, filter, search)",
     "modal (publish confirmation, archive confirmation, validation warning acknowledgment)",
     "badge (Status: Draft / Pending Review / Active / Archived; Channel; Compliance Framework)",
@@ -70,13 +70,13 @@
     "CodeEditor or TextArea (operator raw JSON panel — Advanced mode only)"
   ],
   "new_patterns_required": [
-    "Generation progress screen with labeled stages (15–90s wait with advancing stage labels) — requires DS review",
-    "Split-pane layout for Stage 2 (AEP summary left + live chat right) and Stage 3 (AEP summary left + refinement/diff right) — requires DS review for responsive handling",
-    "Stage 3 diff view with per-field accept/reject — new pattern; requires DS review",
-    "Archetype starter buttons in Stage 2 (one-click first-response injection) — new micro-interaction",
-    "Conversation state label indicator in Stage 2 chat (real-time state display) — new pattern",
-    "Repeatable row input for Systems at Risk (add/remove application rows) — may need DS pattern definition",
-    "Example upload with per-file OCR status (uploading → OCR processing → ready / failed) — new pattern"
+    "Generation progress screen with labeled stages (15–45s wait with advancing stage labels) — requires DS review",
+    "Inline per-message feedback panel (👍👎 → expands inline with chips + free text + action) — new pattern; requires DS review",
+    "Behavior refinement sidebar (always-visible prompt input that applies changes and auto-starts new session) — new pattern",
+    "Archetype quick-start chips above message input (one-click first reply injection) — new micro-interaction",
+    "Session history list in sidebar (past sessions with timestamp + archetype + outcome) — new pattern",
+    "Example upload with per-file paste-text inline fallback — requires DS review",
+    "Adversary Method chip selector (multi-select pill group, pick 1–2) — new pattern"
   ],
   "next_actions": [
     "Resolve critical open issues: mandatory reviewer gate (PM) and multi-channel deployment model (Both) before finalizing the publish flow",
@@ -87,5 +87,5 @@
     "Design Stage 3 (diff view) — per-field accept/reject, section grouping, guardrail block messaging",
     "Audit Stillsuit DS v2 for: table pattern, wizard step bar, split-pane, diff view, repeatable row input"
   ],
-  "last_updated": "2026-05-20"
+  "last_updated": "2026-05-22"
 }

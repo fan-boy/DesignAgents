@@ -1,82 +1,54 @@
 flowchart TD
-    A([AEP Library]) --> B{Entry path}
+    A([AEP Library]) --> B{Entry}
+    B -- New AEP --> S1[Step 1: Setup\nBlank form]
+    B -- Clone AEP --> S1C[Step 1: Setup\nPre-filled from source\nClone banner]
+    S1C --> S1FORM
 
-    B -- New AEP --> S1[Stage 1: Guided Form\nBlank sections]
-    B -- Start from Template --> TPL[Template Picker Modal\n6 Dune-curated templates]
-    TPL --> S1T[Stage 1: Guided Form\nPre-filled from template\nBanner: update and regenerate]
-    S1T --> S1SEC
+    S1 --> S1FORM[Fill mandatory fields\nAEP Name, Attack Type\nAdversary Method, Target Context\nOpening Message]
+    S1FORM --> S1EX[Optional: Upload examples\n1-5 files — .txt .docx .jpg .png\nOr paste text inline]
+    S1EX --> S1CH[Select channels\nWhatsApp Telegram SMS\nTeams Viber Instagram Signal]
+    S1CH --> GEN{Generate & Test}
 
-    B -- Edit Draft --> S1[Stage 1: Guided Form\nLast saved state]
-    B -- Clone AEP --> S1C[Stage 1: Guided Form\nPre-filled from source\nNew version, lineage tracked]
-    S1C --> S1SEC
-    B -- View AEP row --> DET[AEP Detail Page\n6-section read view\nVersion history + Linked campaigns]
-
-    S1 --> S1SEC[Section Navigation\n1: Account Context\n2: Attack Scenario\n3: Systems at Risk\n4: Rules and Compliance\n5: Cultural Context\n6: Termination Logic]
-    S1SEC --> EX[Example Upload\nOptional: 1-5 files\n.txt .docx .png .jpg with OCR\nPer-file status: uploading / OCR / ready / failed]
-    EX --> CH[Channel Selection\nWhatsApp Telegram Viber\nFB Messenger SMS Instagram\nMS Teams Signal]
-    CH --> GEN{Generate My AEP}
-
-    GEN --> GENPROG[Generation Progress Screen\nAnalyzing your scenario\nBuilding conversation flow\nConfiguring guardrails\nFinalizing\n15-90 seconds]
-    GENPROG --> GENRESULT{Generation result}
-    GENRESULT -- Full failure --> GENFAIL[Error state\nRetry or save draft\nForm inputs preserved]
+    GEN --> PROG[Generation progress\nAnalyzing scenario\nBuilding persona\nConfiguring behavior\nReady\n15–45 seconds]
+    PROG --> GENRESULT{Result}
+    GENRESULT -- Failure --> GENFAIL[Error state\nRetry with preserved form]
     GENFAIL --> GEN
-    GENRESULT -- Partial failure --> GENPART[Per-section error\nRetry failed sections only\nSucceeded sections locked]
-    GENPART --> GEN
     GENRESULT -- Success --> S2
 
-    S2[Stage 2: Live Chat Test\nSplit pane\nLeft: AEP summary\nRight: Chat simulator\nState label visible to customer only]
-    S2 --> S2START[Persona sends opening message automatically\nCustomer plays employee role]
-    S2START --> ARCH{Use archetype starter?}
-    ARCH -- Yes --> ARCHINJ[One-click inject\nCurious / Skeptical / Hostile / Compliant]
-    ARCHINJ --> S2CHAT
-    ARCH -- No: type freely --> S2CHAT[Conversation exchange\nState label updates in real time\nTyping indicator on persona responses]
-    S2CHAT --> S2TIMEOUT{Response timeout?}
-    S2TIMEOUT -- Yes --> S2ERR[In-chat timeout message\nRetry + Reset conversation]
-    S2ERR --> S2CHAT
-    S2TIMEOUT -- No --> S2DONE{Session complete?\nTerminal state reached}
-    S2DONE -- No: continue --> S2CHAT
-    S2DONE -- Yes --> S2SUMMARY[Session summary\nStates traversed\nMessages exchanged\nFinal state\nGuardrail events]
-    S2SUMMARY --> S2DEC{Satisfied with behavior?}
-    S2DEC -- No: refine --> S3
-    S2DEC -- Yes: publish --> PUBCHECK
-    S2DEC -- Run another session --> S2START
+    S2[Step 2: Chat Test\nThree-area layout\nLeft: Behavior panel + sessions\nMain: Live chat with feedback]
+    S2 --> PERSONA[AEP sends opening message automatically]
+    PERSONA --> ARCHETYPE{Use archetype quick-start?}
+    ARCHETYPE -- Yes --> ARCHINJ[Inject preset reply\nCurious / Skeptical / Hostile / Compliant]
+    ARCHINJ --> CHAT
+    ARCHETYPE -- No: type freely --> CHAT[Conversation exchange\nTyping indicator on persona responses]
 
-    S3[Stage 3: Prompt-Based Refinement\nSplit pane\nLeft: AEP summary\nRight: Refinement interface]
-    S3 --> S3INPUT[Customer types refinement prompt\nPlain English description of issue]
-    S3INPUT --> S3BLOCK{Prompt blocked?}
-    S3BLOCK -- Guardrail removal --> S3ERR[Inline blocked message\nPrompt editable for retry]
-    S3ERR --> S3INPUT
-    S3BLOCK -- Compliance removal --> S3ERR2[Redirect to Stage 1\nRules and Compliance section]
-    S3BLOCK -- No block --> S3PROC[Processing < 20s\nTargeted field-level edits only]
-    S3PROC --> S3DIFF[Diff view\nChanged fields per section\nOld value vs New value\nPer-field Accept / Reject\nAccept all / Reject all]
-    S3DIFF --> S3ACT{Customer action}
-    S3ACT -- Accept changes --> S3ACCEPT[Draft updated\nSub-version incremented\nTimestamp + prompt logged]
-    S3ACCEPT --> S3LOOP{Continue refining?}
-    S3LOOP -- Yes: another prompt --> S3INPUT
-    S3LOOP -- No: back to test --> S2START
-    S3ACT -- Reject all --> S3REJECT[Draft unchanged\nReturn to test or retry prompt]
-    S3REJECT --> S2DEC
+    CHAT --> AEP_RESP[AEP responds\n👍 👎 controls appear below message]
+    AEP_RESP --> FEEDBACK{Manager rates response?}
 
-    PUBCHECK{Validation check}
-    PUBCHECK -- Blocking errors --> VALERR[In-flow error\nSection and field highlighted\nPublish blocked]
-    VALERR --> S1SEC
-    PUBCHECK -- Warnings only --> VALWARN[Warning acknowledgment\nPer-warning checkboxes\nMust check all to proceed]
-    VALWARN --> PUBMODAL
-    PUBCHECK -- All clear --> PUBMODAL
+    FEEDBACK -- 👍 Thumbs up --> GOODPANEL[Inline: What worked?\nQuick chips + optional note\nSave → logs positive signal]
+    FEEDBACK -- 👎 Thumbs down --> BADPANEL[Inline: What's wrong?\nQuick chips + free text\nApply & Regenerate]
+    BADPANEL --> REGEN[Regenerates that specific\nresponse inline]
+    REGEN --> AEP_RESP
+    GOODPANEL --> CONTINUE
+    FEEDBACK -- Skip --> CONTINUE{Session terminal?}
+    CONTINUE -- No --> CHAT
+    CONTINUE -- Yes --> LOGGED[Session logged in sidebar]
 
-    PUBMODAL[Publish confirmation modal\nAEP Name\nImmutability notice\nClone required for future edits]
+    LOGGED --> ACTION{Next action?}
+    ACTION -- New Chat --> S2
+    ACTION -- Refine behavior --> REFINE[Left sidebar\nDescribe behavior change\nApply changes]
+    REFINE --> NEWCHAT[New session auto-starts]
+    NEWCHAT --> S2
+    ACTION -- Publish --> PUBCHECK
+
+    PUBCHECK{Publish check}
+    PUBCHECK -- 0 sessions --> BLOCKED[Publish disabled\nTooltip: complete a test first]
+    PUBCHECK -- 1 session --> WARN[Warning acknowledgment\nProceed after checking]
+    WARN --> PUBMODAL
+    PUBCHECK -- 2+ sessions --> PUBMODAL
+
+    PUBMODAL[Confirmation modal\nAEP Name + immutability notice]
     PUBMODAL -- Cancel --> S2
-    PUBMODAL -- Confirm Publish --> REVCHECK{Reviewer configured?}
-    REVCHECK -- No --> PUB([AEP Active\nAvailable in campaign builder\nToast: published successfully])
-    REVCHECK -- Yes --> PENDING([AEP Pending Review\nCampaign creation allowed\nCampaign launch blocked\nReviewer notified])
-
-    DET -- Security Manager: Clone --> S1C
-    DET -- Security Manager: Archive --> ARCCHECK{In active campaign?}
-    ARCCHECK -- Yes --> ARCBLOCK[Archive blocked\nNaming blocking campaigns]
-    ARCCHECK -- No --> ARCCONFIRM[Archive confirmation modal]
-    ARCCONFIRM -- Confirm --> ARCHIVED([AEP Archived\nRemoved from default view])
-    ARCCONFIRM -- Cancel --> DET
-
-    A --> EMPTYQ{Any AEPs?}
-    EMPTYQ -- No --> EMPTY[Empty state\nNew AEP CTA\nStart from Template CTA]
-    EMPTYQ -- Yes --> TABLE[Table view\nFilter: status channel compliance date campaign\nSearch: name + scenario description]
+    PUBMODAL -- Confirm --> REVCHECK{Reviewer configured?}
+    REVCHECK -- No --> ACTIVE([AEP Active\nAvailable in campaign builder])
+    REVCHECK -- Yes --> PENDING([AEP Pending Review\nReviewer notified])

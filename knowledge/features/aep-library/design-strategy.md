@@ -83,9 +83,64 @@ Stage 3: Customer describes issues in plain English. LLM makes targeted field-le
 
 ---
 
-## Recommended strategy
+## Recommended strategy (updated 2026-05-22)
 
-**Option C — Structured Form + AI Generation + Natural-Language Refinement Loop**
+**2-Step Builder: Setup Form + Chat Test with Inline Feedback**
+
+This replaces the previous 3-stage wizard (Form → Generate → Test → Separate Refinement) with a simpler, more direct flow that matches how security managers actually iterate on persona behavior.
+
+The key insight from Mobbin research (Google Gemini, ChatGPT, RelevanceAI): feedback on AI outputs works best when it's inline and immediate — not batched into a separate "refinement stage." The previous Stage 3 diff view was technically correct but felt heavy for what is fundamentally a "this response was off, fix it" interaction.
+
+### Step 1: Setup (mandatory fields + examples)
+
+Full-page centered form within the dashboard shell. Two-step progress indicator at top.
+
+Mandatory fields (required to generate):
+- AEP Name
+- Attack Type (dropdown)
+- Adversary Method (chip selector: Authority / Urgency / Reciprocity / Curiosity / Scarcity / Familiarity)
+- Target Context (textarea: role, business unit, org environment)
+- Opening Message (textarea: the first message the persona sends)
+
+Optional but strongly recommended:
+- Example messages (drag-and-drop upload: .txt, .docx, .jpg, .png — up to 5 files, or paste inline)
+- Channel selection (WhatsApp, Telegram, SMS, Teams, etc.)
+
+Primary CTA: **"Generate & Test →"** — generates the AEP and advances to Step 2.
+Secondary CTA: **Save Draft** — saves form state without generating.
+
+### Step 2: Chat Test (live chat + inline feedback + behavior refinement)
+
+Three-area layout:
+
+**Left sidebar** (~300px):
+- Refine behavior panel: "What should the AEP do differently?" textarea + "Apply changes" button. Applying triggers a new chat session automatically. Placeholder hints rotate with examples.
+- Sessions list: chronological session history with timestamp + archetype + outcome. "New Chat" button at top of list.
+
+**Main chat area** (remaining width):
+- AEP sends opening message automatically on load
+- Archetype quick-start chips above input: Curious · Skeptical · Hostile · Compliant
+- After each AEP response: 👍 👎 inline feedback controls appear below the message
+  - **👎 Thumbs down** → inline panel expands with reason chips (Too formal, Too aggressive, Off-topic, Unrealistic, Wrong register) + optional free-text + "Apply & Regenerate" — regenerates only that specific response using feedback as context
+  - **👍 Thumbs up** → inline panel expands with positive chips (Perfect tone, Realistic, Good adaptation) + optional note + Save
+- "New Chat" button in header
+- Message input at bottom: "Reply as employee…"
+- "Publish AEP" in header (active after 1+ completed session)
+
+### Why this is simpler and better
+
+- **No separate refinement stage**: feedback happens inline at the moment a response is seen — no switching screens
+- **Regenerate single responses**: instead of applying a diff across many fields, the manager can fix one bad turn without restarting the whole conversation
+- **Behavior prompt stays visible**: the refinement input is always in the sidebar — no hunting for it after the chat ends
+- **Session history is persistent**: all test runs are logged in the sidebar, making it easy to compare behavior across attempts
+
+### What this replaces
+
+The previous Stage 3 (separate prompt-refinement screen with per-field diff view) is eliminated. That pattern was borrowed from code review tools and doesn't fit the conversation-testing mental model. Inline per-message feedback is the industry standard (Google Gemini, ChatGPT, Claude) and is more intuitive for security managers who are thinking "this message was wrong" not "which field should I edit."
+
+---
+
+**Option C — Structured Form + AI Generation + Natural-Language Refinement Loop** (previous — superseded)
 
 ### AEP Library — management surface
 
