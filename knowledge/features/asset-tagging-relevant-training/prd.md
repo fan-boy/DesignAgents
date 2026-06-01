@@ -51,7 +51,6 @@ The core gap is a missing metadata layer: simulation assets are not tagged with 
 - End-user-facing admin dashboards (customer organizations) will not expose Method or Persona tags. This is an internal tool.
 - This PRD does not introduce weighted scoring or ML-based ranking within matched results.
 - This PRD does not add multi-persona support for users. Users have exactly one Persona.
-- This PRD does not implement a taxonomy governance workflow. Taxonomy changes are made via engineering deploy.
 - This PRD does not change existing campaign configuration, scheduling, or targeting logic.
 
 ---
@@ -66,6 +65,8 @@ The core gap is a missing metadata layer: simulation assets are not tagged with 
 | US-02 | As a CS team member, I want to open a training record and assign it one or more Methods and Personas so that it surfaces in relevant matches. |
 | US-03 | As a Product team member, I want dropdowns for Method and Persona to show only values from the approved taxonomy so that I cannot introduce invalid tags. |
 | US-04 | As a Product team member, I want to see which assets are missing Method or Persona tags so that I can prioritize tagging work before go-live. |
+| US-10 | As a Product team member, I want to add a new Method or Persona value through the internal dashboard so that new attack techniques or departments can be supported without an engineering deploy. |
+| US-11 | As a Product team member, I want to be prevented from deleting a taxonomy value that is still in use by assets or trainings so that I do not accidentally break existing tag mappings. |
 
 ### System / automated
 
@@ -89,7 +90,7 @@ The core gap is a missing metadata layer: simulation assets are not tagged with 
 
 **FR-03** Taxonomy values must be stored in the database (not hardcoded in application logic) and loaded dynamically by all consumers.
 
-**FR-04** Taxonomy values must be immutable at runtime. Changes require an engineering deploy and a data migration script.
+**FR-04** Taxonomy values must be manageable through the internal dashboard. Authorized internal users (Product and CS teams) must be able to add new Method and Persona values without an engineering deploy. Deleting or renaming an existing value that is in use must be blocked until all references are removed or re-tagged.
 
 **FR-05** The Method taxonomy must contain exactly these values (display label → stored slug):
 
@@ -473,6 +474,33 @@ Both form fields are visible and editable only to users with the `internal_admin
 
 A summary view showing counts of tagged vs. untagged assets and trainings would support the migration effort. This can be a simple table or counter on the internal dashboard home. Not required for v1.
 
+### 10.5 Taxonomy management (internal dashboard)
+
+Internal admins must be able to manage the Method and Persona taxonomies directly from the internal dashboard without an engineering deploy.
+
+**Location:** Internal Dashboard → Settings → Taxonomy (new page)
+
+| Action | Behavior |
+|---|---|
+| View all Method values | Paginated list of all Method slugs and display labels, with usage count (how many assets/trainings reference each). |
+| View all Persona values | Same for Persona. |
+| Add new Method value | Form: display label (required, unique), slug (auto-generated from label, editable, unique). On save, value becomes immediately available in all dropdowns. |
+| Add new Persona value | Same. |
+| Edit display label | Allowed at any time. Slug is immutable after creation to preserve FK integrity. |
+| Delete a value | Blocked if any asset or training currently references the value. Error message must list the count of blocking references. Allowed only when usage count is zero. |
+
+**Access control:** Restricted to `internal_admin` role only. CS team (`internal_cs`) may view but not create or delete taxonomy values.
+
+**API endpoints to add:**
+- `GET /internal/taxonomy/methods` — list (already specified in Section 9)
+- `GET /internal/taxonomy/personas` — list (already specified)
+- `POST /internal/taxonomy/methods` — create new Method value
+- `POST /internal/taxonomy/personas` — create new Persona value
+- `PATCH /internal/taxonomy/methods/:slug` — update display label
+- `PATCH /internal/taxonomy/personas/:slug` — update display label
+- `DELETE /internal/taxonomy/methods/:slug` — delete (blocked if in use)
+- `DELETE /internal/taxonomy/personas/:slug` — delete (blocked if in use)
+
 ---
 
 ## 11. Fallback Pool Full Specification
@@ -555,7 +583,7 @@ LIMIT 1
 
 ### 13.1 Pre-migration (before deploy)
 
-1. **Taxonomy seed:** Insert all 11 Method slugs into `taxonomy_methods` and all 11 Persona slugs into `taxonomy_personas`. This is a deploy-time seed script, not a manual step.
+1. **Taxonomy seed:** Insert all 11 Method slugs into `taxonomy_methods` and all 11 Persona slugs into `taxonomy_personas` via a deploy-time seed script. After launch, additional values can be added at any time through the internal dashboard (Settings → Taxonomy) without a deploy.
 
 2. **Schema migration:** Apply database migrations to add all new columns and tables described in Section 7. New columns are nullable or have safe defaults. This migration is non-destructive and backward-compatible with the pre-deploy codebase.
 
@@ -587,7 +615,7 @@ LIMIT 1
 
 - Multi-persona users: the current data model is single-persona per user. This feature does not extend it.
 - Customer-facing tag editing: external admin users cannot view or edit Method/Persona tags.
-- Taxonomy governance UI: adding or removing taxonomy values requires a deploy.
+- Taxonomy governance for customer-facing orgs: customers cannot define or modify Method/Persona values. This is an internal-only capability.
 - Automatic tagging via ML/NLP: all tagging in v1 is manual.
 - Training content creation or editing.
 - Learner-facing UI changes.
@@ -607,7 +635,7 @@ LIMIT 1
 | OQ-02 | What is the required behavior when the fallback pool is fully exhausted for a user — skip assignment (current spec), notify an admin, or re-assign the least-recently-completed training? | Product | Blocking: exhaustion handling path |
 | OQ-03 | Can a user have more than one Persona in any customer's directory? If yes, the matching logic and user data model need a tiebreaker or union strategy before launch. | Engineering / Product | Blocks correctness for multi-role users |
 | OQ-04 | Should the ordering within a matched tier be randomized to increase variety, or is stable list order (current spec) preferred? | Product | Assignment variety |
-| OQ-05 | Who owns taxonomy governance going forward? What is the process for adding a new Method or Persona value, and how are existing assets and trainings retroactively re-tagged? | Product | Long-term data quality |
+| OQ-05 | When a new Method or Persona value is added via the dashboard, is there a process for retroactively tagging existing untagged assets and trainings against it? Should the dashboard surface a "newly added, 0 references" warning to prompt action? | Product | Long-term data quality |
 | OQ-06 | Are there any trainings in the Training Videos column that are intentionally excluded from John Notes and must never be assigned? | Product / CS | Curated list import accuracy |
 | OQ-07 | Should persona-specific FST fallback entries be created for the 6 currently uncovered personas (Operations, Sales, Marketing, R&D, Customer Support, Temp/Contractor), or is SAT-only fallback acceptable for those groups? | Product / Content | Fallback relevance for 6 personas |
 | OQ-08 | Is the internal-only access scope for Method and Persona tags firm for v1? Will external admins (customer org admins) ever need to see or configure these tags? | Product | API and permission scope |
