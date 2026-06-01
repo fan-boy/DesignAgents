@@ -39,6 +39,7 @@ This system exists to help:
 | `design-review` | `/design-review` | Run a structured heuristic and quality review of a design |
 | `dev-handoff` | `/dev-handoff` | Generate a developer handoff spec |
 | `prototype-builder` | `/prototype-builder` | Build or extend a working prototype in an approved local Next.js codebase |
+| `prd-creator` | `/prd-creator` | Build a confluence ready prd|
 
 Skills may be invoked explicitly with `/skill-name` and may also be selected automatically when the task clearly matches the skill description. Claude Code supports prompt-based skills as reusable capabilities rather than keeping all instructions in the root context. [web:67][web:205]
 
