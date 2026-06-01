@@ -1,4 +1,5 @@
 # Edge Cases — AEP Builder + AEP Library
+Last updated: 2026-06-01 (v2C Inline AI design)
 
 ## System states
 
@@ -7,9 +8,10 @@
 - **Generation timeout (image OCR path):** P95 < 90s but may feel very long. Progress stages must visibly advance; if a stage stalls beyond expected time, surface estimated remaining wait rather than silence.
 - **OCR failure on image upload:** Individual image file fails OCR extraction. Surface per-file error with option to paste the text content manually instead.
 - **Stage 2 persona response timeout:** P95 < 3s, but what happens if exceeded? Needs in-chat timeout message with "Try again" and "Reset conversation" options.
-- **Stage 2 test session saves mid-conversation:** Customer closes browser during an active test session. Should the transcript be preserved in session history?
-- **Refinement round timeout:** Refinement P95 < 20s; if exceeded, surface error with retry. Customer's original prompt should not be lost.
-- **Auto-save / resume for Stage 1 form:** If customer closes the browser mid-Stage-1, is the draft preserved and resumable? (Unresolved — Eng question)
+- **Step 2 test session saves mid-conversation:** Customer closes browser during an active test session. Should the transcript be preserved in the Recent Changes / session log?
+- **Refinement round timeout:** Refinement P95 < 20s; if exceeded, "Generation failed" appears in Recent Changes with "Something went wrong. Your changes weren't saved." and "Try again →". Instruction text not lost.
+- **Quick Action chip + custom instruction conflict:** Manager selects a chip (e.g., "Less aggressive") and also types in the custom instruction field. Does Apply combine both? Define precedence — likely: custom instruction overrides or appends to chip selection.
+- **Auto-save / resume for Step 1 form:** If customer closes the browser mid-Step-1, is the draft preserved and resumable? (Unresolved — Eng question)
 - **Validation on demand fails:** "Check AEP" button returns an error rather than validation results — retry CTA needed.
 - **Draft auto-save failure:** Background save of form state fails silently — customer may lose work. Need a visible save-state indicator.
 

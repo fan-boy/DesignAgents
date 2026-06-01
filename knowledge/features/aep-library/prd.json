@@ -1,0 +1,61 @@
+{
+  "feature_name": "AEP Builder + AEP Library",
+  "feature_slug": "aep-library",
+  "written_at": "2026-06-01",
+  "flows": [
+    "AEP Library — management catalog",
+    "Build New AEP — Step 1: AEP Setup",
+    "Build New AEP — Step 2: Test & Refine",
+    "AEP Detail and Version History",
+    "Clone AEP"
+  ],
+  "actors": ["Security Manager (Admin)", "Reviewer", "Dune Operator", "Dune Admin"],
+  "wizard_steps": {
+    "Build New AEP": [
+      "Step 1 — AEP Setup (AEP Title, Adversary Method, Target Context, Example Messages, View More fields)",
+      "Step 2 — Test & Refine (Live chat + AI Refine panel + Publish)"
+    ]
+  },
+  "key_fields": [
+    "AEP Title",
+    "Adversary Method (chip selector, 1-2)",
+    "Target Context (textarea)",
+    "Example Messages (upload, up to 5 files)",
+    "Quick Actions chips (More casual, Less aggressive, Add urgency, More formal, Shorter, More empathetic)",
+    "Custom Instruction textarea",
+    "Archetype quick-starts (Curious, Skeptical, Hostile, Compliant)",
+    "Per-message thumbs up/down feedback"
+  ],
+  "integrations": [
+    "Risk Scoring Engine",
+    "Campaign Builder",
+    "Email Notifications",
+    "Adaptive Workflows",
+    "Smart Groups",
+    "Dune Operator Panel"
+  ],
+  "edge_cases_count": 18,
+  "open_questions_flagged": [
+    "Is a Reviewer ever mandatory (blocking gate) or always optional?",
+    "Multi-channel simultaneous deployment vs. one-channel-per-campaign?",
+    "AEP library scoped per-org vs. per-account/program?",
+    "Does 'View More' in Step 1 expose full 6-section form or a subset?",
+    "What is the Reasoning panel content model — always AEP-behavior-specific, or can it show general LLM reasoning?"
+  ],
+  "figma_used": true,
+  "source_docs_used": true,
+  "figma_frames_used": [
+    "Build AEP on platfform — Section 1 / Test & Refine — v2C (Inline AI)",
+    "Build AEP on platfform — Section 1 / v2C — 2. Chip Selected",
+    "Build AEP on platfform — Section 1 / v2C — 3. Applying (Loading)",
+    "Build AEP on platfform — Section 1 / v2C — 4. Applied (Success)",
+    "Build AEP on platfform — Section 1 / v2C — 5. Error",
+    "Build AEP on platfform — Section 1 / Create New Campaign — Select Templates",
+    "Build AEP on platfform — Red Teaming — AEP Library [v2]",
+    "Build AEP on platfform — Red Teaming — Dashboard [v4]",
+    "Build AEP on platfform — Test & Refine — v2A (Tabbed)",
+    "Build AEP on platfform — Test & Refine — v2B (Bottom Drawer)"
+  ],
+  "confidence": "high",
+  "confidence_notes": "Figma v2C (Inline AI) designs are detailed and multi-state. All prior research artifacts (prd-research, design-strategy, design-review, edge-cases, user-flow) were read and synthesized. Minor gap: 'View More' fields in Step 1 are not fully visible in Figma — PRD references them as the advanced 6-section model but cannot enumerate every sub-field from the frames available. Step 2 placeholder copy ('Generate Design Element') persists in Figma; PRD describes the intended behavior, not the placeholder."
+}

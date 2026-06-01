@@ -1,5 +1,5 @@
 # User Flow — AEP Builder
-Dune Security · User Flow · Last updated: 2026-05-22 (v3 — 2-step builder)
+Dune Security · User Flow · Last updated: 2026-06-01 (v4 — v2C Inline AI design)
 
 ---
 
@@ -18,35 +18,33 @@ Dune Security · User Flow · Last updated: 2026-05-22 (v3 — 2-step builder)
 1. Manager clicks **"New AEP"** from the AEP Library.
 2. Builder opens full-page at **Step 1 of 2: Setup**. Step indicator at top shows ① Setup ② Test.
 3. Manager fills mandatory fields:
-   - **AEP Name** — free text (e.g., "Concentrix — UA Refund Fraud")
-   - **Attack Type** — dropdown (Refund Fraud / Credential Theft / SIM Swap / Account Action / Data Exfiltration / Other)
-   - **Adversary Method** — chip selector, pick 1–2 (Authority / Urgency / Reciprocity / Curiosity / Scarcity / Familiarity)
-   - **Target Context** — textarea: who the employee targets are (role, business unit, org context)
-   - **Opening Message** — textarea: the first message the AEP sends to the employee
-4. Manager optionally uploads **example messages** — real social engineering messages the org has received (.txt, .docx, .jpg, .png). Drag-and-drop zone + paste text inline option. Up to 5 files.
-5. Manager selects **target channels** (WhatsApp, Telegram, SMS, Teams, etc.) — chips multi-select.
-6. Manager clicks **"Generate & Test →"**.
-7. Generation progress screen: labeled stages advancing ("Analyzing scenario" → "Building persona" → "Configuring behavior" → "Ready"). ~15–45 seconds.
-8. Builder advances to **Step 2: Chat Test**.
+   - **AEP Title** — free text (e.g., "Meta IT Impersonator")
+   - **Adversary Method** — chip selector, pick 1–2 (Authority / Urgency / Reciprocity / Curiosity / Scarcity / Familiarity). Severity shown inline (e.g., "Moderate").
+   - **Target Context** — textarea: who the employee targets are (role, business unit, org context). Placeholder: "Who is the target? Describe their role, department, and org context…"
+4. Manager optionally uploads **example messages** — real social engineering messages the org has received (.txt, .docx, .jpg, .png with OCR). Drag-and-drop zone + paste inline option. Up to 5 files.
+5. Optionally: Manager selects a **template** from the picker (Dune-curated, e.g. "Ransomware") to pre-fill the form fields.
+6. Optionally: Manager clicks **"View More"** to expand advanced configuration fields (Attack Scenario, Systems at Risk, Rules & Compliance, Cultural Context, Termination Logic).
+7. Manager clicks **"Refine and Test"** (primary CTA).
+8. Generation progress screen: labeled stages advancing ("Analyzing scenario" → "Building persona" → "Configuring behavior" → "Ready"). ~15–45 seconds.
+9. Builder advances to **Step 2: Test & Refine**.
 
 ---
 
-### Step 2: Chat Test
+### Step 2: Test & Refine
 
-**Layout: three areas**
-- Left sidebar: Behavior refinement panel + session history
-- Main area: Live chat conversation
-- Each AEP message has inline feedback controls
+**Layout: two panels**
+- Left panel: AI Refine panel (Quick Actions + Custom Instruction + Recent Changes + Apply and Regenerate CTA)
+- Right panel: Live chat conversation with inline per-message feedback controls
 
 **Starting the test**
-9. AEP persona sends its opening message automatically.
-10. Manager types a reply as the employee (or clicks an archetype quick-start chip to inject a preset reply).
+10. AEP persona sends its opening message automatically.
+11. Manager types a reply as the employee (or clicks an archetype quick-start chip to inject a preset reply).
 
-**Archetype quick-starts** (chips above message input):
+**Archetype quick-starts** ("Reply as:" chips above message input):
 - Curious · Skeptical · Hostile · Compliant — each injects a pre-written first response
 
 **Conversation flow**
-11. Manager and persona exchange messages. After each AEP response, **feedback controls appear under the message**:
+12. Manager and persona exchange messages. After each AEP response, **feedback controls appear under the message**:
     - 👍 (good) and 👎 (not good) icon buttons
     - Clicking either expands an **inline feedback panel** directly below the message
 
@@ -62,22 +60,25 @@ Dune Security · User Flow · Last updated: 2026-05-22 (v3 — 2-step builder)
 - Free-text field: "Describe the issue or suggest a better response…"
 - "Apply & Regenerate" button — immediately regenerates that specific response using the feedback as context
 
-**Behavior refinement (left sidebar)**
-12. Left sidebar always shows a **Refine behavior** input:
-    - Textarea: "What should the AEP do differently?"
-    - Example hints rotate in placeholder: "Make the opening more casual", "Use more Tagalog phrases", "Be less pushy on first refusal"
-    - "Apply changes" button — applies to the AEP and starts a new chat session automatically
+**AI Refine Panel (left panel)**
+13. The left panel is always visible. It contains:
+    - **Quick Actions** chips: More casual · Less aggressive · Add urgency · More formal · Shorter · More empathetic. Clicking a chip selects it and updates the CTA to "Apply '[Chip Label]'."
+    - **Custom Instruction** textarea: "Describe a change to the AEP's behavior… e.g. 'Don't mention dollar amounts so early'"
+    - **Recent Changes** list: chronological history of applied instructions with timestamps
+    - **Apply and Regenerate** CTA (or "Apply '[Chip Label]'" when a chip is selected)
+
+**Refinement states**
+- *Chip selected:* Chip highlights, CTA updates to name the chip.
+- *Applying:* "Applying changes…" shown while the instruction processes (P95 < 20s).
+- *Applied / success:* "✦ Regenerated" tag appears on the first message of the new session. Recent Changes appends the instruction with "just now." Toast: "Changes applied — new session started."
+- *Error:* "Generation failed" in Recent Changes. Inline: "Something went wrong. Your changes weren't saved." "Try again →" available.
 
 **New chat**
-13. "New Chat" button at top of main area (and in sidebar session list) — starts a fresh conversation, preserves all previous sessions in the sidebar history list.
-
-**Session history (left sidebar)**
-- List of past sessions: timestamp + archetype used + session outcome (terminal state reached / abandoned)
-- Click any session to view it read-only
+14. Applying a behavior change via the left panel automatically starts a new chat session. The prior session's conversation remains accessible in the right panel.
 
 **Publishing**
-14. After at least 1 completed session, **"Publish AEP"** button activates in the page header.
-15. Publish confirmation modal:
+15. After at least 1 completed session, **"Publish AEP"** button activates in the page header.
+16. Publish confirmation modal:
     - AEP name + immutability notice
     - Warning acknowledgment if fewer than 2 sessions completed
 16. Confirm → AEP moves to Active status in the library.
@@ -102,13 +103,14 @@ Dune Security · User Flow · Last updated: 2026-05-22 (v3 — 2-step builder)
 
 | Trigger | System behavior |
 |---|---|
-| "Generate & Test →" clicked | POST to generation API; labeled progress screen; P95 45s |
+| "Refine and Test" clicked | POST to generation API; labeled progress screen; P95 45s |
 | Generation completes | Advances to Step 2; AEP persona sends opening message |
 | Generation fails | Error state with retry; form state preserved |
 | AEP sends response | Typing indicator 1–2s; response appears; 👍👎 controls visible below message |
 | 👎 + "Apply & Regenerate" | New response generated for that turn only; replaces the flagged response inline |
-| "Apply changes" (behavior) | AEP updated; new chat session auto-starts; prior session logged in sidebar |
-| "New Chat" clicked | Fresh chat starts; session logged in sidebar list |
+| "Apply and Regenerate" (behavior change) | AEP updated; new chat session auto-starts; "Changes applied — new session started" toast; Recent Changes updated |
+| Quick Action chip + Apply | Same as behavior change; chip label used as instruction |
+| Behavior change error | "Generation failed" in Recent Changes; "Try again →" available; instruction text preserved |
 | "Publish AEP" confirmed | Validation; AEP status → Active; toast: "AEP published and available in campaign builder" |
 
 ---

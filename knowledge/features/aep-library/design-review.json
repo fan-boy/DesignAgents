@@ -1,130 +1,112 @@
 {
-  "feature_name": "AEP Builder — Step 2 Chat Test",
+  "feature_name": "AEP Builder — Step 1 Setup + Step 2 Test & Refine (v2C Inline AI)",
   "feature_slug": "aep-library",
-  "review_scope": "Step 2 Chat Test screen — two-panel layout with refinement sidebar and live chat conversation",
-  "review_focus": ["simulation integrity", "state completeness", "hierarchy", "error prevention", "trust"],
-  "verdict": "needs revision",
-  "quality_bar_assessment": "Structurally sound — the two-panel layout and inline 👍/👎 feedback placement are correct. Falls short of Stripe-level craft on: simulation immersion (Attacker label), content accuracy (wrong placeholder copy in left panel), and missing workflow elements (session history, publish guard, archetype chips). Not handoff-ready.",
+  "review_scope": "Step 1 simplified setup form + Step 2 v2C (Inline AI) — two-panel layout with persistent AI Refine left panel and live chat right panel. Five states: base, chip selected, applying, applied/success, error.",
+  "review_focus": ["state completeness", "content accuracy", "error prevention", "trust", "refinement UX"],
+  "verdict": "near handoff-ready",
+  "quality_bar_assessment": "Close to Stripe-level craft. The v2C design is a meaningful improvement over the prior version. The Quick Actions chips, Recent Changes list, and full state coverage (applying, applied, error) are well-designed. Three blocking gaps remain: placeholder copy in the AI response area, missing publish eligibility guard state, and undefined 'View More' expanded state in Step 1.",
   "strengths": [
-    "Inline 👍/👎 per-message feedback controls correctly positioned at moment of reaction — matches Gemini/ChatGPT rating patterns",
-    "Refinement instruction rendered as a sent message (green bubble) creates a clear record of what was asked and is an intuitive interaction pattern",
-    "Two-panel split keeps the live conversation always visible while refinement is always accessible — correct structural decision",
+    "Quick Actions chips (More casual, Less aggressive, Add urgency, More formal, Shorter, More empathetic) eliminate the blank-page problem for refinement and match the mental model of 'I know what kind of change I want'",
+    "Inline 👍/👎 per-message feedback correctly positioned at moment of reaction — matches Gemini/ChatGPT/Claude rating patterns",
+    "Recent Changes list with timestamps gives the manager a record of what has been tried and closes the 'did my change apply?' loop",
+    "Applied/Success state (v2C-4) forms a complete feedback loop: '✦ Regenerated' tag on first new message, 'Changes Applied' chip state, and 'Changes applied — new session started' toast",
+    "Error state (v2C-5) is correctly handled — 'Generation failed' with 'Something went wrong. Your changes weren't saved.' and 'Try again →', instruction text preserved",
     "Draft badge surfaced in the chat header grounds the manager in the AEP's current status",
-    "Channel context (Whatsapp) shown per message is a useful detail for multi-channel AEPs"
+    "Simplified Step 1 form (four required fields + View More) dramatically lowers the barrier to first generation while preserving access to advanced configuration",
+    "AEP sender label now uses the AEP's configured name ('IT Support Scam AEP') — no longer 'Attacker', which was the highest-priority prior finding"
   ],
   "findings": [
     {
       "id": "DR-01",
       "severity": "S3",
-      "category": "Simulation integrity / Match between system and real world",
-      "location": "Chat panel — message sender labels",
-      "issue": "AEP messages are labeled 'Attacker' throughout. The employee receiving messages in a live campaign would not see 'Attacker' — they would see a realistic persona name. The security manager testing this AEP should experience it from the employee's perspective.",
-      "why_it_matters": "The entire value of Step 2 is validating whether the AEP would be believable to a real employee. 'Attacker' as a sender label signals a system role, not a persona. It breaks the mental model of testing from the employee's perspective and undermines the manager's ability to catch authenticity issues.",
-      "recommended_fix": "Use the AEP's configured persona name as the sender (the same name a real employee would see). Surface AEP name/type in the chat header as context, not on every message. Use 'You' for the employee responder — consistent with how chat apps label the local participant.",
-      "principles": ["Match between system and the real world", "Clarity before cleverness"],
-      "teaching_note": "Simulation tools must make the test feel like the thing being simulated, not a log viewer. The sender label is the first signal of whether this is a real conversation or a database record. Getting this right is the difference between useful behavioral validation and a rubber-stamp review."
+      "status": "open — carries over from 2026-05-22 review",
+      "category": "Content accuracy / Recognition rather than recall",
+      "location": "Left panel — AI response area (Reasoning section and action card)",
+      "issue": "The AI response after a refinement instruction still reads: 'I've created a comprehensive admin UI for the Dune Security training platform… a full assignment activity tracking system…' The action card reads 'Generate Design Element Version 1.' This placeholder copy is from an unrelated tool and makes the refinement confirmation pattern unreadable.",
+      "why_it_matters": "If this ships with generic LLM responses that don't confirm what behavioral change was applied, security managers will lose trust in the refinement flow immediately. It also blocks meaningful stakeholder review.",
+      "recommended_fix": "Replace with AEP-behavior-specific copy. After applying 'Less aggressive': 'Done. I've softened the persona's pushback resistance. It will now back off faster when the employee shows hesitation, rather than escalating. Starting a new test session.' Action card: 'AEP Updated' not 'Generate Design Element.'",
+      "principles": ["Match between system and the real world", "Trust is part of the UX"]
     },
     {
       "id": "DR-02",
       "severity": "S3",
-      "category": "Content accuracy / Recognition rather than recall",
-      "location": "Left panel — AI refinement response and action card",
-      "issue": "After a refinement instruction, the AI response describes building 'a comprehensive admin UI for the Dune Security training platform' with 'a full assignment activity tracking system.' The action card reads 'Generate Design Element Version 1.' This content belongs to a different product or workflow entirely.",
-      "why_it_matters": "Wrong placeholder content makes it impossible to evaluate whether the refinement flow is well-designed. It also misrepresents what the AI response pattern should communicate — a behavior change confirmation, not a design generation result. This blocks meaningful design review and sets incorrect expectations for engineering.",
-      "recommended_fix": "Replace with AEP-appropriate confirmation: 'Done. I've softened the opening — the AEP will now use more casual phrasing and build rapport before making asks. Starting a new test session.' The action card should read 'AEP Updated — v2' and the 'Additional feedback' link should be labeled 'Refine further' or similar.",
-      "principles": ["Match between system and the real world", "Trust is part of the UX"],
-      "teaching_note": "Placeholder copy in design reviews reveals borrowed patterns. 'Generate Design Element' suggests this was adapted from an AI design-generation tool. The AEP refinement flow needs its own vocabulary: behavioral change confirmation, session restart signal, and a 'what changed' summary."
+      "status": "open — carries over from 2026-05-22 review",
+      "category": "Error prevention / Trust and risk communication",
+      "location": "Top right — Publish AEP button",
+      "issue": "Publish AEP button appears active in the base state with no visible publish eligibility guard. The 0-sessions disabled state and 1-session warning acknowledgment are documented in user-flow and edge-cases but are not in the Figma designs.",
+      "why_it_matters": "Publishing is irreversible. A manager who publishes after 0 test sessions could deploy an unvalidated persona in a live campaign against real employees.",
+      "recommended_fix": "Add disabled state frame (greyed button + tooltip: 'Complete at least one test session before publishing'). Add 1-session warning acknowledgment modal. Consider session counter in step header ('1 session completed').",
+      "principles": ["Error prevention", "Trust and risk communication"]
     },
     {
       "id": "DR-03",
-      "severity": "S3",
-      "category": "State completeness",
-      "location": "Left panel — missing session history and New Chat button",
-      "issue": "The left sidebar shows only the refinement panel. Session history (documented in design strategy as a required component) and New Chat are both absent.",
-      "why_it_matters": "Without session history, the manager cannot understand how many sessions they have run, compare behavior across sessions, navigate back to a prior conversation, or know whether they have tested enough to publish. The session list is also the primary evidence that informs publish eligibility.",
-      "recommended_fix": "Add session history below the refinement thread. Each entry: session number, archetype used, turn count, outcome. Highlight the active session. Add 'New Chat' button in the sidebar header or chat area header.",
-      "principles": ["State completeness matters", "Visibility of system status"],
-      "teaching_note": "In a multi-session workflow, the session list is progress evidence, not just navigation. It tells the manager 'you've done the work' — which is the signal that makes Publish feel earned rather than premature."
+      "severity": "S2",
+      "status": "open — new in v2C review",
+      "category": "Hierarchy and clarity",
+      "location": "Left panel — Reasoning section",
+      "issue": "The 'Reasoning ›' section is collapsed by default (correct) but its content model when expanded is undefined beyond the wrong placeholder. Not defined as permanent feature vs. debug aid.",
+      "why_it_matters": "Shipping without a defined content model means either placeholder copy or generic LLM reasoning that adds cognitive load without decision-support value.",
+      "recommended_fix": "Define content model before handoff. If retained: collapsed by default, behavior-specific plain-language ('I removed the dollar amount from the opening message and added a rapport-building phrase before the ask'). If not retained: remove. Do not ship a placeholder.",
+      "principles": ["Aesthetic and minimalist design", "Reduce cognitive load"]
     },
     {
       "id": "DR-04",
-      "severity": "S3",
-      "category": "Error prevention / Trust and risk communication",
-      "location": "Top right — Publish AEP button",
-      "issue": "Publish AEP appears enabled with no signal of testing readiness. Design strategy requires: disabled with tooltip at 0 sessions; warning acknowledgment at 1 session; standard modal at 2+ sessions.",
-      "why_it_matters": "Publishing is irreversible — AEPs are immutable after publish. A manager could publish an unvalidated persona that gets deployed in a live campaign against real employees. The guard is not a polish improvement; it prevents a real operational mistake.",
-      "recommended_fix": "0 sessions: disable button, tooltip 'Complete at least one test session to publish.' 1 session: enable with warning modal requiring acknowledgment checkbox. 2+ sessions: standard confirmation modal. Add a lightweight session count indicator in the header so managers know where they stand.",
-      "principles": ["Error prevention", "Trust and risk communication", "Trust is part of the UX"],
-      "teaching_note": "Consequential irreversible actions need both a structural guard (disabled state or warning gate) and a contextual signal (how close am I to the threshold). The guard prevents the mistake; the signal prevents the user from being surprised by the guard."
+      "severity": "S2",
+      "status": "open — new in v2C review",
+      "category": "State completeness",
+      "location": "Step 1 — View More disclosure",
+      "issue": "Step 1 has a 'View More' disclosure with no designed expanded state. If this exposes the advanced six-section fields, the content and label are not visible in any Figma frame.",
+      "why_it_matters": "Managers doing a first-time setup may not know what 'View More' contains or whether they need it. Advanced fields (compliance frameworks, termination logic) are consequential for AEP behavior.",
+      "recommended_fix": "Design the expanded state. Label it descriptively ('Advanced Configuration' or 'More scenario detail — optional'). Show which fields are inside so the manager can decide whether they need them.",
+      "principles": ["Visibility of system status", "User control and freedom"]
     },
     {
       "id": "DR-05",
-      "severity": "S2",
-      "category": "Visibility of system status",
-      "location": "Chat panel — last attacker message timestamp",
-      "issue": "Last attacker message shows two timestamps: '3:23 pm · 10:23 am' — one real, one scenario time, rendered as if both are valid simultaneously.",
-      "why_it_matters": "In a security product where audit trails matter, ambiguous timestamps erode trust in the system's precision. Also signals an unresolved data model decision about what time means in a simulated conversation.",
-      "recommended_fix": "Choose one timestamp format and apply consistently: real session wall-clock time, relative time since session start, or no timestamp for simulations. Remove the dual-timestamp entirely.",
-      "principles": ["Consistency and standards", "Aesthetic and minimalist design"],
-      "teaching_note": "Timestamp format is a system design decision. For simulated conversations, 'time within the scenario' and 'real session time' are different concepts. Decide which is meaningful to the security manager and surface only that."
+      "severity": "S1",
+      "status": "resolved",
+      "category": "Simulation integrity",
+      "location": "Chat panel — message sender labels",
+      "note": "Previous finding DR-01 (2026-05-22): AEP messages were labeled 'Attacker.' Now uses the AEP's configured name ('IT Support Scam AEP'). Employee responder is 'You • Employee.' Resolved."
     },
     {
       "id": "DR-06",
-      "severity": "S2",
+      "severity": "S1",
+      "status": "resolved",
       "category": "Flexibility and efficiency of use",
-      "location": "Chat panel — input bar area",
-      "issue": "Archetype quick-start chips (Curious / Skeptical / Hostile / Compliant) documented in the design strategy as a required Step 2 element are absent.",
-      "why_it_matters": "Chips reduce the cognitive load of starting a test — the manager does not need to invent a realistic employee reply. They also make it easier to test the AEP consistently across sessions. Without them, managers default to improvising, producing inconsistent test inputs.",
-      "recommended_fix": "Add archetype chips above the 'Reply as Employee' input bar. They should disappear or become inactive after the first message is sent (starter aid, not ongoing control).",
-      "principles": ["Flexibility and efficiency of use", "Recognition rather than recall"],
-      "teaching_note": "Archetype chips are a scaffolding pattern — they help first-time testers start without knowing what a 'good' test input looks like. Especially valuable for non-technical security managers who may not have practiced social engineering simulation before."
+      "location": "Chat panel — archetype chips",
+      "note": "Previous finding DR-06 (2026-05-22): archetype chips were missing. v2C includes 'Reply as:' with Curious, Skeptical, Hostile, Compliant chips. Resolved."
     },
     {
       "id": "DR-07",
-      "severity": "S2",
-      "category": "Consistency and standards",
-      "location": "Chat panel — employee sender labels",
-      "issue": "Employee responder labeled 'Employee' in one message and 'John Doe' in another. Inconsistent identity breaks the mental model of the test.",
-      "why_it_matters": "The manager playing the employee needs a consistent identity to maintain the mental model that they are simulating a specific person. Switching between role label and personal name mid-conversation creates confusion.",
-      "recommended_fix": "Use 'You' consistently for all messages sent by the manager. This is the standard chat app pattern and is unambiguous. If a target employee persona is relevant, it belongs in the AEP setup, not injected mid-conversation.",
-      "principles": ["Consistency and standards", "Match between system and the real world"],
-      "teaching_note": "Consistent sender labeling is a foundational chat UI decision. Most chat applications resolve this simply: the local participant is always 'You.' Deviation from this needs strong justification."
-    },
-    {
-      "id": "DR-08",
-      "severity": "S2",
-      "category": "Hierarchy and clarity",
-      "location": "Left panel — Reasoning section",
-      "issue": "The 'Reasoning ›' expandable section, when populated, may expose AI chain-of-thought about behavioral changes. Value to security managers is unclear; current mock content is about building a UI, not AEP behavior.",
-      "why_it_matters": "If Reasoning is retained with wrong or overly technical content, it adds cognitive load without decision-support value. Security managers care whether the behavior is now correct, not how the AI reasoned about it.",
-      "recommended_fix": "If Reasoning is retained: keep collapsed by default (already correct), make content plain-language and behavior-specific ('I softened the opening by removing formal greetings...'), scope to what changed rather than explaining the full AEP. Consider whether this belongs in a debug/Operator view rather than the standard customer view.",
-      "principles": ["Aesthetic and minimalist design", "Reduce cognitive load"],
-      "teaching_note": "AI transparency features (showing reasoning) are valuable when they help users make better decisions. When they describe process rather than outcome, they add noise. Ask: does seeing the reasoning change what the manager does next? If not, it should be optional or hidden."
-    },
-    {
-      "id": "DR-09",
       "severity": "S1",
-      "category": "Visibility of system status",
-      "location": "Top header — step indicator",
-      "issue": "Active vs. completed step differentiation in the step indicator is not clearly legible — the active step circle appears only slightly different from the completed step.",
-      "why_it_matters": "Low severity because the manager is actively using Step 2 and the indicator is informational. But clearer active/complete states would reinforce orientation in the wizard.",
-      "recommended_fix": "Step 1 (complete): checkmark inside the circle. Step 2 (active): filled circle with bold label. Standard wizard step indicator pattern.",
-      "principles": ["Visibility of system status", "Consistency and standards"],
-      "teaching_note": "Step indicators in wizards should communicate three states: complete (done, can return), active (here now), and upcoming (not yet). Use distinct visual treatments for each, not just subtle shading differences."
+      "status": "resolved",
+      "category": "Consistency and standards",
+      "location": "Chat panel — employee sender label consistency",
+      "note": "Previous finding DR-07 (2026-05-22): inconsistent Employee/John Doe labeling. v2C consistently uses 'You • Employee.' Resolved."
     }
   ],
   "open_questions": [
-    "[PM] What does the employee sender label represent — the logged-in manager's own identity, a fixed target persona from setup, or a generic label?",
-    "[Eng] What specifically does the AI confirm changed after a refinement instruction? Is it a diff, a summary, or a re-statement of updated behavior?",
-    "[Both] Is the 'Reasoning' section a permanent feature or a debug/transparency aid? If permanent, it needs a well-defined content model.",
-    "[PM] What does 'Additional feedback' trigger — chaining a follow-up instruction, or rating the AI's refinement response?"
+    "[Eng] What does the AI confirm changed after a behavior instruction is applied? Natural-language summary, field diff, or re-statement of updated behavior? Defines Reasoning section content model.",
+    "[Both] Is 'Reasoning ›' a permanent customer-facing feature or a debug/transparency aid? If the latter, consider moving to Operator overlay.",
+    "[PM] Does 'View More' in Step 1 expose the full six-section form or a curated subset? Which fields are required vs. optional inside?",
+    "[PM] Is there a session counter visible in Step 2 so the manager knows how many sessions completed before hitting the Publish guard?"
   ],
   "revision_priorities": [
-    "Fix 'Attacker' sender label — replace with AEP persona name; use 'You' for employee responder",
-    "Replace all placeholder content in left panel with AEP-appropriate behavior confirmation copy and correct action card labels",
-    "Restore session history list and New Chat button in the left sidebar",
-    "Add publish eligibility guard — disabled at 0 sessions, warning acknowledgment at 1 session",
-    "Add archetype quick-start chips above the employee reply input"
+    "Replace left panel placeholder copy ('Generate Design Element Version 1') with AEP-behavior-specific confirmation copy — blocking issue for stakeholder review and handoff",
+    "Add publish eligibility guard states to Figma — 0-sessions disabled state with tooltip and 1-session warning acknowledgment modal",
+    "Design 'View More' expanded state in Step 1 with descriptive label and field inventory",
+    "Define and finalize Reasoning section content model — either real behavior-specific copy or remove the section"
   ],
-  "last_updated": "2026-05-22"
+  "last_updated": "2026-06-01",
+  "prior_review_date": "2026-05-22",
+  "figma_frames_reviewed": [
+    "Test & Refine — v2C (Inline AI)",
+    "v2C — 2. Chip Selected",
+    "v2C — 3. Applying (Loading)",
+    "v2C — 4. Applied (Success)",
+    "v2C — 5. Error",
+    "Create New Campaign — Select Templates (Step 1 form)",
+    "Red Teaming — AEP Library [v2]",
+    "Red Teaming — Dashboard [v4]"
+  ]
 }

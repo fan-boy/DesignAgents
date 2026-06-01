@@ -1,5 +1,5 @@
 # Design Strategy — AEP Builder + AEP Library
-Dune Security · Design Strategy · Last updated: 2026-05-20 (v2 update — PRD v0.2)
+Dune Security · Design Strategy · Last updated: 2026-06-01 (v3 update — v2C Inline AI confirmed)
 
 ---
 
@@ -83,60 +83,66 @@ Stage 3: Customer describes issues in plain English. LLM makes targeted field-le
 
 ---
 
-## Recommended strategy (updated 2026-05-22)
+## Confirmed strategy (updated 2026-06-01)
 
-**2-Step Builder: Setup Form + Chat Test with Inline Feedback**
+**2-Step Builder: Simplified Setup Form + Chat Test with Inline AI Refinement Panel (v2C)**
 
-This replaces the previous 3-stage wizard (Form → Generate → Test → Separate Refinement) with a simpler, more direct flow that matches how security managers actually iterate on persona behavior.
+Figma v2C (Inline AI) is the confirmed design direction. This supersedes the previous 3-stage wizard and the intermediate v2A (tabbed) and v2B (bottom drawer) variants.
 
-The key insight from Mobbin research (Google Gemini, ChatGPT, RelevanceAI): feedback on AI outputs works best when it's inline and immediate — not batched into a separate "refinement stage." The previous Stage 3 diff view was technically correct but felt heavy for what is fundamentally a "this response was off, fix it" interaction.
+The key insight from Mobbin research (Google Gemini, ChatGPT, RelevanceAI): feedback on AI outputs works best when it's inline and immediate — not batched into a separate "refinement stage." The v2C design solves this with a persistent left panel that contains Quick Actions chips, a Custom Instruction textarea, Recent Changes history, and Apply and Regenerate — always visible, never requiring a screen switch.
 
-### Step 1: Setup (mandatory fields + examples)
+### Step 1: AEP Setup (confirmed — v2C)
 
-Full-page centered form within the dashboard shell. Two-step progress indicator at top.
+Full-page form within the dashboard shell. Two-step progress indicator at top (① AEP Setup, ② Test & Refine). Breadcrumb: Red Teaming > New AEP.
 
-Mandatory fields (required to generate):
-- AEP Name
-- Attack Type (dropdown)
-- Adversary Method (chip selector: Authority / Urgency / Reciprocity / Curiosity / Scarcity / Familiarity)
-- Target Context (textarea: role, business unit, org environment)
-- Opening Message (textarea: the first message the persona sends)
+**General Details section** — four required fields:
+- **AEP Title** (text input) — the name used in the library and campaign builder
+- **Adversary Method** (chip selector, pick 1–2: Authority / Urgency / Reciprocity / Curiosity / Scarcity / Familiarity) — severity shown inline (e.g., "Moderate")
+- **Target Context** (textarea) — who the employees are, their role and org context
+- **Example Messages** (drag-and-drop upload: .txt, .docx, .jpg, .png with OCR — up to 5 files, or paste inline) — grounds generation quality
 
-Optional but strongly recommended:
-- Example messages (drag-and-drop upload: .txt, .docx, .jpg, .png — up to 5 files, or paste inline)
-- Channel selection (WhatsApp, Telegram, SMS, Teams, etc.)
+**Template picker** — Dune-curated templates (e.g., "Ransomware", shown with duration estimate and enabled status) pre-fill the form fields as a starting point.
 
-Primary CTA: **"Generate & Test →"** — generates the AEP and advances to Step 2.
-Secondary CTA: **Save Draft** — saves form state without generating.
+**View More disclosure** — expands advanced configuration: Attack Scenario, Systems at Risk, Rules & Compliance, Cultural Context, Termination Logic (the full six-section model for users who need more precision).
 
-### Step 2: Chat Test (live chat + inline feedback + behavior refinement)
+Primary CTA: **"Refine and Test"** — generates the AEP and advances to Step 2.
+Secondary CTA: **Save as Draft** — preserves form state without generating.
 
-Three-area layout:
+### Step 2: Test & Refine (confirmed — v2C Inline AI)
 
-**Left sidebar** (~300px):
-- Refine behavior panel: "What should the AEP do differently?" textarea + "Apply changes" button. Applying triggers a new chat session automatically. Placeholder hints rotate with examples.
-- Sessions list: chronological session history with timestamp + archetype + outcome. "New Chat" button at top of list.
+Two-panel layout. Header: AEP name, Draft badge, step indicator, Publish AEP button.
 
-**Main chat area** (remaining width):
-- AEP sends opening message automatically on load
-- Archetype quick-start chips above input: Curious · Skeptical · Hostile · Compliant
+**Left panel — AI Refine panel (persistent, always visible):**
+- **Quick Actions** chips: More casual · Less aggressive · Add urgency · More formal · Shorter · More empathetic. Selecting a chip updates the CTA to "Apply '[Chip Label]'."
+- **Custom Instruction** textarea: "Describe a change to the AEP's behavior… e.g. 'Don't mention dollar amounts so early'"
+- **Recent Changes** list: chronological history of applied instructions with timestamps (e.g., "Make it less pushy — 2 min ago")
+- **Apply and Regenerate** CTA — applies the instruction to the AEP and auto-starts a new chat session
+
+**States for the refinement flow:**
+- *Chip selected:* Chip highlights, CTA updates to name the chip action
+- *Applying:* "Applying changes…" shown while processing (P95 < 20s)
+- *Applied / success:* "✦ Regenerated" tag on first new message; Recent Changes appends instruction with "just now"; toast: "Changes applied — new session started"
+- *Error:* "Generation failed" in Recent Changes; "Something went wrong. Your changes weren't saved." with "Try again →"; instruction text preserved
+
+**Right panel — Live chat area:**
+- AEP sends opening message automatically; persona labeled with AEP's configured name (not "Attacker")
+- "Reply as:" chips above input: Curious · Skeptical · Hostile · Compliant — inject preset first replies
+- Manager's messages labeled "You • Employee"
+- Message input: "Or type your own reply…"
 - After each AEP response: 👍 👎 inline feedback controls appear below the message
-  - **👎 Thumbs down** → inline panel expands with reason chips (Too formal, Too aggressive, Off-topic, Unrealistic, Wrong register) + optional free-text + "Apply & Regenerate" — regenerates only that specific response using feedback as context
-  - **👍 Thumbs up** → inline panel expands with positive chips (Perfect tone, Realistic, Good adaptation) + optional note + Save
-- "New Chat" button in header
-- Message input at bottom: "Reply as employee…"
-- "Publish AEP" in header (active after 1+ completed session)
+  - **👎 Thumbs down** → reason chips (Too formal, Too aggressive, Off-topic, Unrealistic, Wrong register) + optional free-text + "Apply & Regenerate" — regenerates only that specific response
+  - **👍 Thumbs up** → chips (Perfect tone, Realistic, Good adaptation) + optional note + Save
+- **Reasoning ›** collapsible section — content model TBD (see design-review DR-03); collapsed by default
 
-### Why this is simpler and better
+### Why v2C is better than v2A (tabbed) and v2B (bottom drawer)
 
-- **No separate refinement stage**: feedback happens inline at the moment a response is seen — no switching screens
-- **Regenerate single responses**: instead of applying a diff across many fields, the manager can fix one bad turn without restarting the whole conversation
-- **Behavior prompt stays visible**: the refinement input is always in the sidebar — no hunting for it after the chat ends
-- **Session history is persistent**: all test runs are logged in the sidebar, making it easy to compare behavior across attempts
+- v2A (tabbed Chat / Refine with AI): switching between tabs loses conversation context while refining — managers must toggle back and forth
+- v2B (bottom drawer Refine with AI): collapsed drawer means refinement is always one click away but never fully co-visible with the conversation — partial improvement
+- v2C (persistent left panel): the full refinement toolkit is always visible alongside the conversation. Quick Actions chips eliminate the "what do I type?" problem. Recent Changes builds a visible history of what has been tried. No screen switching required.
 
 ### What this replaces
 
-The previous Stage 3 (separate prompt-refinement screen with per-field diff view) is eliminated. That pattern was borrowed from code review tools and doesn't fit the conversation-testing mental model. Inline per-message feedback is the industry standard (Google Gemini, ChatGPT, Claude) and is more intuitive for security managers who are thinking "this message was wrong" not "which field should I edit."
+The previous Stage 3 (separate prompt-refinement screen with per-field diff view) and all intermediate tabbed/drawer variants are superseded by v2C. The diff-view pattern was borrowed from code review tools and doesn't fit the conversation-testing mental model.
 
 ---
 
@@ -301,12 +307,11 @@ Same UI as customer with an "Operator mode" indicator. Additional panels:
 
 ---
 
-## Next design actions
+## Next design actions (updated 2026-06-01)
 
-1. **Resolve critical open issues #1 and #2** before finalizing the Builder flow — mandatory reviewer gate and multi-channel model both change screens materially.
-2. **Design the AEP Library table first** — entry, return point, and management surface for all AEPs. Status model (Draft / Pending Review / Active / Archived) and row actions are self-contained deliverables.
-3. **Design Stage 1 form second** — six sections is a lot; work through progressive disclosure strategy and help text approach. Template pre-fill path and "Start from Template" entry point are part of this screen.
-4. **Design the generation progress screen** — P95 90s wait with labeled stages is a trust-critical moment. This screen needs dedicated attention.
-5. **Design Stage 2 (Live Chat Test) third** — state label panel, archetype starters, session controls. Validate split-pane layout against DS for responsive handling.
-6. **Design Stage 3 (diff view) fourth** — this is the most consequential screen for product quality. Spend design cycles on diff legibility, per-field accept/reject, and guardrail block messaging.
-7. **Audit Stillsuit DS v2 for:** table pattern, wizard step bar, drawer, modal, badge variants, split-pane layout, diff view — flag gaps for DS review.
+1. **Fix left panel placeholder copy** — replace "Generate Design Element Version 1" and the wrong Reasoning paragraph with AEP-behavior-specific confirmation copy. This is the single blocking issue for handoff readiness.
+2. **Add publish eligibility guard states** — design the 0-sessions disabled state (Publish AEP greyed + tooltip) and 1-session warning acknowledgment modal. Add to v2C base frame.
+3. **Design "View More" expanded state in Step 1** — label, field list, and help text for the advanced configuration section. Decide which fields are required vs. optional inside the expanded view.
+4. **Define Reasoning section content model** — either spec the AEP-specific behavior-change explanation format or remove the section. Do not ship a placeholder.
+5. **Design generation progress screen** — P95 45–90s wait with labeled advancing stages is a trust-critical moment. Must visibly progress; static spinner is not acceptable.
+6. **Verify Stillsuit DS v2 components** — step indicator (active/complete/upcoming states), chat bubble pattern, chip component, collapsible disclosure, modal, and toast. Flag any gaps to DS.
