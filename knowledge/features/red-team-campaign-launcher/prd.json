@@ -1,0 +1,90 @@
+{
+  "feature_name": "Red Team Campaign Launcher",
+  "feature_slug": "red-team-campaign-launcher",
+  "written_at": "2026-05-12",
+  "flows": [
+    "Create Red Team Campaign (8-step wizard)",
+    "Campaign Detail — In-Progress Monitoring",
+    "Campaign Detail — Post-Campaign Reporting (Overview tab)",
+    "Campaign Detail — Post-Campaign Reporting (Conversations tab)",
+    "Email Alert Configuration"
+  ],
+  "actors": [
+    "Red Team admin (primary — create, launch, monitor, configure alerts, re-tag)",
+    "Standard admin (read-only results, export CSV)",
+    "Read-only viewer (results view only, no export)"
+  ],
+  "wizard_steps": {
+    "Create Red Team Campaign": [
+      "Step 1 — Channel Selection",
+      "Step 2 — Audience",
+      "Step 3 — Template + Message",
+      "Step 4 — Compliance Pre-flight",
+      "Step 5 — Delivery",
+      "Step 6 — Remediation",
+      "Step 7 — Test Send",
+      "Step 8 — Review + Launch"
+    ]
+  },
+  "key_fields": [
+    "Channel selection (SMS, WhatsApp; Viber/Telegram/Vishing Coming Soon)",
+    "Audience targeting mode (Groups, Individuals, Both)",
+    "Group picker with per-channel coverage indicator",
+    "People-search component with per-user channel chips",
+    "Overlap detection and deduplication callout",
+    "AEP selection (one per campaign)",
+    "Message editor with channel tabs (SMS + WhatsApp in multi-channel mode)",
+    "Compliance Pre-flight checklist (carrier whitelist, API status, consent docs)",
+    "Delivery schedule (date, time, timezone)",
+    "Delivery spread toggle and window",
+    "Batch size and batch delay",
+    "Fallback routing selector (Fall back to SMS / Surface error / Silent exclude)",
+    "Remediation suppression toggle (ON by default)",
+    "Test send confirmation checkboxes per channel",
+    "Compliance acknowledgment checkbox",
+    "Campaign name"
+  ],
+  "conversation_states": [
+    "Awaiting Response (Ignored)",
+    "Curious (Complicit)",
+    "Engaged (Complicit)",
+    "Hesitant (Complicit)",
+    "Compromised (Complicit)",
+    "Declined (Non-Complicit)"
+  ],
+  "integrations": [
+    "WhatsApp Business API",
+    "SMS carrier whitelist",
+    "AEP library",
+    "IDP / SCIM (geo/site filter and chart)",
+    "Workday (Employee ID)",
+    "Risk Scoring Engine (assumed isolated from simulation pipeline)",
+    "Email notification system (alert digest)",
+    "Domo API (deferred to v3)"
+  ],
+  "edge_cases_count": 18,
+  "open_questions_flagged": [
+    "Risk pipeline: isolated or integrated with simulations?",
+    "WhatsApp Business API custom message feasibility — template-only or arbitrary?",
+    "Template library: red-team-specific or shared with simulations?",
+    "Compliance acknowledgment copy requires legal review",
+    "Sub-admin RBAC visibility (department managers, compliance viewers)",
+    "Vishing architecture (Dune-managed VOIP vs. manual outcome recording) — out of v1 scope",
+    "Individual targeting maximum user count",
+    "IDP SCIM integration timeline",
+    "Workday integration ETA for Employee ID",
+    "Email alert AWS API connection readiness"
+  ],
+  "figma_used": false,
+  "source_docs_used": true,
+  "sources_used": [
+    "prd-research.json",
+    "prd-research-summary.md",
+    "design-strategy.json",
+    "edge-cases.md",
+    "open-questions.md",
+    "user-flow.md"
+  ],
+  "confidence": "high",
+  "confidence_notes": "All six existing knowledge files were present and internally consistent. Design strategy was fully resolved (Option B selected, 8-step wizard confirmed, all step names defined). Conversation states and in-progress dashboard spec were confirmed in design-strategy.json and user-flow.md. No Figma file was used — copy and field labels are derived from user-flow.md and design-strategy.json rather than a shipped design. Open questions are documented as Gaps; they do not block the PRD from being a complete and actionable working document."
+}
