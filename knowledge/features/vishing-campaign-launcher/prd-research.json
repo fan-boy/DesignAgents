@@ -16,14 +16,14 @@
     "IDP SCIM required for per-target local timezone call window application"
   ],
   "assumptions": [
-    "Dune's VOIP infrastructure places calls automatically using the Voice AEP persona (AI-driven) — not confirmed, contradicted by 'operators actively placing calls' language in Step 5",
+    "Dune's VOIP infrastructure places calls automatically using the Voice AEP persona (AI-driven) — CONFIRMED 2026-06-08",
     "Call recording consent and jurisdiction compliance checks are platform-verified states — likely self-certifications without a described document store",
     "Call outcome classification is entered by Dune operators manually after each call — not described explicitly",
     "Debrief is entirely out-of-platform for v1",
     "Voice AEP locked at campaign activation (Calling), not at submission (Pending Activation)"
   ],
   "gaps": [
-    "Execution model (AI-driven vs. human-operated calls) is contradicted within the PRD — highest-leverage unresolved question",
+    "Execution model confirmed AI-driven — 'operators actively placing calls' language in PRD Step 5 was incorrect and has been corrected",
     "Caller ID spoofing capability not confirmed — Caller Identity fields may be script briefing only, not VOIP-level config",
     "Compliance check verification model not described — no document store, upload flow, or verification mechanism for consent items",
     "No ops-to-admin feedback loop for Pending Activation — ops cannot request changes without going outside the platform",

@@ -105,9 +105,9 @@ Delivery configuration is replaced by call-specific settings.
 
 **Inter-attempt delay** — the minimum delay between call attempts to the same target. Options: 1 hour, 2 hours, 4 hours, Next business day. Default: 2 hours.
 
-**Campaign date** — the date on which Dune operators begin placing calls. A single date picker (not a delivery spread window — vishing calls are placed manually within the configured window). The admin sets a requested start date; Dune ops confirms readiness before calls begin.
+**Campaign date** — the date on which the AI VOIP system begins placing calls. A single date picker. The admin sets a requested start date; Dune ops provisions and activates the AI system before calls begin. Once activated, the system dials automatically within the configured call window.
 
-There is no batch sending, delivery spread, or fallback routing configuration — these are specific to the VOIP execution model and are managed by Dune operators.
+There is no batch sending, delivery spread, or fallback routing configuration in v1. The AI VOIP system places calls sequentially within the configured call window and attempt settings.
 
 **Step 6 — Remediation**
 
@@ -131,7 +131,7 @@ The final step is a read-only summary of all configured steps, identical in stru
 
 Summary cards show: selected channel (Vishing) with VOIP status; audience targeting mode and counts; selected Voice AEP name with script outline preview; campaign-specific calling notes (if entered); compliance pre-flight status; call window, max attempts, and requested start date; remediation setting; and test call status (Completed or Skipped with warning).
 
-The compliance acknowledgment checkbox above the CTA is adapted for vishing: the admin confirms the campaign has appropriate internal authorization, that targets will be called on real phone numbers by a VOIP system operated by Dune, and that the admin is responsible for managing the debrief and disclosure process.
+The compliance acknowledgment checkbox above the CTA is adapted for vishing: the admin confirms the campaign has appropriate internal authorization, that targets will receive real phone calls from an AI voice system operated by Dune's VOIP infrastructure, and that the admin is responsible for managing the debrief and disclosure process.
 
 When the admin clicks **Submit Campaign Request**, the campaign moves to **Pending Activation** status. A confirmation screen reads: "Campaign request submitted. Dune operators will review your configuration and activate calling within one business day. You'll receive an email confirmation when calls begin." The campaign appears in the Red Team campaign list with a **Pending Activation** status badge.
 

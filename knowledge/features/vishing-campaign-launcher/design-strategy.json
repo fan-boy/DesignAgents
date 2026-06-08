@@ -29,7 +29,6 @@
     }
   ],
   "tradeoffs": [
-    "Execution model ambiguity is not resolved by this strategy — copy in Steps 1, 5, 7, 8 and Pending Activation has two variants pending PM/Eng confirmation",
     "Group B acknowledgment checklist is a new DS pattern requiring DS review before implementation",
     "Outlined badge variant requires DS confirmation — new variant needed if it doesn't exist",
     "Manual VOIP event fallback for test call allows self-attestation — pragmatic but removes certainty that admin reviewed the persona live"
@@ -42,11 +41,11 @@
     "Zero Reached stat shows 'N/A' for susceptibility rate, not '0%', to avoid misleading denominator"
   ],
   "open_issues": [
-    "Is VOIP execution AI-driven or human-operated in v1? Affects copy in Steps 1, 5, 7, 8, and Pending Activation",
     "Is Group B compliance acknowledgment a self-certification or does a document upload flow need to be designed?",
     "Does outlined badge variant exist in DS v2?",
     "What is Dune's committed activation SLA?",
-    "Is debrief out-of-platform, and should the Overview tab include debrief resources?"
+    "Is debrief out-of-platform, and should the Overview tab include debrief resources?",
+    "Does the VOIP AI system emit semantic outcome events automatically, or does a Dune ops member classify each call post-completion? Affects real-time vs. latent Call Log updates."
   ],
   "risks": [
     "Execution model copy will be wrong if not confirmed before design — two incompatible copy variants exist",

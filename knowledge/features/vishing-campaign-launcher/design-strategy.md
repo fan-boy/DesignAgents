@@ -37,23 +37,18 @@ Make vishing feel like a first-class channel in the Red Team Campaign Launcher �
 
 ---
 
-## The Single Open Issue That Must Be Resolved Before Design Begins
+## Execution Model: Confirmed AI-Driven
 
-**Is VOIP execution AI-driven or human-operated in v1?**
+**Resolved 2026-06-08:** VOIP execution is AI-driven. The system places and conducts calls automatically using the Voice AEP persona. Dune operators provision and activate the campaign; the AI handles all call placement and conversation within the configured window.
 
-This question must be answered before Step 2 of the AEP builder and Step 7 of the campaign wizard are designed. Here is the fork:
-
-| If AI-driven | If human-operated (Dune ops) |
-|---|---|
-| Step 2 test call: admin calls a number and speaks with an AI bot | Step 2 test call: admin calls a number and the Dune operator reads from the script — a "dress rehearsal" |
-| Campaign scale: unlimited, parallel, fast | Campaign scale: limited by operator bandwidth; estimate per campaign |
-| Outcome streaming: VOIP system emits events in real time | Outcome streaming: operator logs outcome after each call; latency varies |
-| Caller Identity fields: VOIP-level config (if spoofing supported) | Caller Identity fields: briefing doc for the operator |
-| "Pending Activation" wait: SLA to configure automation | "Pending Activation" wait: SLA to confirm operator availability and scheduling |
-
-**Recommendation:** If v1 is human-operated (which the "operators actively placing calls" language in Step 5 implies), design the product to be honest about this while being ready to swap to AI-driven in v2. The key design move: Step 1 channel card and the Pending Activation screen must say clearly what Dune is doing, not hide behind "managed infrastructure." Admins who expect automation and experience human calling schedules will lose trust immediately.
-
-The strategy below is written to be valid for either execution model, with specific call-outs where the two paths diverge.
+Copy implications locked in:
+- **Step 1 channel card sub-label:** "AI voice calls via Dune VOIP"
+- **Step 2 AEP test call:** Admin speaks with the live AI caller persona — not a Dune operator
+- **Step 5 campaign date:** Date when the AI system begins dialing; Dune ops provision first
+- **Step 7 test call:** Admin calls a number and experiences the AI persona directly
+- **Pending Activation:** Wait is for AI system provisioning and configuration by ops, not operator scheduling
+- **Step 8 compliance acknowledgment:** "targets will receive real phone calls from an AI voice system operated by Dune's VOIP infrastructure"
+- **Outcome streaming:** VOIP system emits call events in real time; no manual operator classification for standard outcomes
 
 ---
 
@@ -366,11 +361,11 @@ Each acknowledgment item has a **Learn more** tooltip with 2–3 sentences of le
 
 ## Open Issues Before Design Can Be Finalized
 
-1. **[Both]** Is VOIP execution AI-driven or human-operated in v1? Copy throughout Steps 1, 5, 7, 8, and Pending Activation changes based on the answer.
-2. **[PM]** Is Group B compliance acknowledgment a self-certification or does a document upload flow need to be designed? If upload, that's a new settings surface (Compliance Settings) with non-trivial scope.
-3. **[Eng]** Does the outlined badge variant exist in DS v2? Confirm before designing the Call Log table.
-4. **[PM]** What is Dune's committed activation SLA? The "within 1 business day" copy in multiple places needs to be an explicit product commitment before it ships.
-5. **[PM]** Is debrief out-of-platform? If yes, should the post-campaign Overview tab include a "Debrief resources" section or template?
+1. **[PM]** Is Group B compliance acknowledgment a self-certification or does a document upload flow need to be designed? If upload, that's a new settings surface (Compliance Settings) with non-trivial scope.
+2. **[Eng]** Does the outlined badge variant exist in DS v2? Confirm before designing the Call Log table.
+3. **[PM]** What is Dune's committed activation SLA? The "within 1 business day" copy in multiple places needs to be an explicit product commitment before it ships.
+4. **[PM]** Is debrief out-of-platform? If yes, should the post-campaign Overview tab include a "Debrief resources" section or template?
+5. **[Eng]** Does the VOIP system emit semantic outcome events (Engaged, Compromised, Declined) automatically from call behavior, or does a Dune ops team member classify each call post-completion? This affects whether the Call Log table updates in real time or with latency.
 
 ---
 

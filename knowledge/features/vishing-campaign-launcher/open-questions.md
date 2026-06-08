@@ -1,8 +1,6 @@
 # Open Questions — Vishing Campaign Launcher
 
 ## Unresolved
-
-- [ ] [Both] Is VOIP execution AI-driven (automated bot places and conducts calls using the Voice AEP persona) or human-operated (Dune red teamers place calls manually using the script as a guide)? This is the highest-leverage question — it changes the AEP test-and-refine UX, campaign scale expectations, and how outcome events stream into the platform.
 - [ ] [Eng] Does Dune's VOIP infrastructure support caller ID spoofing — displaying an arbitrary caller name and company on the recipient's caller ID? If not, what identity information is shown to call recipients? This determines whether "Caller Identity" fields are VOIP-level configuration or script briefing only, and affects all help text and Step 3 script preview copy.
 - [ ] [PM] Where is "call recording consent on file" stored and verified in the platform? Is there a Compliance Settings document upload flow, or is this a per-campaign self-certification? Same question for the one-party/two-party consent jurisdiction check — is the platform verifying this or is the admin self-certifying?
 - [ ] [PM] Is there a mechanism for Dune ops to request changes to a submitted campaign before activating it, or is ops' only option to activate or contact the admin outside the platform?
@@ -17,4 +15,4 @@
 
 ## Resolved
 
-_(None yet — move items here with answers as PM/Eng respond.)_
+- [x] [Both] Is VOIP execution AI-driven (automated bot places and conducts calls using the Voice AEP persona) or human-operated (Dune red teamers place calls manually using the script as a guide)? — **Answer: AI-driven. The VOIP system places and conducts calls automatically using the Voice AEP persona. Confirmed 2026-06-08.**
