@@ -49,6 +49,20 @@ Last updated: 2026-06-01 (v2C Inline AI design)
 - **Operator Assist flag set:** Customer receives a prominent in-platform notification with: operator name, timestamp, summary of what changed, and a diff view. Customer can review changes and republish when ready (requires cloning if original is already Active).
 - **Delete vs. Archive:** PRD uses "Archive" (soft-delete) not "Delete" (hard-delete). Archive is reversible — confirm whether Unarchive is a supported action.
 
+## Version control states
+
+- **Revert to checkpoint with only 1 session:** Manager tries to revert to the only session — result is the AEP's initial generated state. Confirmation copy: *"This will reset the AEP to its initial generated state. Your current session will stay in history."*
+- **Revert to checkpoint mid-conversation:** Manager is mid-conversation when triggering a revert. Show confirmation: *"This will end your current conversation and reset the AEP to Session [N]. Your current conversation will be saved in history."* Do not silently discard the active conversation.
+- **Restore from version history — only v1 exists (no prior versions to restore from):** "Restore" action is not available. Version History tab shows v1 but Restore button is hidden or disabled with tooltip: *"This is the only version. Clone this AEP to start a new one."*
+- **Restore creates a Draft but manager navigates away before publishing:** Draft is saved and accessible from the AEP Library table (status: Draft) with restore banner still visible when reopened. No data loss.
+- **Concurrent restores by two managers from same version:** Two separate Drafts are created (e.g., v4 and v5). Both are valid. Each manager sees their own Draft. Library shows both as Drafts.
+- **Restore during Pending Review:** If the AEP is in Pending Review status, Reviewer cannot trigger a restore (read-only access). Version History tab is visible but Restore is inactive. Only Security Managers with editor access can restore.
+- **Accidental revert (builder checkpoint):** No "undo the revert" is available. However, sessions that were marked read-only after the revert remain in history — the manager can revert forward to a later checkpoint to recover.
+- **Version history with many versions (10+):** Default view shows 5 most recent versions. "Show all [N] versions" disclosure for the rest. Oldest versions are rarely accessed but must remain accessible.
+- **Restoring a version tied to an Archived AEP:** If the parent AEP is Archived, the Restore action should still be available from Version History. Restoring creates a new Draft that is not linked to the Archived AEP's status.
+- **Campaign uses a version where parent AEP is later Archived:** Campaign continues to run as-is. Archived status on the AEP does not affect in-flight campaigns pinned to older versions. This is by design.
+- **Revert confirmation: what happens to "greyed-out" post-revert sessions:** They remain visible in history but are clearly marked as pre-revert context: labelled *"Before reset — [date]"* in a muted style. Cannot be reverted-to (they represent a discarded path), but can be viewed read-only for reference.
+
 ## Responsive / Accessibility
 
 - **Generation progress screen (15–90s):** Must not use a static spinner. Labeled stage text ("Analyzing your scenario", "Building conversation flow", "Configuring guardrails", "Finalizing") must update visibly. Consider progress bar with time estimate.

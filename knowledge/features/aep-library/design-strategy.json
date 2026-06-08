@@ -78,14 +78,41 @@
     "Example upload with per-file paste-text inline fallback — requires DS review",
     "Adversary Method chip selector (multi-select pill group, pick 1–2) — new pattern"
   ],
+  "version_control_model": {
+    "principle": "Rollback always creates a new Draft — never directly replaces an Active version. Preserves immutability and audit trail.",
+    "layer_1_builder_checkpoints": {
+      "trigger": "Every successful Apply and Regenerate in Step 2 creates a behavioral checkpoint",
+      "revert_action": "'Revert to here' via ... menu on session row in Session History",
+      "confirmation": "Modal explaining which session will be restored, that later sessions stay in history, and that a new session starts automatically",
+      "result": "AEP behavioral state resets; new session auto-starts; post-revert sessions marked read-only in history"
+    },
+    "layer_2_version_history": {
+      "entry_points": ["AEP Library table row ... menu → Version history", "AEP Detail page → Version History tab"],
+      "version_history_columns": ["Version number (v1, v2, v3...)", "Published date", "Sessions count", "Status (Active / Archived)", "Campaigns using this version"],
+      "restore_action": "'Restore' button on any non-current version row",
+      "confirmation": "Modal: a new Draft (next version number) will be created; current Active unaffected; campaigns not impacted",
+      "result": "New Draft opens in Step 1 with restore banner; normal build flow proceeds; publishing creates new Active version",
+      "campaign_pinning": "Campaigns stay pinned to their original version — restore never affects in-flight campaigns"
+    },
+    "version_numbering": "Auto-incrementing integers (v1, v2, v3) — not semantic versioning",
+    "library_table_behavior": "Shows only current Active version per AEP; version number displayed as secondary label",
+    "new_screens_required": [
+      "Revert to checkpoint confirmation modal (Step 2 builder)",
+      "Version History tab on AEP Detail page — table with version rows + Restore action",
+      "Restore confirmation modal — explains new Draft creation, campaign safety, immutability",
+      "Step 1 restore banner — 'Restored from v[N] — published [date]'"
+    ]
+  },
   "next_actions": [
     "Resolve critical open issues: mandatory reviewer gate (PM) and multi-channel deployment model (Both) before finalizing the publish flow",
-    "Design AEP Library table first — status model, row actions, filter/search, empty state",
-    "Design Stage 1 form — progressive disclosure strategy for 6 sections, help text approach, template pre-fill path",
-    "Design generation progress screen — labeled stages, partial failure handling",
-    "Design Stage 2 (Live Chat Test) — state label panel, archetype starters, session controls, split-pane",
-    "Design Stage 3 (diff view) — per-field accept/reject, section grouping, guardrail block messaging",
-    "Audit Stillsuit DS v2 for: table pattern, wizard step bar, split-pane, diff view, repeatable row input"
+    "Design AEP Library table — status model, row actions, filter/search, empty state, version number label",
+    "Design AEP Detail page — Version History tab with version rows and Restore action",
+    "Design Step 2 session history — extend with ... menu and Revert to here action",
+    "Design revert confirmation modal (builder) and restore confirmation modal (library)",
+    "Design Step 1 restore banner",
+    "Fix DR-01: replace left panel placeholder copy with AEP-behavior-specific confirmation content",
+    "Fix DR-02: add Publish AEP disabled state (0 sessions) + 1-session warning acknowledgment modal",
+    "Fix DR-03: define or remove Reasoning section content model before handoff"
   ],
-  "last_updated": "2026-05-22"
+  "last_updated": "2026-06-08"
 }

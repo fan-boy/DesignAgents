@@ -1,5 +1,5 @@
 # User Flow — AEP Builder
-Dune Security · User Flow · Last updated: 2026-06-01 (v4 — v2C Inline AI design)
+Dune Security · User Flow · Last updated: 2026-06-08 (v5 — version control + rollback flows added)
 
 ---
 
@@ -137,3 +137,81 @@ Dune Security · User Flow · Last updated: 2026-06-01 (v4 — v2C Inline AI des
 | **Active** | Manager completes Step 2 and publishes |
 | **Pending Review** | Manager publishes with Reviewer configured on account |
 | **Abandoned** | Manager closes without saving |
+
+---
+
+## Version control flows
+
+### Flow A — Revert to builder checkpoint (within Draft)
+
+**Trigger:** Manager is in Step 2 and wants to undo recent refinements and return the AEP to an earlier behavioral state.
+
+1. Manager locates a previous session in the **Session History** list in the left panel.
+2. Manager opens the "..." menu on a session row → clicks **"Revert to here"**.
+3. Confirmation modal appears:
+   - *"Reset to Session [N]?"*
+   - Body: *"The AEP's behavior will reset to what it was after Session [N] — [archetype], [date]. Sessions after this will stay in your history. A new session starts automatically."*
+   - Actions: **Cancel** (left) | **Reset and restart** (right, primary)
+4. On confirm:
+   - AEP behavioral state resets to the selected checkpoint
+   - All sessions after the checkpoint remain in history as read-only (greyed, labelled "Before reset")
+   - A new session auto-starts immediately in the chat panel
+   - Left panel Recent Changes appends: *"Reverted to Session [N] — just now"*
+5. Manager continues testing from the restored behavioral state.
+
+**When to use:** Applied several changes and the AEP got worse; wants to try a different direction from an earlier state.
+
+---
+
+### Flow B — Restore from version history (from AEP Library, post-publish)
+
+**Trigger:** Manager has published v2 (or later) and decides a previous version was better. They want to create a new version based on an older one.
+
+**Entry points:**
+- AEP Library table → row "..." menu → **"Version history"**
+- AEP Detail page → **"Version History"** tab
+
+**Steps:**
+1. Manager opens the Version History tab on the AEP Detail page.
+2. Version history list shows all versions:
+   - Each row: version number (v1, v2…), published date, sessions count, status (Active / Archived), campaigns using this version
+   - Current Active version is labeled "Current"
+3. Manager identifies the version to restore and clicks **"Restore"** on that row.
+4. Restore confirmation modal appears:
+   - *"Restore v[N] as a new draft?"*
+   - Body: *"A new Draft (v[N+1]) will be created from v[N] — published [date]. Your current v[current] stays Active. Campaigns using v[current] are not affected."*
+   - Actions: **Cancel** (left) | **Create Draft from v[N]** (right, primary)
+5. On confirm:
+   - New Draft (next version number) is created, cloned from the selected version
+   - Manager is taken to **Step 1** of the builder with a banner: *"Restored from v[N] — published [date]. Review the details below and regenerate when ready."*
+6. Manager reviews Step 1 fields (may edit or leave as-is), clicks **"Refine and Test"**.
+7. Normal generation + Step 2 test flow proceeds.
+8. Manager publishes the restored Draft as the new Active version.
+9. Campaigns using the old version remain pinned to it; new campaigns can now select the restored version.
+
+---
+
+## Decision points (updated — version control)
+
+| Decision | Condition | Outcome |
+|---|---|---|
+| Generation succeeds | All sections generate | Advances to Step 2 |
+| Generation fails | Full failure | Error state with retry; form inputs preserved |
+| Thumbs down + Apply | Manager submits feedback | Regenerates that specific AEP response inline |
+| Apply behavior change | Manager submits refinement prompt | AEP updated; new chat session starts automatically |
+| Revert to checkpoint | Manager selects "Revert to here" on a session | Confirmation modal → AEP resets to that behavioral state; new session starts |
+| Publish eligibility | At least 1 completed session | Less than 1: Publish disabled; 1: Warning acknowledgment required |
+| Clone | Manager clones an existing AEP | Step 1 pre-filled; clone banner; next version number assigned |
+| Restore from version history | Manager clicks "Restore" on a past version | Confirmation modal → new Draft created from that version; builder opens at Step 1 with restore banner |
+| Campaign pinned to older version | Manager publishes new version | Campaigns remain pinned to their original version; must be updated manually |
+
+---
+
+## System responses (updated — version control)
+
+| Trigger | System behavior |
+|---|---|
+| "Revert to here" confirmed | AEP behavioral state resets to checkpoint; new session auto-starts; Recent Changes appended; post-checkpoint sessions marked read-only |
+| "Create Draft from v[N]" confirmed | New Draft created from selected version; builder opens at Step 1 with restore banner |
+| "Refine and Test" on restored Draft | Normal generation flow; produces new behavioral state from the restored form inputs |
+| Publish restored Draft | AEP status → Active as new version; previous versions remain Archived; campaigns unaffected |

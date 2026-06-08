@@ -1,5 +1,5 @@
 # Design Strategy — AEP Builder + AEP Library
-Dune Security · Design Strategy · Last updated: 2026-06-01 (v3 update — v2C Inline AI confirmed)
+Dune Security · Design Strategy · Last updated: 2026-06-08 (v4 — version control + rollback model added)
 
 ---
 
@@ -143,6 +143,68 @@ Two-panel layout. Header: AEP name, Draft badge, step indicator, Publish AEP but
 ### What this replaces
 
 The previous Stage 3 (separate prompt-refinement screen with per-field diff view) and all intermediate tabbed/drawer variants are superseded by v2C. The diff-view pattern was borrowed from code review tools and doesn't fit the conversation-testing mental model.
+
+---
+
+## Version control + rollback model (added 2026-06-08)
+
+### Core principle
+"Rollback" in the AEP system is not a true revert — it always creates a new Draft from a prior behavioral state. This preserves the immutability of published AEPs, maintains a complete audit trail, and ensures campaigns that are already pinned to a version are never affected by a restore operation.
+
+### Two layers of version control
+
+#### Layer 1 — Builder checkpoints (within Draft, before publishing)
+Every time "Apply and Regenerate" succeeds in Step 2, the AEP's behavioral state is checkpointed automatically. These checkpoints are visible in the **Session History** section of the left panel — each session entry corresponds to a behavioral state of the AEP at the time that session was run.
+
+**Revert to checkpoint:**
+- Each session entry in the history list has a **"Revert to here"** action (accessible via "..." menu on the session row)
+- Triggers a confirmation: *"This will reset the AEP to its behavior from Session [N]. Sessions after this one will stay in your history but won't affect the reset. A new session will start automatically."*
+- On confirm: AEP behavioral state resets to that checkpoint; a new session auto-starts; all previous sessions remain in history as read-only
+- This is safe to do without consequence — the AEP is still a Draft and nothing is live
+
+**When to use:** Manager applied several refinements and the AEP got worse, or wants to branch from an earlier behavioral state to try a different direction.
+
+#### Layer 2 — Version history (published AEPs, from the AEP Library)
+Each time a manager publishes an AEP, a new immutable version is created. Cloning also creates a new version lineage. Version history is accessible from the **AEP Detail page** — a dedicated "Version History" section (or tab) lists all past versions.
+
+**Version history list — each row shows:**
+- Version number (v1, v2, v3 — auto-incrementing integers)
+- Published date and author
+- Status (Active / Archived)
+- Sessions count (how many test sessions were run before publishing this version)
+- Campaigns using this version (count + link to campaign list)
+
+**"Restore this version" action:**
+- Available on any non-current version row
+- Creates a new **Draft** (next version number) cloned from the selected version
+- Draft opens in Step 1 with a banner: *"Restored from v[N] — published [date]. Review the setup below and regenerate to apply your changes."*
+- The restored Draft goes through the normal builder flow: edit Step 1 if needed → generate → test → publish
+- Campaigns using the older version are **not affected** — they remain pinned to their original version
+- The restored Draft, once published, becomes the newest Active version
+
+**"Restore" on the current Active version:** Not available — no action needed, it is already active.
+
+### Version numbering
+- Auto-incrementing integers: v1, v2, v3 (no semantic versioning — AEPs are not code)
+- Every publish creates a new version
+- Cloning from any version starts the new lineage at next available number (e.g., if v3 is current, clone creates v4 Draft)
+- Restoring from v1 creates a v4 Draft (not v1 again)
+
+### Campaign pinning rule
+- Campaigns are pinned to the AEP version that was Active at the time of campaign creation
+- Version restores and new publishes do **not** retroactively affect running or completed campaigns
+- Managers must manually update campaign AEP selection to use a new version — this is by design (prevents silent behavior changes mid-campaign)
+
+### What's in the AEP Library table vs. detail page
+- **Library table:** Shows only the current Active version for each AEP. The version number (e.g., "v3") is displayed as a secondary label on the row.
+- **AEP Detail page:** Full version history accessible via "Version History" tab. All versions — Active and Archived — are listed here.
+
+### Design patterns required
+- **Session History** in Step 2 left panel: existing pattern extended with "..." menu on each session row containing "Revert to here" action
+- **Confirmation modal** for checkpoint revert: standard DS modal, consequence-focused copy
+- **Version History tab/section** on AEP Detail page: table pattern, rows are version entries, "Restore" action on each row
+- **Restore confirmation modal:** explains that a new Draft will be created, current Active version is unaffected, campaigns not impacted
+- **Restore banner** in Step 1: informational banner explaining which version was restored from and when it was published
 
 ---
 
