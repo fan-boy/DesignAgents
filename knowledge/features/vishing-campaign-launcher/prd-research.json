@@ -1,0 +1,77 @@
+{
+  "feature_name": "Vishing Campaign Launcher",
+  "feature_slug": "vishing-campaign-launcher",
+  "goal": "Let Red Team admins configure and commission voice phishing campaigns against their own employees via a managed VOIP-backed wizard, with AI-generated caller personas and per-call outcome streaming.",
+  "user_segments": ["Red Team Admin", "Standard Admin (view only)", "Read-only Viewer", "Dune Operator (execution side, no described UI)"],
+  "success_metrics": [
+    "Not defined in PRD — flag for PM"
+  ],
+  "constraints": [
+    "Vishing-only in v1 — cannot combine with SMS or WhatsApp in same campaign",
+    "Admins request campaigns; Dune operators activate delivery — admin cannot trigger calls directly",
+    "Voice AEPs non-interchangeable with text AEPs in campaign selection",
+    "Remediation suppressed by default; suppression locked at launch",
+    "Risk scoring pipeline isolated from vishing outcomes in v1",
+    "Caller ID spoofing feasibility dependent on Dune VOIP provider capabilities and jurisdiction law",
+    "IDP SCIM required for per-target local timezone call window application"
+  ],
+  "assumptions": [
+    "Dune's VOIP infrastructure places calls automatically using the Voice AEP persona (AI-driven) — not confirmed, contradicted by 'operators actively placing calls' language in Step 5",
+    "Call recording consent and jurisdiction compliance checks are platform-verified states — likely self-certifications without a described document store",
+    "Call outcome classification is entered by Dune operators manually after each call — not described explicitly",
+    "Debrief is entirely out-of-platform for v1",
+    "Voice AEP locked at campaign activation (Calling), not at submission (Pending Activation)"
+  ],
+  "gaps": [
+    "Execution model (AI-driven vs. human-operated calls) is contradicted within the PRD — highest-leverage unresolved question",
+    "Caller ID spoofing capability not confirmed — Caller Identity fields may be script briefing only, not VOIP-level config",
+    "Compliance check verification model not described — no document store, upload flow, or verification mechanism for consent items",
+    "No ops-to-admin feedback loop for Pending Activation — ops cannot request changes without going outside the platform",
+    "Call outcome classification mechanism not described — latency between call completion and platform update unknown",
+    "Campaign edit flow during Pending Activation not described",
+    "Susceptibility rate denominator inconsistency: vishing uses Reached, text campaigns use Total Delivered — rates non-comparable",
+    "Debrief flow absent — no in-platform disclosure or notification tool described",
+    "Operator-side UI and permission model not described",
+    "No described mechanism for admins without a registered phone number to complete Step 7 test call"
+  ],
+  "edge_cases": [
+    "VOIP degrades while campaign is in Calling status — auto-pause or manual ops handling?",
+    "Test call completes but reviewed checkbox doesn't appear due to VOIP event not received",
+    "Zero Reached targets at campaign completion — susceptibility rate 0/0 division edge case",
+    "Admin pauses campaign while a call is currently connected — does live call complete or terminate?",
+    "Admin re-tags outcome post-campaign — does this retroactively update susceptibility rate in Overview tab?",
+    "Two gray badge states (Not Yet Called, No Answer) visually indistinguishable in Call Log table",
+    "Voice AEP Channel Type selector — admin builds full text AEP before realizing they need voice; must restart",
+    "Large campaign (500+ targets) Call Log table pagination and load performance not described",
+    "Export CSV during Calling status — in-progress data inclusion behavior not specified"
+  ],
+  "critical_questions": [
+    { "owner": "Both", "question": "Is VOIP execution AI-driven (automated bot) or human-operated (Dune red teamers using script)? This changes the AEP test flow, campaign scale limits, and outcome streaming model." },
+    { "owner": "Eng", "question": "Does Dune's VOIP infrastructure support caller ID spoofing to display arbitrary caller name and company on recipient devices? If not, what identity is surfaced?" },
+    { "owner": "PM", "question": "Where is call recording consent stored and verified? Is the jurisdiction check platform-verified or self-certified?" },
+    { "owner": "PM", "question": "Is there a mechanism for Dune ops to request changes to a submitted campaign before activating, or can they only activate or contact admin outside the platform?" },
+    { "owner": "Eng", "question": "How are call outcomes classified — VOIP semantic events or manual operator entry in an ops panel? What is the latency between call completion and platform update?" },
+    { "owner": "PM", "question": "Should campaign edits be allowed while in Pending Activation? Does editing reset the ops review queue?" },
+    { "owner": "PM", "question": "Should susceptibility rate use Reached or Total Targets as denominator to ensure comparability with text campaign rates?" },
+    { "owner": "PM", "question": "Is debrief entirely out-of-platform for v1? Should post-campaign reporting include debrief guidance or resources?" },
+    { "owner": "Eng", "question": "When admin pauses a vishing campaign, do in-progress calls (currently connected) terminate immediately or complete naturally?" },
+    { "owner": "PM", "question": "Is the Voice AEP locked at submission (Pending Activation) or at activation (Calling)?" }
+  ],
+  "design_risks": [
+    "AI-vs-human execution ambiguity creates false expectations about campaign scale and completion speed — admins may submit 200-target campaigns expecting automated overnight completion",
+    "Step 4 status card pattern implies platform verification for self-certified compliance items — legal exposure if consent is not actually on file",
+    "Pending Activation is a trust vacuum — no status updates, estimated timeline, or change request mechanism for admins waiting on ops",
+    "Call outcome classification ambiguity at the boundary between Engaged and Compromised — subjective for voice calls vs. objective for text (link clicked)",
+    "Two gray badge states (Not Yet Called and No Answer) break visual scanning in Call Log table at campaign scale",
+    "AEP Channel Type selector is a one-way decision with late-visible consequences — admins who choose wrong must rebuild the entire AEP"
+  ],
+  "teaching_notes": [
+    "Inherit 8-step wizard pattern directly from Red Team Campaign Launcher — design vishing steps as channel-swapped variants, not a new wizard",
+    "AEP builder Channel Type selector is net-new — must integrate into existing builder header without disrupting the established two-step flow",
+    "Step 4 compliance pre-flight must visually distinguish platform-verified checks (VOIP status) from self-certified items (consent, jurisdiction) — use acknowledgment/checkbox pattern for self-certifications",
+    "Re-tag interaction in Call Log tab inherits from text campaign Conversations tab — adapt to vishing outcome labels (Engaged, Compromised, Declined) not text labels",
+    "Risk score isolation is confirmed for v1 — no risk delta indicators anywhere in vishing reporting surfaces",
+    "Susceptibility rate denominator decision has downstream reporting implications — flag for PM before designing Overview charts"
+  ],
+  "last_updated": "2026-06-08"
+}
