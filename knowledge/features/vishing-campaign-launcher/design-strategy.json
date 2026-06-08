@@ -1,0 +1,79 @@
+{
+  "feature_name": "Vishing Campaign Launcher",
+  "feature_slug": "vishing-campaign-launcher",
+  "design_goal": "Make vishing a first-class channel in the Red Team Campaign Launcher by inheriting the existing wizard and reporting infrastructure and replacing only the steps where voice is genuinely different from text.",
+  "user_segments": ["Red Team Admin (primary)", "Standard Admin (view only)", "Read-only Viewer"],
+  "constraints": [
+    "Vishing-only campaigns in v1 — no mixing with SMS or WhatsApp",
+    "Admin requests campaign; Dune operators activate delivery",
+    "Execution model unresolved (AI-driven vs. human-operated) — must be confirmed before copy is finalized",
+    "Voice AEPs non-interchangeable with text AEPs",
+    "Remediation suppressed by default; locked at launch",
+    "Risk scoring isolated in v1",
+    "Caller ID spoofing capability not confirmed",
+    "IDP SCIM required for per-target timezone enforcement",
+    "Outlined badge variant may not exist in DS v2 — requires confirmation"
+  ],
+  "selected_strategy": "Channel-Swapped Wizard with Four Targeted Enhancements",
+  "selected_strategy_rationale": "Inherits the 8-step wizard and reporting infrastructure completely. Applies four focused enhancements at trust-critical departure points: split Step 4 compliance pre-flight (verified vs. self-certified), Pending Activation trust layer (timeline estimate, in-app updates, contact path), Call Log badge differentiation (outlined vs. filled gray), and AEP Channel Type consequence preview. Avoids both the trust failures of pure inheritance and the design debt of a full parallel system.",
+  "alternative_strategies": [
+    {
+      "name": "Pure Inheritance",
+      "summary": "Treat vishing as a third channel with minimal new patterns. Status card pattern for all compliance checks. Two gray badges as-is. Pending Activation as described in PRD.",
+      "rejected_because": "Compliance self-certifications would look like platform-verified states (legal exposure). Two gray badges are visually indistinguishable at scale. Pending Activation is a trust vacuum with no status, timeline, or contact path."
+    },
+    {
+      "name": "Full Redesign",
+      "summary": "Treat vishing as so different from text that every step gets a bespoke design. New compliance module, new reporting surface, new campaign status model.",
+      "rejected_because": "Abandons wizard infrastructure that gives the product its consistency. Creates unnecessary design debt and slows engineering. Differences between vishing and text are real but bounded."
+    }
+  ],
+  "tradeoffs": [
+    "Execution model ambiguity is not resolved by this strategy — copy in Steps 1, 5, 7, 8 and Pending Activation has two variants pending PM/Eng confirmation",
+    "Group B acknowledgment checklist is a new DS pattern requiring DS review before implementation",
+    "Outlined badge variant requires DS confirmation — new variant needed if it doesn't exist",
+    "Manual VOIP event fallback for test call allows self-attestation — pragmatic but removes certainty that admin reviewed the persona live"
+  ],
+  "assumptions": [
+    "The 8-step wizard pattern from the Red Team Campaign Launcher is the correct base — no structural redesign needed",
+    "Debrief is out-of-platform for v1",
+    "Susceptibility rate denominator decision (Reached vs. Total Targets) will be made by PM before reporting is designed",
+    "Campaign-specific calling notes have a 500-char limit to prevent ops panel overflow",
+    "Zero Reached stat shows 'N/A' for susceptibility rate, not '0%', to avoid misleading denominator"
+  ],
+  "open_issues": [
+    "Is VOIP execution AI-driven or human-operated in v1? Affects copy in Steps 1, 5, 7, 8, and Pending Activation",
+    "Is Group B compliance acknowledgment a self-certification or does a document upload flow need to be designed?",
+    "Does outlined badge variant exist in DS v2?",
+    "What is Dune's committed activation SLA?",
+    "Is debrief out-of-platform, and should the Overview tab include debrief resources?"
+  ],
+  "risks": [
+    "Execution model copy will be wrong if not confirmed before design — two incompatible copy variants exist",
+    "Group B acknowledgment checklist scope may be larger than expected if a document upload settings surface is required",
+    "Caller ID spoofing limitation not surfaced in UI — if Caller Identity fields are script-briefing only, admins will expect the wrong thing",
+    "Pending Activation SLA commitment not confirmed — '1 business day' copy may create customer support liability"
+  ],
+  "ds_patterns_used": [
+    "wizard — 8-step with persistent step bar (inherited from Red Team Campaign Launcher)",
+    "status card — Group A platform-verified compliance checks (inherited from text campaign Step 4)",
+    "badge — outcome states in Call Log table (extended with outlined variant)",
+    "drawer — call transcript / recording detail (inherited from text campaign Conversations tab)",
+    "modal — destructive action confirmations (Cancel campaign, Skip test call)",
+    "table — Call Log table with sort/filter and empty state",
+    "empty state — no Voice AEPs in library"
+  ],
+  "new_patterns_required": [
+    "Acknowledgment checklist (Group B, Step 4) — multi-item vertical checklist for admin self-certifications. Similar to Step 8 single checkbox but multi-item. Requires DS review.",
+    "Outlined badge variant — 'Not Yet Called' state needs hollow/outlined visual treatment to distinguish from filled 'No Answer' gray badge. Requires DS confirmation."
+  ],
+  "next_actions": [
+    "Resolve execution model question with PM and Eng before opening Figma",
+    "Confirm DS v2 badge variants — check whether outlined badge exists; create DS-tracked request if not",
+    "Flag Group B acknowledgment checklist for DS review and get sign-off",
+    "Begin design with AEP builder Channel Type selector — lowest dependency, highest novelty",
+    "Design Step 4 split compliance layout — most novel structural change, informs wizard visual rhythm",
+    "Use existing Red Team Campaign Launcher Figma file as base — copy step frames for Steps 1, 2, 6, 8; create new voice variant frames for Steps 3, 4, 5, 7"
+  ],
+  "last_updated": "2026-06-08"
+}

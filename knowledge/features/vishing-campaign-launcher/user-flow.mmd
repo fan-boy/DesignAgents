@@ -1,0 +1,112 @@
+flowchart TD
+
+  %% ── Entry Points ──────────────────────────────────────────
+  E1([Red Team → Create Campaign]) --> S1
+  E2([Group detail page]) --> S1
+  E3([Dashboard quick action]) --> S1
+  E4([AEP Library → New AEP]) --> AEP1
+
+  %% ── Flow A: Voice AEP Builder ──────────────────────────────
+  AEP1{Channel Type?}
+  AEP1 -- Text --> AEP_TEXT([Text AEP flow — not this flow])
+  AEP1 -- Voice --> AEP2
+
+  AEP2[Step 1 — AEP Setup: Title, Adversary Method,\nCaller Identity, Tone, Target Context,\nScript Outline, Objection Handling]
+  AEP2 --> AEP2A{Refine and Test clicked}
+  AEP2A -- Save as Draft --> AEP_DRAFT([AEP saved as Draft])
+  AEP2A -- Generate --> AEP2B{Generation result?}
+  AEP2B -- Full failure --> AEP2[Retry — inputs preserved]
+  AEP2B -- Partial failure --> AEP2C[Per-section retry — succeeded sections retained]
+  AEP2C --> AEP3
+  AEP2B -- Success --> AEP3
+
+  AEP3[Step 2 — Test and Refine: Script Preview\nQuick Action chips · Custom Instruction\nCall Test Number button]
+  AEP3 --> AEP3A{Admin action?}
+  AEP3A -- Apply refinement --> AEP3B{Refinement result?}
+  AEP3B -- Success → script updates --> AEP3
+  AEP3B -- Guardrail hit --> AEP3C[Inline guardrail message] --> AEP3
+  AEP3B -- Error --> AEP3D[Error in Recent Changes + Retry] --> AEP3
+  AEP3A -- Call Test Number --> AEP3E{VOIP call placed}
+  AEP3E -- Answered → call completes --> AEP3F[Checkbox: Mark test call as reviewed]
+  AEP3E -- Not answered in 60s --> AEP3G[Inline error + Retry]
+  AEP3G -- Retry --> AEP3E
+  AEP3G -- Manual fallback --> AEP3F
+  AEP3F --> AEP3A
+  AEP3A -- Publish AEP --> AEP4{Test call count?}
+  AEP4 -- 0 sessions --> AEP4A[Publish disabled — tooltip shown]
+  AEP4 -- 1 session --> AEP4B[Warning acknowledgment modal] --> AEP4C
+  AEP4 -- 2+ sessions --> AEP4C[Publish confirmation modal]
+  AEP4C --> AEP_PUBLISHED([AEP Active — available in campaign builder])
+
+  %% ── Flow B: Vishing Campaign Wizard ────────────────────────
+  S1[Step 1 — Channel Selection:\nSelect Vishing card\nSMS and WhatsApp disable]
+  S1 --> S1A{VOIP status?}
+  S1A -- Active --> S2
+  S1A -- Degraded --> S1B[Warning chip on card — can proceed\nStep 4 will block until resolved] --> S2
+
+  S2[Step 2 — Audience:\nTargeting mode · Phone coverage indicator\nOverlap detection · Cooldown warning]
+  S2 --> S2A{Phone coverage?}
+  S2A -- Zero coverage all targets --> S2B[Hard block — Continue disabled\nInline error + resolution path]
+  S2A -- Partial coverage --> S2C[Warning callout — can proceed] --> S3
+  S2A -- Full coverage --> S3
+
+  S3[Step 3 — Voice AEP + Script:\nVoice AEP selector · Script Preview\nCampaign-specific calling notes]
+  S3 --> S3A{Voice AEPs published?}
+  S3A -- None --> S3B[Empty state:\nBuild one now — opens AEP builder in new tab\nWizard auto-saves as Draft]
+  S3B --> AEP1
+  AEP_PUBLISHED --> S3_RETURN([Return to wizard Step 3])
+  S3_RETURN --> S3
+  S3A -- One or more --> S3C[Admin selects AEP\nScript Preview populates] --> S4
+
+  S4[Step 4 — Compliance Pre-flight:\nGroup A: Platform-verified status cards\nGroup B: Admin acknowledgment checklist]
+  S4 --> S4A{Group A platform checks?}
+  S4A -- VOIP Degraded --> S4B[Group A item: Pending\nContinue blocked until VOIP Active]
+  S4A -- All Active --> S4C{Group B acknowledgments?}
+  S4C -- All checked --> S5
+  S4C -- Unchecked items --> S4D[Continue blocked\nItems remain with instruction]
+
+  S5[Step 5 — Call Configuration:\nCall window · Max attempts · Delay\nCampaign start date]
+  S5 --> S6
+
+  S6[Step 6 — Remediation:\nSuppression ON default\nVoice-adapted rule events if toggled off]
+  S6 --> S7
+
+  S7[Step 7 — Test Call:\nPhone number input · Place Test Call\nCall status indicator · Reviewed checkbox]
+  S7 --> S7A{Test call action?}
+  S7A -- Place Test Call --> S7B{VOIP result?}
+  S7B -- Call answered → completes --> S7C[Checkbox: Mark test call as reviewed] --> S8
+  S7B -- Not answered in 60s --> S7D[Inline error + Retry]
+  S7D -- Retry --> S7A
+  S7D -- Manual fallback --> S7C
+  S7A -- Skip test call --> S7E[Strong warning modal → explicit confirm\nSoft warning flag in Step 8]
+  S7E --> S8
+
+  S8[Step 8 — Review + Request:\nSummary cards · Compliance acknowledgment checkbox\nSubmit Campaign Request CTA]
+  S8 --> S8A{Hard blocks present?}
+  S8A -- Yes --> S8B[Submit disabled\nInline error → navigate to blocking step]
+  S8A -- No → checkbox checked --> S8C[Submit Campaign Request]
+  S8C --> CONFIRM([Post-submit confirmation screen:\nCampaign request submitted\nOps activate within 1 business day])
+  CONFIRM --> PENDING
+
+  %% ── Flow C: Campaign Status Lifecycle ───────────────────────
+  PENDING[Campaign: Pending Activation\nReview status row · Submission timestamp\nSLA estimate · Contact link\nRead-only config summary]
+  PENDING --> PA_A{Ops action?}
+  PA_A -- Ops activate --> CALLING
+  PA_A -- Ops request change --> PA_B[In-app notification: config updated\nDiff drawer on campaign detail]
+  PA_B --> PENDING
+  PA_A -- Admin cancels request --> CANCELLED
+
+  CALLING[Campaign: Calling\nPulsing badge · Stats row auto-refresh 30s\nCall Log table with 6-state badges\nOutcome legend card on first view]
+  CALLING --> CA_A{Event?}
+  CA_A -- Call placed and classified --> CA_B[Call Log row updates\nStats row recalculates]
+  CA_B --> CALLING
+  CA_A -- Admin pauses --> CA_C[Confirmation modal\nRemaining attempts cancelled] --> PAUSED
+  CA_A -- Admin cancels --> CA_D[Confirmation modal\nStatus → Cancelled] --> CANCELLED
+  CA_A -- All targets terminal or window closes --> COMPLETED
+
+  PAUSED([Campaign: Paused])
+  CANCELLED([Campaign: Cancelled — Call Log reflects attempts before cancellation])
+
+  COMPLETED[Campaign: Completed\nOverview tab default\nCall Log tab with re-tag controls]
+  COMPLETED --> RPT_A[Overview: Stats locked · Charts · Export CSV]
+  COMPLETED --> RPT_B[Call Log: Per-target table\nTranscript/Notes drawer · Re-tag RBAC-gated]
