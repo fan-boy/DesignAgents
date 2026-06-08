@@ -1,0 +1,166 @@
+{
+  "feature_name": "Vishing Campaign Launcher",
+  "feature_slug": "vishing-campaign-launcher",
+  "analyzed_at": "2026-06-08",
+  "direct_competitors": ["KnowBe4", "Adaptive Security", "Hoxhunt", "SoSafe", "Proofpoint"],
+  "adjacent_competitors": [],
+  "workflow_stages": [
+    "Caller persona / template selection",
+    "Audience targeting",
+    "Compliance and consent gating",
+    "Call window / schedule configuration",
+    "Execution (automated vs. human)",
+    "Live monitoring during campaign",
+    "Outcome state classification",
+    "Post-campaign reporting"
+  ],
+  "competitors": [
+    {
+      "name": "KnowBe4",
+      "url": "knowbe4.com",
+      "tier": "direct",
+      "entry_point": "KSAT Admin Console > Phishing > Vishing Security Tests (Gold tier and above)",
+      "setup_friction": "CSV upload of phone numbers required — not sourced from directory or group system. Separate from email phishing targeting.",
+      "core_flow": [
+        "Upload CSV with employee phone numbers",
+        "Select VST template (5 Kevin Mitnick scenarios or custom TTS)",
+        "Set campaign frequency (recurring or one-time)",
+        "Configure time window (business hours default)",
+        "Launch — fully automated IVR execution"
+      ],
+      "feedback_states": ["Pass (no keypad entry)", "Fail (keypad data entered)", "Email report on completion"],
+      "error_prevention": "None described. No compliance pre-flight, no consent check, no preview before launch.",
+      "trust_model": "Minimal. No pre-flight review step, no acknowledgment, immediate launch after setup.",
+      "rbac_notes": "Gold tier required. No specific sub-admin role differentiation for vishing described.",
+      "repeat_use_efficiency": "Set-and-forget recurring frequency. Templates reusable. CSV must be re-uploaded to update targeting.",
+      "ai_personalization": "None. Pre-recorded or TTS messages only. No adaptive conversation.",
+      "risk_score_surface": "Absent for vishing specifically.",
+      "remediation_path": "Fail triggers short remedial training module assignment.",
+      "confidence": "high",
+      "source_notes": "Support documentation and press release directly observed. IVR execution and binary outcome confirmed."
+    },
+    {
+      "name": "Adaptive Security",
+      "url": "adaptivesecurity.com",
+      "tier": "direct",
+      "entry_point": "Platform > Phishing Simulations > Voice (within automated campaign program)",
+      "setup_friction": "Executive voice persona requires audio recording upload. Multi-channel scenario setup spans email + voice + SMS configuration.",
+      "core_flow": [
+        "Define attack goal and target role",
+        "Select or create voice persona (exec impersonation or generic)",
+        "Configure scenario context and social engineering tactics",
+        "Set role-based targeting and adaptive difficulty",
+        "Launch — automated execution, always-on"
+      ],
+      "feedback_states": ["Behavioral outcome metrics (engagement patterns, information disclosure)", "Risk score update on outcome"],
+      "error_prevention": "Not publicly described.",
+      "trust_model": "Medium. Always-on continuous execution — admins configure once, campaigns run indefinitely. Limited described pre-launch review.",
+      "rbac_notes": "Not publicly described.",
+      "repeat_use_efficiency": "High — always-on model. No per-campaign relaunch needed. Role-based targeting updates dynamically.",
+      "ai_personalization": "Strong. Executive voice cloning via audio upload, OSINT-driven scenario personalization, adaptive difficulty per user.",
+      "risk_score_surface": "Strong. Simulation outcomes feed directly into human risk scores.",
+      "remediation_path": "Automated remediation training triggers on failure.",
+      "confidence": "medium",
+      "source_notes": "Product page and blog observed. Campaign configuration workflow inferred — not directly observed in admin console."
+    },
+    {
+      "name": "Hoxhunt",
+      "url": "hoxhunt.com",
+      "tier": "direct",
+      "entry_point": "Not a self-serve feature. Accessed via engagement with Hoxhunt team as a custom managed service.",
+      "setup_friction": "Very high. Admin cannot configure or launch independently. Hoxhunt team builds scenario using executive voice/likeness.",
+      "core_flow": [
+        "Admin engages Hoxhunt team",
+        "Executive voice and video sample captured",
+        "Hoxhunt team builds deepfake scenario",
+        "Hoxhunt delivers campaign on agreed timeline",
+        "Results returned to admin in platform"
+      ],
+      "feedback_states": ["Per-employee behavioral outcome", "Who fell and who reported", "Adaptive difficulty feedback"],
+      "error_prevention": "Managed by vendor team — admin has no pre-flight visibility into scenario before delivery.",
+      "trust_model": "Low admin control. Admins have no direct visibility into what scenario will be used or when until post-delivery.",
+      "rbac_notes": "Not described.",
+      "repeat_use_efficiency": "Low. Each engagement is custom and requires vendor involvement.",
+      "ai_personalization": "High capability — deepfake voice and video. But admin has no control over persona configuration.",
+      "risk_score_surface": "Integrated into Hoxhunt's behavioral model.",
+      "remediation_path": "Adaptive difficulty and training integrated.",
+      "confidence": "high",
+      "source_notes": "Managed service nature confirmed across multiple sources (blog, buyer's guide). Self-serve vishing absence confirmed."
+    },
+    {
+      "name": "SoSafe",
+      "url": "sosafe-awareness.com",
+      "tier": "direct",
+      "entry_point": "Not a self-serve recurring campaign. One-off demo experience for executive buy-in.",
+      "setup_friction": "High. Managed demo, not admin-configurable.",
+      "core_flow": ["Request demo engagement", "SoSafe team executes one-off personalized vishing call"],
+      "feedback_states": ["Not documented"],
+      "error_prevention": "Not described.",
+      "trust_model": "Not described.",
+      "rbac_notes": "Not described.",
+      "repeat_use_efficiency": "None — one-off demo model.",
+      "ai_personalization": "Personalized scenario using public data, but admin has no config control.",
+      "risk_score_surface": "Not described for vishing.",
+      "remediation_path": "Not applicable.",
+      "confidence": "medium",
+      "source_notes": "Early access status and demo-only nature confirmed from product news. Limited workflow detail."
+    },
+    {
+      "name": "Proofpoint",
+      "url": "proofpoint.com",
+      "tier": "direct",
+      "entry_point": "Not a documented core feature.",
+      "setup_friction": "N/A — vishing not available as self-serve feature.",
+      "core_flow": ["Not applicable"],
+      "feedback_states": ["Not applicable"],
+      "error_prevention": "Not applicable.",
+      "trust_model": "Not applicable.",
+      "rbac_notes": "Not applicable.",
+      "repeat_use_efficiency": "Not applicable.",
+      "ai_personalization": "Absent for vishing.",
+      "risk_score_surface": "Absent for vishing.",
+      "remediation_path": "Not applicable.",
+      "confidence": "high",
+      "source_notes": "Absence confirmed from product documentation review. Voice vishing not a documented core feature of Proofpoint SAT (ZenGuide)."
+    }
+  ],
+  "observed_patterns": [
+    "Automated VOIP/AI execution is the market norm — all self-serve platforms use automation, not human operators",
+    "Time window configuration (business hours default with admin override) is a recognized, expected concept",
+    "Role-based or group-based targeting is expected — CSV upload is a below-market anti-pattern",
+    "Immediate remediation coupling on failure is the default in awareness training; red team suppression is an intentional departure",
+    "Binary pass/fail outcomes are the current market floor for vishing — no competitor has multi-state behavioral classification",
+    "Compliance gating is absent from all competitor products"
+  ],
+  "anti_patterns": [
+    "CSV upload for phone number targeting — forces duplicate data management separate from user directory",
+    "Binary pass/fail outcomes for red team context — inadequate for measuring adversarial engagement depth",
+    "Siloing vishing as a separate product section or add-on from other red team channels",
+    "Always-on execution without explicit admin control points — removes visibility into when campaigns fire, problematic for debrief scheduling",
+    "No compliance surface at all — creates legal risk for enterprise and EMEA customers"
+  ],
+  "differentiation_opportunities": [
+    "Richest outcome taxonomy in market: 5-state model (Not Yet Called, No Answer, Engaged, Compromised, Declined) vs. binary pass/fail across all competitors",
+    "Voice AEP as structured caller persona builder — Script Outline + Objection Handling + Tone config + version history is unique in market",
+    "Compliance-aware pre-flight wizard with consent, jurisdiction, and works council gating — no competitor has this",
+    "Unified red team campaign launcher (vishing + SMS + WhatsApp in one wizard + one reporting surface) — competitors silo vishing",
+    "Live call monitoring during campaign with per-call state tracking — no competitor has described equivalent in-progress view for vishing",
+    "Request model with explicit debrief responsibility — admin stays informed and in control vs. opaque managed service"
+  ],
+  "design_implications": [
+    "Set execution model expectations (Dune executes, not automated) at Step 1 channel card — not buried in Step 8 — because automated execution is the market default",
+    "Compliance pre-flight UI must visually distinguish platform-verified states from self-certified acknowledgments — novel concept with no market precedent",
+    "Outcome states need first-use education — red team buyers may be conditioned to binary pass/fail from prior tools",
+    "Voice AEP Channel Type selector must preview the downstream Step 2 difference before admin commits — no market analogue for admins to draw on",
+    "Reporting must use vishing-specific charts (Attempt Distribution, Reached vs. No Answer) that signal purpose-built surface, not repurposed phishing dashboard",
+    "Recommend adding Brightside AI to competitor-list.md — most sophisticated vishing-specific platform observed, not currently in registry"
+  ],
+  "confidence_notes": [
+    "KnowBe4: High — support docs and press release directly observed",
+    "Adaptive Security: Medium — product page and blog observed; admin console workflow inferred",
+    "Hoxhunt: High — managed service nature confirmed across multiple independent sources",
+    "SoSafe: Medium — demo-only nature confirmed; limited workflow detail",
+    "Proofpoint: High — absence of vishing as documented feature confirmed",
+    "Brightside AI (non-registry): Observed for market context only — most complete vishing buyer's guide patterns came from their content; recommend adding to competitor list"
+  ]
+}
