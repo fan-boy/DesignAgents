@@ -1,0 +1,61 @@
+{
+  "feature_name": "Vishing Campaign Launcher",
+  "feature_slug": "vishing-campaign-launcher",
+  "written_at": "2026-06-08",
+  "flows": [
+    "Voice AEP creation (AEP builder — Voice type)",
+    "Voice AEP test and refine",
+    "Vishing campaign wizard (8 steps)",
+    "Campaign detail — In-progress (Calling status)",
+    "Campaign detail — Post-campaign reporting"
+  ],
+  "actors": ["Red Team Admin", "Standard Admin", "Read-only Viewer", "Dune Operator"],
+  "wizard_steps": {
+    "Vishing Campaign Wizard": [
+      "Step 1 — Channel Selection (Vishing)",
+      "Step 2 — Audience",
+      "Step 3 — Voice AEP + Script",
+      "Step 4 — Compliance Pre-flight",
+      "Step 5 — Call Configuration",
+      "Step 6 — Remediation",
+      "Step 7 — Test Call",
+      "Step 8 — Review + Request"
+    ],
+    "Voice AEP Builder": [
+      "Step 1 — AEP Setup (Voice)",
+      "Step 2 — Test & Refine (Voice)"
+    ]
+  },
+  "key_fields": [
+    "Caller Identity (Name, Claimed Company, Claimed Role)",
+    "Tone / Character (chip selector)",
+    "Script Outline (Opening, Core Ask, Closing)",
+    "Objection Handling Notes",
+    "Campaign-specific Calling Notes",
+    "Call Window (start time, end time, timezone)",
+    "Max Attempts Per Target",
+    "Inter-attempt Delay",
+    "Campaign Date (requested start)"
+  ],
+  "integrations": [
+    "Dune VOIP Infrastructure",
+    "AEP Library",
+    "IDP / SCIM",
+    "Risk Scoring Engine",
+    "Workday",
+    "Email Notification System"
+  ],
+  "edge_cases_count": 13,
+  "open_questions_flagged": [
+    "Does call recording require a separate VOIP provider configuration — and if recordings are not available, is an operator notes-only fallback acceptable for all customers?",
+    "Risk pipeline integration — are vishing outcomes isolated from risk scoring in v1, same as SMS/WhatsApp red team?",
+    "What is the SLA for Dune operator campaign activation after submission (currently described as 'within one business day')?",
+    "IDP SCIM timezone data — is per-target local timezone call window enforcement feasible in v1 or deferred?",
+    "Two-party consent jurisdiction enforcement — does the platform auto-detect target jurisdictions or does the admin self-certify?",
+    "Call recording availability — is recording always on, opt-in per campaign, or determined by VOIP provider config?"
+  ],
+  "figma_used": false,
+  "source_docs_used": true,
+  "confidence": "medium",
+  "confidence_notes": "No Figma designs exist yet. PRD is synthesized from confirmed design decisions, the Red Team Campaign Launcher PRD, and the AEP Library PRD. All wizard step-level decisions are confirmed. Open questions remain around call recording, VOIP SLA, risk pipeline isolation, and two-party consent enforcement mechanics."
+}
