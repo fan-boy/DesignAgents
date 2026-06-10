@@ -1,9 +1,21 @@
 ## Last updated
-2026-06-08 — First full PRD written from confirmed design decisions, Red Team Campaign Launcher PRD, and AEP Library PRD. No Figma designs yet.
+2026-06-10 — Major revision. Voice AEP data model updated to reflect actual Persona + Scenario + Facts architecture. Scenario visualization added. OSINT/Facts review added as a campaign wizard step. Collectibles and goals surfaced as the outcome engine.
 
 ---
 
-The Vishing Campaign Launcher extends the existing Red Team Campaign Launcher to support voice phishing (vishing) as a third adversarial channel alongside SMS and WhatsApp. Admins configure and request a vishing campaign through the same 8-step wizard used for text-based red team campaigns. Dune executes calls via managed VOIP infrastructure connected to the AEP library; call outcome events stream into the platform automatically. Voice AEPs are a new type in the AEP Library with voice-specific configuration. In v1, vishing campaigns are vishing-only — they cannot be combined with SMS or WhatsApp channels in the same campaign. Like all red team campaigns, admins request the campaign and Dune operators set it live; the admin cannot initiate delivery unilaterally.
+The Vishing Campaign Launcher extends the existing Red Team Campaign Launcher to support voice phishing (vishing) as a third adversarial channel alongside SMS and WhatsApp. Admins configure and request a vishing campaign through the same 8-step wizard used for text-based red team campaigns. Dune executes calls via AI-driven VOIP infrastructure — the system places and conducts calls automatically using the configured Voice AEP. Call outcome events stream into the platform per call. Voice AEPs are a new, more detailed type in the AEP Library, comprising two separately-versioned components: a **Persona** and a **Scenario**. In v1, vishing campaigns are vishing-only — they cannot be combined with SMS or WhatsApp channels in the same campaign.
+
+---
+
+## Voice AEP Architecture
+
+A Voice AEP is structurally richer than a text AEP. It is composed of two versioned components that are built and managed separately but published together:
+
+**Persona** — the caller's identity and voice. Defines the name and claimed role the AI caller presents, the voice model and audio characteristics (voice ID, speed, background ambience), the system prompt that governs the caller's personality and hard constraints, a greeting message, and a list of banned phrases the AI will never say. The persona is the "who" of the call.
+
+**Scenario** — the call's operational playbook. Defines the sequence of phases (discrete stages of the conversation), the transition rules that move the call from one phase to the next, the tactics available to the AI in each phase (specific persuasion moves with templates and intent descriptions), the collectibles the AI is trying to extract from the target (keyed data points matched by regex — e.g., last-4 SSN, email confirmation, password, MFA code), and the goals that determine call success (weighted objectives). The scenario is the "what" and "how" of the call.
+
+**Facts (OSINT)** — tenant-level intelligence injected into the AI at call time. Facts are stored separately per organization and include org chart data (CISO name, head of finance), tooling context (SSO provider, EDR product, ticketing system, MFA provider), company news (recent funding rounds, acquisitions), and internal policies (wire approval thresholds, helpdesk hours). Facts are not part of the AEP itself — they are reviewed and approved at campaign configuration time and make the AI's conversation specifically convincing for each target's organization.
 
 ---
 
@@ -11,47 +23,140 @@ The Vishing Campaign Launcher extends the existing Red Team Campaign Launcher to
 
 Voice AEPs are created and managed in the same AEP Library accessed via **Red Teaming > AEP Library**. They are distinguished from text AEPs by a **Voice** channel badge on their library row and a **Channel Type** attribute on their detail page. Voice AEPs and text AEPs are non-interchangeable: a vishing campaign can only select a Voice AEP, and an SMS or WhatsApp campaign can only select a text AEP.
 
-**Creating a Voice AEP**
+When an admin clicks **New AEP**, the builder opens with a **Channel Type** selector: **Text** or **Voice**. Selecting Voice opens the Voice AEP builder, which uses a three-step progress indicator: **① Persona** · **② Scenario** · **③ Test & Refine**.
 
-When an admin clicks **New AEP**, the builder opens with a new **Channel Type** selector before any other fields: **Text** or **Voice**. Selecting Voice adapts both builder steps to voice-specific configuration. The two-step progress indicator remains identical: **① AEP Setup** and **② Test & Refine**.
+---
 
-**Step 1 — AEP Setup (Voice)**
+**Step 1 — Persona**
 
-The setup form contains the following fields under **General Details**:
+The Persona step configures who the AI caller is. Fields:
 
-**AEP Title** (required, text input) — the name used to identify this AEP in the library and campaign builder. Example placeholder: "Add an AEP title."
+**AEP Title** (required, text input) — the name used to identify this AEP in the library and campaign builder.
 
-**Adversary Method** (required, chip selector, pick 1–2) — the psychological levers the caller persona uses. Options are identical to text AEPs: Authority, Urgency, Reciprocity, Curiosity, Scarcity, Familiarity. Severity level shown inline.
+**Caller Name** (required) — the name the AI caller uses to introduce itself (e.g., "Tessa").
 
-**Caller Identity** (required, structured inputs) — three sub-fields defining who the VOIP caller claims to be: **Caller Name** (e.g., "James from IT Security"), **Claimed Company or Team** (e.g., "Acme IT Support"), and **Claimed Role** (e.g., "Security Analyst"). These values are what Dune's VOIP system presents as the caller's identity during the call.
+**Claimed Role** (required) — the role the caller claims to hold (e.g., "Internal security monitoring team, extension 4471"). This appears in the caller's self-introduction and is used to establish authority or context.
 
-**Tone / Character** (required, chip selector, pick 1) — the dominant emotional register for the caller persona. Options: Urgent, Friendly, Authoritative, Casual, Concerned. The selected tone informs the AI's script generation and call delivery style.
+**Greeting Message** (required, textarea) — the exact first words the AI speaks when the target picks up. Shown in preview with the selected voice. Example: "Hey, this is Tessa from the security team. I'm calling about an alert that just came through on your account. Got a sec?"
 
-**Target Context** (required, textarea) — a description of the employee population being called: their role, department, and organizational context. Same field as text AEPs.
+**Voice** (required, selector) — chooses the AI voice model. A **Preview voice** button plays a 5-second sample. Voice options are drawn from Dune's configured voice library.
 
-**Script Outline** (required, structured textarea) — the talking points the AI caller persona follows. The field is structured as three labeled sections: **Opening** (how the call begins and the pretext established), **Core Ask** (the specific action the caller attempts to persuade the target to take), and **Closing** (how the caller handles success or exits the call). Placeholder per section: "Describe what the caller says at this stage…"
+**Personality Constraints** (structured fields) — controls that govern the caller's conversational behavior:
+- *Tone* (chip selector, pick 1): Casual, Formal, Urgent, Warm, Neutral
+- *Response length*: Short (1–2 sentences per turn) / Medium / Long
+- *Cadence*: Slow / Normal / Fast (maps to the voice speed setting)
+- *Background audio* (optional selector): Office ambience, Lobby, Road noise, None
 
-**Objection Handling Notes** (optional, textarea) — instructions for how the persona should respond to common pushback: "who is this?", "I'll call you back on the main number", "I don't give out that information over the phone." These notes are passed to the AI as behavioral guardrails during the call.
+**Banned Phrases** (optional, tag input) — a list of phrases the AI will never say. Pre-populated with common over-explicit social engineering language: "verify your identity," "for security purposes," "I need you to," "company policy." Admin can add or remove entries.
 
-**Example Calls or Scripts** (optional, upload zone) — real vishing call transcripts or scripts the organization has encountered or collected. Accepted formats: .txt, .docx, .pdf. Up to 5 files.
+The primary CTA is **Next: Scenario**; the secondary CTA is **Save as Draft**.
 
-The **View More** disclosure expands additional advanced fields: Attack Scenario, Systems at Risk, Rules & Compliance, Cultural Context, and Termination Logic — the same extended configuration available for text AEPs.
+---
 
-The primary CTA is **Refine and Test**; the secondary CTA is **Save as Draft**.
+**Step 2 — Scenario**
 
-**Step 2 — Test & Refine (Voice)**
+The Scenario step defines the call's operational playbook. The step is split into two panels: a **Scenario builder** on the left and a **Scenario visualization** on the right that updates live as the admin configures phases and tactics.
 
-Step 2 for a Voice AEP replaces the live chat interface with a **Script Preview** panel and a **Test Call** action.
+**Scenario overview fields:**
 
-The **AI Refine panel** on the left is identical in structure to the text AEP refine panel — Quick Actions chips, Custom Instruction textarea, and Recent Changes list — but the quick-action chips are adapted for voice: More assertive, Less pushy, Add urgency, Soften opener, Shorter script, More empathetic opener.
+**Scenario Name** (required, text input) — human-readable name for this scenario (e.g., "IT Security Verification Call").
 
-The **Script Preview panel** on the right shows the current generated script rendered as a structured read-only document: Opening, Core Ask, Closing, and Objection Handling sections. A **Call Test Number** button appears at the top of this panel. Clicking it triggers a VOIP call to the admin's registered phone number, allowing them to experience the AI caller persona live before approving the script.
+**Scenario Description** (required, textarea) — a plain-language description of what the scenario is attempting: the pretext, the goal, and the type of target it is designed for. This appears on the AEP detail page and is shown to admins reviewing the campaign.
 
-After completing a test call, an inline confirmation appears in the panel: "Mark test call as reviewed" checkbox. The admin must check this before the **Publish AEP** button activates. The 1-session and 2+ session warning logic from text AEPs applies equivalently — "1 test call completed" triggers the acknowledgment warning; "2+ test calls" proceeds to standard publish confirmation.
+**Adversary Methods** (required, chip selector, pick 1–3) — the psychological levers the scenario uses. Options: Authority, Urgency, Reciprocity, Curiosity, Scarcity, Familiarity, Fear. Severity level shown inline.
 
-Thumbs-up and thumbs-down feedback controls appear below each Script Preview render after a test call is completed, rather than after each AI message. The thumbs-down chips are adapted: Script too long, Wrong tone, Opener unrealistic, Core ask too aggressive, Off-brand language.
+**Phases** — the scenario's conversation stages, configured as an ordered list. Each phase has:
+- *Phase name* (e.g., "Greeting," "Verify Identity," "Gather MFA Code")
+- *Phase goal* (plain-language description of what this phase accomplishes)
+- *Transition condition* (when does the call advance to the next phase — e.g., "target has provided identity confirmation")
+- *Tactics* (the specific persuasion moves available in this phase — see below)
 
-**Publishing, version history, and detail page** behavior is identical to text AEPs. Voice AEPs are locked once referenced in an active campaign; cloning creates a new Draft with the same Voice channel type.
+The admin can add, reorder, and remove phases. A minimum of 2 phases is required. A **+Add phase** button appends a new phase below the current last phase.
+
+**Collectibles** — the data points the AI is actively trying to extract from the target. Each collectible has:
+- *Label* (e.g., "Employee ID / Last-4 SSN," "Account password," "Live MFA code")
+- *Phase* — which phase this collectible is relevant to
+- *Risk weight* (1–5 slider) — how sensitive this data point is; informs the susceptibility score
+
+Collectibles drive the campaign's outcome classification. A target who provides a high-weight collectible (password, MFA code) is classified as Compromised; a target who engages but provides only low-weight data (confirms their email) is classified as Engaged.
+
+**Tactics** — the persuasion moves available to the AI within each phase. Each tactic has:
+- *Tactic name* (e.g., "Concede then pivot," "Manager implication," "Authority protocol")
+- *Phase* — which phase this tactic is used in
+- *Intent* (textarea) — what this tactic is trying to accomplish and when to use it
+- *Example templates* (2–3 example phrasings the AI can draw from)
+- *Repeatable* toggle — whether the AI can use this tactic more than once per call
+
+The admin can add custom tactics or use Dune-provided tactic templates appropriate for the selected adversary methods.
+
+**Goals** — the weighted objectives for the scenario. Goals are auto-populated from collectibles but can be edited. Each goal shows its weight (contribution to the overall susceptibility score) and the condition that marks it achieved.
+
+The primary CTA is **Next: Test & Refine**; the secondary CTA is **Save as Draft**.
+
+---
+
+**Scenario Visualization**
+
+The right panel of the Scenario step renders a live **call flow diagram** that updates as the admin configures phases, transitions, and collectibles. The visualization shows:
+
+- **Phase nodes** — each phase rendered as a labeled card showing the phase name, goal summary, and collectibles targeted in that phase
+- **Transition edges** — directed arrows between phases labeled with the transition condition in plain language
+- **Tactic chips** — small chips on each phase node listing the tactics available in that phase; hovering a chip shows the tactic's intent
+- **Collectibles legend** — a sidebar showing all collectibles with their risk weights as colored dots (green = low, amber = medium, red = high)
+- **Goal summary** — at the terminal node (final phase), a summary card shows the maximum achievable susceptibility score and what data the scenario attempts to collect
+
+The visualization is read-only during active editing — it reflects the saved/previewed state of the scenario. An **Export diagram** button downloads the flowchart as a PNG for use in stakeholder presentations or debrief documents.
+
+The admin cannot interact with the diagram to edit — all editing happens in the left panel. The diagram is a comprehension tool, not an editing surface.
+
+---
+
+**Step 3 — Test & Refine (Voice)**
+
+Step 3 is the live testing and refinement surface. It is structurally similar to the text AEP test-and-refine step but adapted for voice.
+
+The **AI Refine panel** on the left contains Quick Action chips adapted for voice (More assertive, Less pushy, Add urgency, Soften opener, Shorter responses, More empathetic opener), a Custom Instruction textarea, a Recent Changes list, and an Apply and Regenerate CTA.
+
+The **right panel** shows two tabs: **Scenario Flow** (the visualization from Step 2, now read-only) and **Live Test**. The default tab on entry is Live Test.
+
+The **Live Test panel** shows the selected voice, greeting message preview, and a **Call Test Number** button. When clicked, the platform places a VOIP call to the admin's phone — the admin experiences the full AI caller persona in real time, including the persona's voice, pacing, background audio, and live response to the admin's replies. The call progresses through the scenario phases in real time; after the call ends, the **Scenario Flow** tab updates to show which phases were reached and which collectibles were triggered during the test session. This gives the admin a concrete picture of how far a real target might progress through the scenario.
+
+After a test call, an inline confirmation appears: "Mark test call as reviewed" checkbox. The admin must check this before the **Publish AEP** button activates. The 1-session and 2+ session warning logic from text AEPs applies equivalently.
+
+Thumbs-down feedback chips after a test session: Persona felt scripted, Scenario too aggressive, Transition too abrupt, Opener unrealistic, Wrong tone for target.
+
+**Publishing, version history, and detail page** behavior is identical to text AEPs. Voice AEPs are locked once referenced in an active campaign. Cloning a Voice AEP creates a new Draft that inherits both the Persona and Scenario from the source, with independent versioning from that point forward.
+
+---
+
+## OSINT / Facts Review
+
+Before any vishing campaign is submitted, the admin reviews the **Organizational Facts** that Dune has collected about their company. These facts are what make the AI caller specifically convincing — it can reference the real CISO's name, name-drop the actual EDR product in use, or use the company's real wire approval policy to structure a financial pretext.
+
+Facts are stored per-organization and populated by Dune through a combination of OSINT research and data the admin provides during onboarding. They are versioned separately from AEPs and campaigns.
+
+Facts are reviewed in **Campaign Wizard Step 3.5** (inserted between Step 3 Voice AEP selection and Step 4 Compliance Pre-flight) as a dedicated review step. The step is titled **Review Organizational Intelligence**.
+
+The facts review step shows all active facts for the organization in a categorized table:
+
+| Category | Example facts |
+|---|---|
+| Org chart | CISO name, head of finance, key executives |
+| Tooling | SSO provider, EDR product, MFA provider, ticketing system, VPN |
+| Company news | Recent funding rounds, acquisitions, public announcements |
+| Internal policies | Wire approval thresholds, helpdesk hours and extension, on-call coverage |
+| Vendor relationships | Key partners, resellers, suppliers |
+
+Each fact row shows: fact label, current value, data source (manual / OSINT), sensitivity (public / internal), and which call phases it is relevant to. The admin can:
+- **Edit** a fact value inline (e.g., correct the CISO's name if it has changed)
+- **Suppress** a fact from this campaign (it remains in the facts library but will not be injected into the AI for this campaign)
+- **Flag** a fact as incorrect (sends a review request to Dune's data team)
+
+A **Scenario relevance indicator** on each fact row shows a pill badge for each scenario phase the fact is relevant to, matched to the selected Voice AEP's scenario. This lets the admin understand exactly when and how each fact will be used during the call.
+
+If no facts exist for the organization (new customer), the step shows an empty state with guidance: "Dune populates your organizational intelligence during onboarding. Contact your Dune representative to configure facts before running vishing campaigns." The admin cannot proceed past this step without at least reviewing the facts state.
+
+The step does not block on empty facts — an admin can proceed with zero facts, but a contextual warning reads: "No organizational intelligence is configured. The AI caller will not be able to reference company-specific details, which reduces realism and susceptibility rates."
 
 ---
 

@@ -1,5 +1,15 @@
 # Edge Cases — Vishing Campaign Launcher
 
+## Facts / OSINT states
+
+- Org has no facts configured (new customer, onboarding incomplete) — Step 3.5 shows empty state; admin must be able to proceed with a warning rather than a hard block, or no new customer can run a vishing campaign
+- Admin suppresses all active facts for this campaign — AI caller will run with no organizational context; this significantly reduces realism and susceptibility rates; admin must be warned but cannot be blocked
+- A fact value is stale (e.g., CISO has changed since last OSINT refresh) — admin flags it in Step 3.5; campaign can still proceed with the flagged fact; behavior after flagging (what the AI uses) is not defined
+- A fact is marked as "sensitive" (e.g., internal wire approval threshold) and the admin is a Standard admin (view-only) — can Standard admins see sensitive fact values in Step 3.5?
+- The selected Voice AEP's scenario has phases that match no active facts — scenario relevance column shows no phase badges for any fact; admin may be confused about whether the AI will use facts at all
+- Admin changes the Voice AEP in Step 3 after completing Step 3.5 — fact relevance mappings in the Step 3.5 Scenario relevance column must update when the admin returns to Step 3.5 (or the column must re-derive on re-entry); stale mappings are misleading
+- Facts database is updated by Dune OSINT team between campaign submission and activation — which facts version does the campaign execute with: the version reviewed at submission, or the latest version at activation?
+
 ## System states
 
 - VOIP infrastructure degrades while campaign is in Calling status — auto-pause behavior not defined; ops handling path not described

@@ -11,28 +11,35 @@ flowchart TD
   AEP1 -- Text --> AEP_TEXT([Text AEP flow — not this flow])
   AEP1 -- Voice --> AEP2
 
-  AEP2[Step 1 — AEP Setup: Title, Adversary Method,\nCaller Identity, Tone, Target Context,\nScript Outline, Objection Handling]
-  AEP2 --> AEP2A{Refine and Test clicked}
+  AEP2[Step 1 — Persona: AEP Title, Caller Name,\nClaimed Role, Greeting Message, Voice selector,\nTone, Cadence, Background Audio, Banned Phrases]
+  AEP2 --> AEP2A{Admin action?}
   AEP2A -- Save as Draft --> AEP_DRAFT([AEP saved as Draft])
-  AEP2A -- Generate --> AEP2B{Generation result?}
-  AEP2B -- Full failure --> AEP2[Retry — inputs preserved]
-  AEP2B -- Partial failure --> AEP2C[Per-section retry — succeeded sections retained]
-  AEP2C --> AEP3
-  AEP2B -- Success --> AEP3
+  AEP2A -- Next: Scenario --> AEP3
 
-  AEP3[Step 2 — Test and Refine: Script Preview\nQuick Action chips · Custom Instruction\nCall Test Number button]
-  AEP3 --> AEP3A{Admin action?}
-  AEP3A -- Apply refinement --> AEP3B{Refinement result?}
-  AEP3B -- Success → script updates --> AEP3
-  AEP3B -- Guardrail hit --> AEP3C[Inline guardrail message] --> AEP3
-  AEP3B -- Error --> AEP3D[Error in Recent Changes + Retry] --> AEP3
-  AEP3A -- Call Test Number --> AEP3E{VOIP call placed}
-  AEP3E -- Answered → call completes --> AEP3F[Checkbox: Mark test call as reviewed]
-  AEP3E -- Not answered in 60s --> AEP3G[Inline error + Retry]
-  AEP3G -- Retry --> AEP3E
-  AEP3G -- Manual fallback --> AEP3F
-  AEP3F --> AEP3A
-  AEP3A -- Publish AEP --> AEP4{Test call count?}
+  AEP3[Step 2 — Scenario: Scenario Name, Description,\nAdversary Methods, Phases, Collectibles,\nTactics, Goals]
+  AEP3 --> AEP3_VIZ[Live call flow diagram updates\nas phases and tactics are configured]
+  AEP3_VIZ --> AEP3
+  AEP3 --> AEP3A{Validation?}
+  AEP3A -- Fewer than 2 phases --> AEP3B[Hard block: add at least 2 phases]
+  AEP3B --> AEP3
+  AEP3A -- No collectibles --> AEP3C[Warning: Engaged/Declined outcomes only]
+  AEP3C --> AEP3_NEXT
+  AEP3A -- Valid --> AEP3_NEXT
+  AEP3_NEXT -- Next: Test and Refine --> AEP4_TEST
+
+  AEP4_TEST[Step 3 — Test and Refine:\nAI Refine panel · Scenario Flow tab\nLive Test tab with Call Test Number]
+  AEP4_TEST --> AEP3D{Admin action?}
+  AEP3D -- Apply refinement --> AEP3E{Result?}
+  AEP3E -- Success → persona/scenario updates --> AEP4_TEST
+  AEP3E -- Error --> AEP3F[Error in Recent Changes + Retry] --> AEP4_TEST
+  AEP3D -- Call Test Number --> AEP3G{VOIP call placed}
+  AEP3G -- Answered → call completes --> AEP3H[Scenario Flow tab highlights\nphases reached + collectibles triggered]
+  AEP3H --> AEP3I[Checkbox: Mark test call as reviewed]
+  AEP3G -- Not answered in 60s --> AEP3J[Inline error + Retry]
+  AEP3J -- Retry --> AEP3G
+  AEP3J -- Manual fallback --> AEP3I
+  AEP3I --> AEP3D
+  AEP3D -- Publish AEP --> AEP4{Test call count?}
   AEP4 -- 0 sessions --> AEP4A[Publish disabled — tooltip shown]
   AEP4 -- 1 session --> AEP4B[Warning acknowledgment modal] --> AEP4C
   AEP4 -- 2+ sessions --> AEP4C[Publish confirmation modal]
@@ -50,13 +57,19 @@ flowchart TD
   S2A -- Partial coverage --> S2C[Warning callout — can proceed] --> S3
   S2A -- Full coverage --> S3
 
-  S3[Step 3 — Voice AEP + Script:\nVoice AEP selector · Script Preview\nCampaign-specific calling notes]
+  S3[Step 3 — Voice AEP + Script:\nVoice AEP selector · Persona tab preview\nScenario Flow diagram tab · Calling notes]
   S3 --> S3A{Voice AEPs published?}
   S3A -- None --> S3B[Empty state:\nBuild one now — opens AEP builder in new tab\nWizard auto-saves as Draft]
   S3B --> AEP1
   AEP_PUBLISHED --> S3_RETURN([Return to wizard Step 3])
   S3_RETURN --> S3
-  S3A -- One or more --> S3C[Admin selects AEP\nScript Preview populates] --> S4
+  S3A -- One or more --> S3C[Admin selects AEP\nPersona preview + Scenario Flow diagram populate] --> S35
+
+  S35[Step 3.5 — Review Organizational Intelligence:\nFacts table by category: Org, Tooling, News,\nPolicies, Vendors · Scenario relevance badges\nEdit · Suppress · Flag actions per row]
+  S35 --> S35A{Facts state?}
+  S35A -- No facts configured --> S35B[Empty state + contact Dune rep guidance\nAdmin can proceed with warning] --> S4
+  S35A -- All facts suppressed --> S35C[Warning: AI caller will not use org context\nAdmin can proceed] --> S4
+  S35A -- Facts reviewed and active --> S4
 
   S4[Step 4 — Compliance Pre-flight:\nGroup A: Platform-verified status cards\nGroup B: Admin acknowledgment checklist]
   S4 --> S4A{Group A platform checks?}

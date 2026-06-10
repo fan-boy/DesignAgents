@@ -1,6 +1,14 @@
 # Open Questions — Vishing Campaign Launcher
 
 ## Unresolved
+
+### Facts / OSINT
+- [ ] [Eng] How is the facts database populated for a new customer? Is there an onboarding flow, a Dune-side admin tool, or does the customer upload facts manually? This determines whether Step 3.5 is typically pre-populated or frequently empty.
+- [ ] [PM] When an admin suppresses a fact for a specific campaign, is that suppression persisted per-campaign or does it reset for each new campaign? If per-campaign, the admin must review and re-suppress on every new campaign run.
+- [ ] [Eng] How does the scenario match facts to phases at runtime? Is the `relevant_phases` field in the fact YAML how the system injects facts — i.e., only facts with the current phase in their `relevant_phases` list are injected each turn? If so, the UI's "Scenario relevance" column in Step 3.5 can be derived by matching fact.relevant_phases against scenario.phases.
+- [ ] [PM] Who is responsible for keeping facts accurate — does Dune own OSINT refresh, or can the admin org update facts themselves? If admin-editable, does fact editing require a separate settings surface?
+
+### Voice AEP — Persona + Scenario
 - [ ] [Eng] Does Dune's VOIP infrastructure support caller ID spoofing — displaying an arbitrary caller name and company on the recipient's caller ID? If not, what identity information is shown to call recipients? This determines whether "Caller Identity" fields are VOIP-level configuration or script briefing only, and affects all help text and Step 3 script preview copy.
 - [ ] [PM] Where is "call recording consent on file" stored and verified in the platform? Is there a Compliance Settings document upload flow, or is this a per-campaign self-certification? Same question for the one-party/two-party consent jurisdiction check — is the platform verifying this or is the admin self-certifying?
 - [ ] [PM] Is there a mechanism for Dune ops to request changes to a submitted campaign before activating it, or is ops' only option to activate or contact the admin outside the platform?

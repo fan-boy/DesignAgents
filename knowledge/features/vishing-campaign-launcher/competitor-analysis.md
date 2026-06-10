@@ -1,5 +1,5 @@
 ## Last updated
-2026-06-08 — First competitor analysis written. Covers vishing simulation capabilities across KnowBe4, Adaptive Security, Hoxhunt, SoSafe, and market context from Brightside AI buyer's guide.
+2026-06-10 — Added OSINT/Facts differentiator section. Dune's organizational intelligence injection (facts system) has no equivalent in any reviewed competitor.
 
 ---
 
@@ -158,7 +158,11 @@ The Vishing Campaign Launcher adds voice phishing as a third adversarial channel
 
 **Richest outcome taxonomy in the market.** Dune's 5-state model (Not Yet Called, No Answer, Engaged, Compromised, Declined, Callback Requested) vs. binary pass/fail across all competitors. For red team buyers — the security teams who want to understand behavioral depth, not just click-through rates — this is a material product advantage. Design the Call Log table and badge system to make this depth immediately visible in the reporting surface.
 
-**Voice AEP as a structured caller persona builder.** No competitor has a purpose-built workflow for creating, testing, and versioning voice caller personas. KnowBe4 uses fixed Kevin Mitnick templates. Adaptive does exec impersonation via audio upload. Dune's Script Outline + Objection Handling + Tone configuration + test call workflow is genuinely differentiated. The AEP library model (version history, publish workflow, campaign linkage) is unique in the market.
+**Voice AEP as a structured Persona + Scenario builder.** No competitor has a purpose-built workflow for creating, testing, and versioning voice caller personas and their call playbooks as distinct, separately-versioned components. KnowBe4 uses fixed Kevin Mitnick templates with binary script branching. Adaptive does exec impersonation via audio upload with no admin-configurable scenario structure. Dune's Persona step (voice, greeting, banned phrases, tone) + Scenario step (phases, tactics, collectibles, goals) + visual call flow diagram is unlike anything in the market. The tactic library — with per-phase intent descriptions, example templates, and `allowed_next` graph edges — is an engineering-grade playbook that no competitor surfaces to admins.
+
+**OSINT-grounded scenario personalization via organized facts.** No competitor has a mechanism for injecting company-specific organizational intelligence into the AI caller at runtime. KnowBe4 and Adaptive use generic templates with static variable substitution (first name, company name). Dune's facts system — with 15+ fact types organized by category (org chart, tooling, news, policies, vendors), sensitivity ratings, relevant phase mapping, and per-campaign admin review — makes each call specifically convincing in a way that cannot be replicated by script-based competitors. This is a structural moat: the quality of a Dune vishing call improves as the facts database deepens. The admin review step (Step 3.5) that surfaces this data is itself a differentiator — it makes AI realism transparent and admin-accountable rather than a black box.
+
+**Voice AEP as a structured caller persona builder.** No competitor has a purpose-built workflow for creating, testing, and versioning voice caller personas. KnowBe4 uses fixed Kevin Mitnick templates. Adaptive does exec impersonation via audio upload. Dune's Persona configuration + Scenario configuration + test call workflow is genuinely differentiated. The AEP library model (version history, publish workflow, campaign linkage) is unique in the market.
 
 **Compliance-aware wizard as a trust signal.** The compliance pre-flight step (Step 4) with explicit consent, jurisdiction, and works council checks is absent from every competitor. For enterprise accounts — particularly EMEA — this turns a compliance anxiety into a product feature. The design language should frame it as "we built the compliance work into the product" rather than making it feel like a blocker.
 
@@ -178,7 +182,9 @@ The Vishing Campaign Launcher adds voice phishing as a third adversarial channel
 
 3. **Outcome states need legend and education on first use.** No competitor has 5-state outcome taxonomy for vishing. Red team buyers may be familiar with binary pass/fail from previous tools. A brief glossary or first-use tooltip on the Call Log table (and during the in-progress view) will reduce confusion about what "Engaged" vs. "Compromised" means in a voice context.
 
-4. **Voice AEP Channel Type selector must show downstream consequences.** No competitor has a comparable concept. Admins new to Voice AEPs won't understand the difference until they hit Step 2 (different test interface) or the campaign builder (voice-only AEP filter). The channel type selector in the AEP builder should preview the different Step 2 experience before the admin commits.
+4. **Voice AEP Channel Type selector must show downstream consequences.** No competitor has a comparable concept. Admins new to Voice AEPs won't understand the 3-step structure (Persona → Scenario → Test & Refine) until they commit. The channel type selector in the AEP builder should preview the 3-step structure and hint at the scenario visualization before the admin commits.
+
+5. **OSINT review step must feel like empowerment, not bureaucracy.** The facts review in Step 3.5 is structurally new — no competitor requires this. Position it as "here's what the AI knows about your company" rather than a compliance gate. The scenario relevance column (showing which phases each fact feeds into) is key to making this feel purposeful rather than a checkbox exercise.
 
 5. **Reporting must not look like a phishing dashboard.** KnowBe4 surfaces vishing results in the same report table as email phishing. The risk is that Dune's vishing reporting feels like a bolted-on addition to the simulation dashboard. The two-tab (Overview + Call Log) structure should have distinct vishing-specific charts (Attempt Distribution, Reached vs. No Answer) that signal this is a purpose-built reporting surface, not a repurposed email phishing template.
 

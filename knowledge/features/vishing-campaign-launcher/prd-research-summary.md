@@ -1,12 +1,12 @@
 # PRD Research — Vishing Campaign Launcher
 
-**Last updated:** 2026-06-08
+**Last updated:** 2026-06-10
 
 ---
 
 ## Feature Summary
 
-The Vishing Campaign Launcher adds voice phishing as a third adversarial channel to the existing Red Team Campaign Launcher. Security admins (Red Team admin role) configure campaigns through the same 8-step wizard, select a Voice AEP as the caller persona, and submit the configuration. Dune executes calls via managed VOIP infrastructure; outcome events stream into the platform per call. Voice AEPs are a new type in the existing AEP Library — same two-step builder, different fields and test interaction. Success means an admin can commission a vishing exercise without manual back-and-forth with Dune ops, and review call-level outcomes in the same reporting surface as text campaigns.
+The Vishing Campaign Launcher adds voice phishing as a third adversarial channel to the existing Red Team Campaign Launcher. Security admins (Red Team admin role) configure campaigns through the same 8-step wizard (+1 for OSINT review), select a Voice AEP as the caller persona, and submit the configuration. Dune executes calls via AI-driven VOIP; outcome events stream into the platform per call. Voice AEPs are a new, structurally richer type in the AEP Library: a three-step builder covering Persona (caller identity, voice, tone, banned phrases), Scenario (phases, collectibles, tactics, goals with a live visualization), and Test & Refine (live call + scenario flow replay). A Facts/OSINT system stores per-organization intelligence (CISO name, tooling, company news, internal policies) that is injected into the AI at runtime and reviewed by the admin in a dedicated wizard step (Step 3.5) before campaign submission. Success means an admin can commission a vishing exercise with confidence in what the AI will say, who it is impersonating, and what organizational context it will use.
 
 **Missing from PRD:** No success metric defined. No explicit SLA commitment from Dune ops for activation. No operator-side interaction model described.
 
@@ -29,7 +29,10 @@ After the admin submits a campaign request, the campaign enters Pending Activati
 **5. Call outcome classification responsibility is unspecified.**
 The call outcome states (Engaged, Compromised, Declined) are described as classified "in real time as Dune operators work through the campaign." This implies operators manually classify each call's outcome — there is no described automatic classification for voice calls the way there is for text (link clicked = Compromised). The PRD doesn't describe where or how operators enter these classifications, what the latency is between a call completing and the classification appearing in the platform, or whether outcomes can be misclassified and corrected. This is a data pipeline gap that affects the entire live monitoring surface.
 
-**6. Debrief flow is absent.**
+**6. OSINT / Facts system is a new design surface with no precedent in the existing product.**
+The PRD now includes a Step 3.5 (Review Organizational Intelligence) where admins review the tenant-level facts database before submitting a campaign. This surface has no analog in the existing wizard or AEP Library. It introduces: a categorized facts table, a scenario-relevance column (which phases each fact is relevant to), per-fact actions (edit, suppress, flag), and two new states (empty-facts and all-suppressed). The design risk is that admins may skip this step perfunctorily without understanding its impact on call realism. The copy and layout of Step 3.5 must frame facts as a capability ("here's what the AI knows about your company"), not a compliance gate.
+
+**7. Debrief flow is absent.**
 The Step 8 compliance acknowledgment states the admin "is responsible for managing the debrief and disclosure process." For vishing, this is significant — employees received real phone calls from what appeared to be a legitimate caller. There is no described debrief functionality in the platform: no bulk notification tool, no debrief message template, no timing control for when targets receive disclosure. The text campaign PRD is equally silent on debrief, but voice is higher-stakes because employees may have taken action (called IT, flagged to a manager, experienced distress). This is likely out-of-platform in v1, but should be explicitly flagged.
 
 **7. Campaign edit flow during Pending Activation is unspecified.**

@@ -6,73 +6,103 @@
   "constraints": [
     "Vishing-only campaigns in v1 — no mixing with SMS or WhatsApp",
     "Admin requests campaign; Dune operators activate delivery",
-    "Execution model unresolved (AI-driven vs. human-operated) — must be confirmed before copy is finalized",
+    "Execution model confirmed AI-driven (2026-06-08)",
     "Voice AEPs non-interchangeable with text AEPs",
+    "Voice AEPs are structurally richer: Persona + Scenario as two separately-versioned components",
+    "Facts/OSINT stored per-organization and injected into the AI at runtime; admin reviews before campaign submission",
     "Remediation suppressed by default; locked at launch",
     "Risk scoring isolated in v1",
     "Caller ID spoofing capability not confirmed",
     "IDP SCIM required for per-target timezone enforcement",
     "Outlined badge variant may not exist in DS v2 — requires confirmation"
   ],
-  "selected_strategy": "Channel-Swapped Wizard with Four Targeted Enhancements",
-  "selected_strategy_rationale": "Inherits the 8-step wizard and reporting infrastructure completely. Applies four focused enhancements at trust-critical departure points: split Step 4 compliance pre-flight (verified vs. self-certified), Pending Activation trust layer (timeline estimate, in-app updates, contact path), Call Log badge differentiation (outlined vs. filled gray), and AEP Channel Type consequence preview. Avoids both the trust failures of pure inheritance and the design debt of a full parallel system.",
+  "selected_strategy": "Channel-Swapped Wizard with Five Targeted Enhancements",
+  "selected_strategy_rationale": "Inherits the 8-step wizard and reporting infrastructure completely. Applies five focused enhancements at trust-critical departure points: (1) split Step 4 compliance pre-flight (verified vs. self-certified), (2) Pending Activation trust layer, (3) Call Log badge differentiation (outlined vs. filled gray), (4) Voice AEP builder Channel Type consequence preview (now showing 3-step structure), (5) OSINT review as a named campaign step (Step 3.5) making AI realism transparent and admin-accountable.",
   "alternative_strategies": [
     {
       "name": "Pure Inheritance",
-      "summary": "Treat vishing as a third channel with minimal new patterns. Status card pattern for all compliance checks. Two gray badges as-is. Pending Activation as described in PRD.",
-      "rejected_because": "Compliance self-certifications would look like platform-verified states (legal exposure). Two gray badges are visually indistinguishable at scale. Pending Activation is a trust vacuum with no status, timeline, or contact path."
+      "summary": "Treat vishing as a third channel with minimal new patterns.",
+      "rejected_because": "Compliance self-certifications would look like platform-verified states. Two gray badges are visually indistinguishable at scale. OSINT injection would be invisible to admins — significant trust and accountability gap."
     },
     {
       "name": "Full Redesign",
-      "summary": "Treat vishing as so different from text that every step gets a bespoke design. New compliance module, new reporting surface, new campaign status model.",
-      "rejected_because": "Abandons wizard infrastructure that gives the product its consistency. Creates unnecessary design debt and slows engineering. Differences between vishing and text are real but bounded."
+      "summary": "Treat vishing as so different from text that every step gets a bespoke design.",
+      "rejected_because": "Abandons wizard infrastructure that gives the product its consistency. Creates unnecessary design debt and slows engineering."
     }
   ],
+  "voice_aep_builder_steps": [
+    "Step 1 — Persona: caller name, claimed role, greeting message, voice selector, tone, cadence, background audio, banned phrases",
+    "Step 2 — Scenario: phases, collectibles, tactics, goals + live call flow visualization (diagram updates in real time)",
+    "Step 3 — Test & Refine: AI refine panel, Scenario Flow tab, Live Test tab (call + post-call phase/collectible highlights)"
+  ],
+  "scenario_visualization_design": {
+    "elements": ["Phase nodes (name, goal, collectible dots, tactic chips)", "Transition arrows (plain-language condition labels)", "Collectibles legend (risk weight color key)", "Goal summary card at terminal node"],
+    "interaction": "Read-only (editing happens in left panel form only)",
+    "test_call_behavior": "After each test call, Scenario Flow tab overlays which phases were reached and which collectibles fired",
+    "export": "PNG download for stakeholder presentations or debrief documents"
+  },
+  "osint_review_step": {
+    "wizard_position": "Step 3.5 — between Voice AEP selection and Compliance Pre-flight",
+    "title": "Review Organizational Intelligence",
+    "fact_categories": ["Org chart", "Tooling", "Company news", "Internal policies", "Vendor relationships"],
+    "admin_actions": ["Edit value inline", "Suppress fact for this campaign", "Flag fact as incorrect"],
+    "scenario_relevance_column": "Shows phase badges matching the selected Voice AEP's scenario phases — tells admin exactly when each fact will be used",
+    "empty_state": "Guidance to contact Dune representative; admin can proceed with warning",
+    "continue_condition": "Always available; contextual warning if fewer than 3 facts active"
+  },
   "tradeoffs": [
     "Group B acknowledgment checklist is a new DS pattern requiring DS review before implementation",
     "Outlined badge variant requires DS confirmation — new variant needed if it doesn't exist",
-    "Manual VOIP event fallback for test call allows self-attestation — pragmatic but removes certainty that admin reviewed the persona live"
+    "Manual VOIP event fallback for test call allows self-attestation — pragmatic but removes certainty that admin reviewed persona live",
+    "Scenario visualization is a novel rendering surface — may require a new DS graph primitive or custom SVG/canvas component",
+    "Step 3.5 Scenario relevance column is AEP-dependent — changes if admin goes back and changes the selected AEP"
   ],
   "assumptions": [
-    "The 8-step wizard pattern from the Red Team Campaign Launcher is the correct base — no structural redesign needed",
+    "The 8-step wizard pattern from the Red Team Campaign Launcher is the correct base",
     "Debrief is out-of-platform for v1",
-    "Susceptibility rate denominator decision (Reached vs. Total Targets) will be made by PM before reporting is designed",
+    "Susceptibility rate denominator decision (Reached vs. Total Targets) will be made by PM",
     "Campaign-specific calling notes have a 500-char limit to prevent ops panel overflow",
-    "Zero Reached stat shows 'N/A' for susceptibility rate, not '0%', to avoid misleading denominator"
+    "Zero Reached stat shows 'N/A' for susceptibility rate, not '0%'"
   ],
   "open_issues": [
-    "Is Group B compliance acknowledgment a self-certification or does a document upload flow need to be designed?",
+    "Is Group B compliance acknowledgment a self-certification or document upload flow?",
     "Does outlined badge variant exist in DS v2?",
     "What is Dune's committed activation SLA?",
     "Is debrief out-of-platform, and should the Overview tab include debrief resources?",
-    "Does the VOIP AI system emit semantic outcome events automatically, or does a Dune ops member classify each call post-completion? Affects real-time vs. latent Call Log updates."
+    "Does the VOIP AI system emit semantic outcome events automatically, or does ops classify post-call?",
+    "How is the facts database populated for new customers?",
+    "Is fact suppression per-campaign or persistent?",
+    "Can the DS diagram component support the scenario visualization, or is a custom component needed for v1?"
   ],
   "risks": [
-    "Execution model copy will be wrong if not confirmed before design — two incompatible copy variants exist",
-    "Group B acknowledgment checklist scope may be larger than expected if a document upload settings surface is required",
-    "Caller ID spoofing limitation not surfaced in UI — if Caller Identity fields are script-briefing only, admins will expect the wrong thing",
-    "Pending Activation SLA commitment not confirmed — '1 business day' copy may create customer support liability"
+    "Scenario visualization is novel and may require significant Eng investment if a DS graph primitive doesn't exist",
+    "OSINT review step requires facts to be populated — empty state for new customers degrades the step significantly",
+    "Group B acknowledgment checklist scope may be larger if document upload is required",
+    "Caller ID spoofing limitation not surfaced in UI — admins may expect wrong behavior",
+    "Pending Activation SLA commitment not confirmed — '1 business day' copy may create support liability"
   ],
   "ds_patterns_used": [
     "wizard — 8-step with persistent step bar (inherited from Red Team Campaign Launcher)",
     "status card — Group A platform-verified compliance checks (inherited from text campaign Step 4)",
     "badge — outcome states in Call Log table (extended with outlined variant)",
     "drawer — call transcript / recording detail (inherited from text campaign Conversations tab)",
-    "modal — destructive action confirmations (Cancel campaign, Skip test call)",
-    "table — Call Log table with sort/filter and empty state",
-    "empty state — no Voice AEPs in library"
+    "modal — destructive action confirmations",
+    "table — Call Log table; Facts review table (Step 3.5)"
   ],
   "new_patterns_required": [
-    "Acknowledgment checklist (Group B, Step 4) — multi-item vertical checklist for admin self-certifications. Similar to Step 8 single checkbox but multi-item. Requires DS review.",
-    "Outlined badge variant — 'Not Yet Called' state needs hollow/outlined visual treatment to distinguish from filled 'No Answer' gray badge. Requires DS confirmation."
+    "Acknowledgment checklist (Group B, Step 4) — multi-item vertical checklist for admin self-certifications",
+    "Outlined badge variant — 'Not Yet Called' state requires hollow/outlined visual treatment",
+    "Scenario visualization diagram — phase nodes, transition arrows, tactic chips, collectibles legend. Novel component. DS review required.",
+    "Facts review table with scenario relevance column (Step 3.5) — phase badge cells are AEP-context-aware"
   ],
   "next_actions": [
-    "Resolve execution model question with PM and Eng before opening Figma",
-    "Confirm DS v2 badge variants — check whether outlined badge exists; create DS-tracked request if not",
-    "Flag Group B acknowledgment checklist for DS review and get sign-off",
-    "Begin design with AEP builder Channel Type selector — lowest dependency, highest novelty",
-    "Design Step 4 split compliance layout — most novel structural change, informs wizard visual rhythm",
-    "Use existing Red Team Campaign Launcher Figma file as base — copy step frames for Steps 1, 2, 6, 8; create new voice variant frames for Steps 3, 4, 5, 7"
+    "Confirm DS v2 badge variants — check whether outlined badge exists",
+    "Flag Group B acknowledgment checklist for DS review",
+    "Define scenario visualization component spec and confirm rendering approach with Eng (SVG, canvas, or DS graph primitive)",
+    "Begin design with AEP builder Persona step — establish voice-specific field vocabulary",
+    "Design Scenario step with visualization panel — highest novelty element in the feature",
+    "Design Step 3.5 OSINT Review — facts table, category structure, empty state, suppression state",
+    "Use existing Red Team Campaign Launcher Figma file as base — copy step frames for Steps 1, 2, 6, 8; create new frames for Steps 3, 3.5, 4, 5, 7"
   ],
-  "last_updated": "2026-06-08"
+  "last_updated": "2026-06-10"
 }

@@ -1,6 +1,6 @@
 # User Flow — Vishing Campaign Launcher
 
-**Last updated:** 2026-06-08
+**Last updated:** 2026-06-10
 
 ---
 
@@ -15,38 +15,48 @@
 
 ## Flow A: Creating a Voice AEP
 
+A Voice AEP is built across three steps: Persona (who the AI caller is) → Scenario (what the call does) → Test & Refine (live test call).
+
 ### Happy Path
 
 1. Admin clicks **New AEP** in the AEP Library
-2. Channel Type selector appears: admin selects **Voice** (previews Step 2 difference before committing)
-3. Builder opens at Step 1 (AEP Setup — Voice variant)
-4. Admin completes: AEP Title, Adversary Method (1–2 chips), Caller Identity (Name / Company / Role), Tone (1 chip), Target Context, Script Outline (Opening / Core Ask / Closing), optional Objection Handling Notes
-5. Admin clicks **Refine and Test** → generation progress (Analyzing scenario → Building caller persona → Configuring script → Ready)
-6. Builder advances to Step 2 (Test & Refine — Voice variant)
-7. Admin reads Script Preview (Opening / Core Ask / Closing / Objection Handling)
-8. Admin applies a Quick Action chip or custom instruction → Apply and Regenerate → script updates
-9. Admin clicks **Call Test Number** → VOIP call placed to admin's phone
-10. Admin completes call → "Mark test call as reviewed" checkbox appears → admin checks it
-11. Admin clicks **Publish AEP** → publish confirmation modal (session count warning if < 2 test calls)
-12. AEP status moves to Active → toast: "AEP published and available in campaign builder"
+2. Channel Type selector appears: admin selects **Voice** (thumbnail shows the 3-step structure before committing)
+3. Builder opens at Step 1 — **Persona**
+4. Admin completes: AEP Title, Caller Name, Claimed Role, Greeting Message, Voice (with preview), Tone, Response Length, Cadence, optional Background Audio, optional Banned Phrases edits
+5. Admin clicks **Next: Scenario** → Step 2 opens
+6. Builder at Step 2 — **Scenario**. Left panel shows scenario form; right panel shows live call flow diagram.
+7. Admin fills: Scenario Name, Scenario Description, Adversary Methods (1–3 chips)
+8. Admin configures Phases (add, name, set goal and transition condition for each phase). Diagram updates live.
+9. Admin adds Collectibles (data the AI extracts) with phase assignment and risk weights.
+10. Admin adds or imports Tactics from Dune tactic library. Diagram updates with tactic chips per phase.
+11. Admin reviews Goals (auto-populated from collectibles, weights editable)
+12. Admin clicks **Next: Test & Refine** → Step 3 opens
+13. Builder at Step 3 — **Test & Refine**. Default tab: Live Test.
+14. Admin clicks **Call Test Number** → VOIP call placed to admin's phone
+15. Admin takes call (experiences the full persona and scenario live)
+16. Call ends → Scenario Flow tab updates showing which phases were reached and which collectibles fired
+17. Admin checks "Mark test call as reviewed" checkbox
+18. Admin clicks **Publish AEP** → publish confirmation modal (session count warning if < 2 test calls)
+19. AEP status moves to Active → toast: "AEP published and available in campaign builder"
 
 ### Decision Points
 
-- **Channel Type = Text:** Builder opens text AEP flow (live chat Step 2). Not this flow.
-- **Generation fails (partial):** Per-section retry options; admin can fix and retry without losing other sections.
-- **Generation fails (full):** Full-form retry CTA. Inputs preserved.
+- **Channel Type = Text:** Builder opens text AEP flow (2-step). Not this flow.
+- **Empty phases list at Step 2:** Continue blocked. Inline validation: "Add at least 2 phases before proceeding."
+- **No collectibles at Step 2:** Warning (not block): "This scenario collects no data. Calls can only result in Engaged or Declined outcomes."
 - **Test call not answered in 60s:** Inline error + Retry. Admin can retry or use manual fallback ("Mark manually →" with confirmation modal).
 - **VOIP event not received after call:** Manual fallback link allows admin to self-attest call completed.
 - **1 test call at publish:** Warning acknowledgment required before confirming.
 - **0 test calls at publish:** Publish button disabled. Tooltip: "Complete at least one test call before publishing."
-- **Refinement hits guardrail:** Inline message describing what cannot be changed and why.
+- **Scenario Flow shows no phases reached in test:** Visual indicator on diagram — admin can use AI Refine to adjust before publishing.
 
 ### System Responses
 
-- Generation progress bar advances through four labeled stages; P95 45s (no files) or 90s (with uploads)
+- Scenario visualization updates in real time as phases and tactics are added to the left panel form
+- After a test call, the Scenario Flow tab overlays a "Last test run" highlight on phases reached and collectibles triggered
 - VOIP system places call when "Call Test Number" is clicked; 60s timeout triggers error
 - Recent Changes list appends each applied instruction with timestamp
-- Publish transitions AEP to Active in library; locks AEP against editing
+- Publish transitions AEP to Active in library; locks both Persona and Scenario components against editing
 
 ---
 
@@ -57,18 +67,22 @@
 1. Admin navigates to **Simulations → Red Team → Create Campaign** (or Dashboard quick action)
 2. **Step 1 — Channel Selection:** Admin selects Vishing channel card. SMS and WhatsApp cards disable. Contextual note explains operator execution model. Admin clicks Continue.
 3. **Step 2 — Audience:** Admin selects targeting mode (Groups, Individuals, or Both). Phone coverage indicator shows reachable target count. Admin confirms audience. Continue.
-4. **Step 3 — Voice AEP + Script:** Admin selects a published Voice AEP from selector. Script Preview populates. Admin adds optional campaign-specific calling notes. Continue.
-5. **Step 4 — Compliance Pre-flight:** Admin reviews Group A (platform-verified: VOIP status ✓, phone coverage ✓). Admin checks all Group B acknowledgment items (recording consent, jurisdiction, works council if applicable). Continue.
-6. **Step 5 — Call Configuration:** Admin sets call window (start/end time + timezone), max attempts per target (default 2), inter-attempt delay (default 2 hours), campaign start date. Continue.
-7. **Step 6 — Remediation:** Suppression ON by default. Admin reviews and keeps default. Continue.
-8. **Step 7 — Test Call:** Admin enters phone number (pre-filled). Clicks Place Test Call. Receives call. Checks "I've completed a test call." Continue.
-9. **Step 8 — Review + Request:** Admin reviews all summary cards. Checks compliance acknowledgment checkbox. Clicks **Submit Campaign Request**.
-10. **Post-submit confirmation screen:** "Campaign request submitted. Ops will activate within 1 business day." Admin clicks "View campaign."
-11. Campaign appears in Red Team list with **Pending Activation** badge.
+4. **Step 3 — Voice AEP + Script:** Admin selects a published Voice AEP from selector. AEP preview populates (Persona tab + Scenario Flow tab). Admin reviews the scenario flow diagram to confirm the AI's behavior. Admin adds optional campaign-specific calling notes. Continue.
+5. **Step 3.5 — Review Organizational Intelligence:** Admin reviews active facts (org chart, tooling, company news, internal policies). Admin can suppress specific facts from this campaign or flag incorrect values. Contextual scenario-relevance badges show which phases each fact feeds into. Admin clicks Continue.
+6. **Step 4 — Compliance Pre-flight:** Admin reviews Group A (platform-verified: VOIP status ✓, phone coverage ✓). Admin checks all Group B acknowledgment items (recording consent, jurisdiction, works council if applicable). Continue.
+7. **Step 5 — Call Configuration:** Admin sets call window (start/end time + timezone), max attempts per target (default 2), inter-attempt delay (default 2 hours), campaign start date. Continue.
+8. **Step 6 — Remediation:** Suppression ON by default. Admin reviews and keeps default. Continue.
+9. **Step 7 — Test Call:** Admin enters phone number (pre-filled). Clicks Place Test Call. Receives call. Checks "I've completed a test call." Continue.
+10. **Step 8 — Review + Request:** Admin reviews all summary cards. Checks compliance acknowledgment checkbox. Clicks **Submit Campaign Request**.
+11. **Post-submit confirmation screen:** "Campaign request submitted. Ops will activate within 1 business day." Admin clicks "View campaign."
+12. Campaign appears in Red Team list with **Pending Activation** badge.
 
 ### Decision Points
 
 - **No published Voice AEPs at Step 3:** Empty state → "Build one now" → AEP Builder opens in new tab. Wizard auto-saves as draft. Admin returns to Step 3 after publishing AEP.
+- **No facts configured at Step 3.5:** Empty state with guidance to contact Dune representative. Admin can continue with contextual warning about reduced realism.
+- **Admin suppresses all facts at Step 3.5:** Warning surfaced; admin can still proceed.
+- **Facts have incorrect values at Step 3.5:** Admin flags fact → request sent to Dune data team. Campaign can still proceed with flagged facts (admin decision).
 - **VOIP Degraded at Step 1:** Admin sees warning chip on card; can proceed. Step 4 Group A item shows ⚠ Pending; Continue blocked until resolved.
 - **Zero phone coverage at Step 2:** Hard block. Continue disabled. Inline error with resolution path.
 - **Group B items unchecked at Step 4:** Continue blocked. Items remain visible with clear instruction.

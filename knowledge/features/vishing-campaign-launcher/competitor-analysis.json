@@ -2,6 +2,7 @@
   "feature_name": "Vishing Campaign Launcher",
   "feature_slug": "vishing-campaign-launcher",
   "analyzed_at": "2026-06-08",
+  "updated_at": "2026-06-10",
   "direct_competitors": ["KnowBe4", "Adaptive Security", "Hoxhunt", "SoSafe", "Proofpoint"],
   "adjacent_competitors": [],
   "workflow_stages": [
@@ -141,18 +142,22 @@
   ],
   "differentiation_opportunities": [
     "Richest outcome taxonomy in market: 5-state model (Not Yet Called, No Answer, Engaged, Compromised, Declined) vs. binary pass/fail across all competitors",
-    "Voice AEP as structured caller persona builder — Script Outline + Objection Handling + Tone config + version history is unique in market",
+    "Voice AEP as structured Persona + Scenario builder — Persona step (voice, greeting, banned phrases, tone) + Scenario step (phases, collectibles, tactics, goals) with live call flow visualization is architecturally unlike anything in the market",
+    "OSINT-grounded scenario personalization — Facts/OSINT system injects company-specific intelligence (CISO name, EDR product, wire policy, funding news) into the AI at runtime; no competitor has this; organizational intelligence deepens over time making calls increasingly convincing",
+    "Admin OSINT review step (Step 3.5) — makes AI realism transparent and admin-accountable; unique concept that no competitor has; frames as 'here's what the AI knows about your company' rather than a black box",
     "Compliance-aware pre-flight wizard with consent, jurisdiction, and works council gating — no competitor has this",
     "Unified red team campaign launcher (vishing + SMS + WhatsApp in one wizard + one reporting surface) — competitors silo vishing",
     "Live call monitoring during campaign with per-call state tracking — no competitor has described equivalent in-progress view for vishing",
     "Request model with explicit debrief responsibility — admin stays informed and in control vs. opaque managed service"
   ],
   "design_implications": [
-    "Set execution model expectations (Dune executes, not automated) at Step 1 channel card — not buried in Step 8 — because automated execution is the market default",
+    "Set execution model expectations at Step 1 channel card — automated AI execution is the market default and admins will assume it correctly for Dune",
     "Compliance pre-flight UI must visually distinguish platform-verified states from self-certified acknowledgments — novel concept with no market precedent",
     "Outcome states need first-use education — red team buyers may be conditioned to binary pass/fail from prior tools",
-    "Voice AEP Channel Type selector must preview the downstream Step 2 difference before admin commits — no market analogue for admins to draw on",
-    "Reporting must use vishing-specific charts (Attempt Distribution, Reached vs. No Answer) that signal purpose-built surface, not repurposed phishing dashboard",
+    "Voice AEP Channel Type selector must preview the 3-step structure (Persona → Scenario → Test & Refine) and hint at the scenario visualization before admin commits",
+    "OSINT review step must feel like an intelligence briefing ('here's what the AI knows about your company'), not a compliance gate — this is where Dune's differentiation is most tangible to the admin",
+    "Scenario visualization is the most important comprehension tool — admins reviewing a library AEP for the first time must be able to understand the call's entire playbook from the diagram without reading YAML",
+    "Reporting must use vishing-specific charts that signal purpose-built surface, not repurposed phishing dashboard",
     "Recommend adding Brightside AI to competitor-list.md — most sophisticated vishing-specific platform observed, not currently in registry"
   ],
   "confidence_notes": [

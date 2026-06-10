@@ -2,10 +2,13 @@
   "feature_name": "Vishing Campaign Launcher",
   "feature_slug": "vishing-campaign-launcher",
   "written_at": "2026-06-08",
+  "updated_at": "2026-06-10",
   "flows": [
-    "Voice AEP creation (AEP builder — Voice type)",
-    "Voice AEP test and refine",
-    "Vishing campaign wizard (8 steps)",
+    "Voice AEP creation — Persona step",
+    "Voice AEP creation — Scenario step with live visualization",
+    "Voice AEP test and refine (Step 3 of 3)",
+    "Vishing campaign wizard (8.5 steps including OSINT review)",
+    "OSINT / Facts review (Step 3.5 — new surface)",
     "Campaign detail — In-progress (Calling status)",
     "Campaign detail — Post-campaign reporting"
   ],
@@ -15,6 +18,7 @@
       "Step 1 — Channel Selection (Vishing)",
       "Step 2 — Audience",
       "Step 3 — Voice AEP + Script",
+      "Step 3.5 — Review Organizational Intelligence (OSINT / Facts)",
       "Step 4 — Compliance Pre-flight",
       "Step 5 — Call Configuration",
       "Step 6 — Remediation",
@@ -22,15 +26,49 @@
       "Step 8 — Review + Request"
     ],
     "Voice AEP Builder": [
-      "Step 1 — AEP Setup (Voice)",
-      "Step 2 — Test & Refine (Voice)"
+      "Step 1 — Persona (caller name, claimed role, greeting, voice, tone, banned phrases)",
+      "Step 2 — Scenario (phases, collectibles, tactics, goals, live visualization)",
+      "Step 3 — Test & Refine (live test call, Scenario Flow replay)"
     ]
   },
+  "voice_aep_architecture": {
+    "persona_fields": [
+      "Caller Name",
+      "Claimed Role",
+      "Greeting Message",
+      "Voice ID / Voice Model",
+      "Tone (Casual / Formal / Urgent / Warm / Neutral)",
+      "Response Length (Short / Medium / Long)",
+      "Cadence (Slow / Normal / Fast)",
+      "Background Audio (Office / Lobby / Road noise / None)",
+      "Banned Phrases (tag input)"
+    ],
+    "scenario_fields": [
+      "Scenario Name",
+      "Scenario Description",
+      "Adversary Methods (1-3 chips)",
+      "Phases (ordered: name, goal, transition condition)",
+      "Collectibles (label, phase assignment, risk weight 1-5)",
+      "Tactics (name, phase, intent, templates, repeatable toggle)",
+      "Goals (auto-from collectibles, weighted)"
+    ],
+    "scenario_visualization": "Live call flow diagram: phase nodes with tactic chips, transition arrows with conditions, collectibles legend, goal summary at terminal node. Read-only during editing. Export as PNG. Updates after test calls to show phases reached and collectibles triggered."
+  },
+  "facts_system": {
+    "description": "Tenant-level OSINT data injected into the AI caller at runtime. Stored per-organization, versioned separately from AEPs. Reviewed in campaign wizard Step 3.5.",
+    "fact_categories": ["Org chart (CISO, head of finance, executives)", "Tooling (SSO, EDR, MFA, ticketing, VPN)", "Company news (funding, acquisitions)", "Internal policies (wire approvals, helpdesk hours)", "Vendor relationships"],
+    "per_fact_fields": ["fact label", "value", "source (manual / OSINT)", "sensitivity (public / internal / sensitive)", "relevant phases", "scenario relevance badge"],
+    "admin_actions_per_fact": ["Edit (inline)", "Suppress (for this campaign)", "Flag (sends correction request to Dune data team)"]
+  },
   "key_fields": [
-    "Caller Identity (Name, Claimed Company, Claimed Role)",
-    "Tone / Character (chip selector)",
-    "Script Outline (Opening, Core Ask, Closing)",
-    "Objection Handling Notes",
+    "Caller Name (Persona)",
+    "Claimed Role (Persona)",
+    "Greeting Message (Persona)",
+    "Voice selector (Persona)",
+    "Banned Phrases (Persona)",
+    "Scenario Phases (Scenario)",
+    "Collectibles with risk weights (Scenario)",
+    "Tactics with intent and templates (Scenario)",
     "Campaign-specific Calling Notes",
     "Call Window (start time, end time, timezone)",
     "Max Attempts Per Target",
@@ -39,23 +77,28 @@
   ],
   "integrations": [
     "Dune VOIP Infrastructure",
-    "AEP Library",
+    "AEP Library (Voice AEPs — Persona + Scenario versioned separately)",
+    "Facts / OSINT Database (tenant-level)",
     "IDP / SCIM",
     "Risk Scoring Engine",
     "Workday",
     "Email Notification System"
   ],
-  "edge_cases_count": 13,
+  "edge_cases_count": 17,
   "open_questions_flagged": [
-    "Does call recording require a separate VOIP provider configuration — and if recordings are not available, is an operator notes-only fallback acceptable for all customers?",
-    "Risk pipeline integration — are vishing outcomes isolated from risk scoring in v1, same as SMS/WhatsApp red team?",
-    "What is the SLA for Dune operator campaign activation after submission (currently described as 'within one business day')?",
-    "IDP SCIM timezone data — is per-target local timezone call window enforcement feasible in v1 or deferred?",
-    "Two-party consent jurisdiction enforcement — does the platform auto-detect target jurisdictions or does the admin self-certify?",
-    "Call recording availability — is recording always on, opt-in per campaign, or determined by VOIP provider config?"
+    "Does call recording require a separate VOIP provider configuration?",
+    "Risk pipeline integration — are vishing outcomes isolated from risk scoring in v1?",
+    "What is the SLA for Dune operator campaign activation after submission?",
+    "IDP SCIM timezone data — is per-target local timezone call window enforcement feasible in v1?",
+    "Two-party consent jurisdiction enforcement — auto-detect or admin self-certify?",
+    "How is the facts database populated for new customers (onboarding flow vs. Dune-side tool)?",
+    "Is fact suppression per-campaign (must re-review each time) or persistent across campaigns?",
+    "How does the VOIP system match facts to phases at runtime (relevant_phases field)?",
+    "Who is responsible for keeping facts accurate — Dune OSINT refresh or admin-managed?"
   ],
   "figma_used": false,
   "source_docs_used": true,
-  "confidence": "medium",
-  "confidence_notes": "No Figma designs exist yet. PRD is synthesized from confirmed design decisions, the Red Team Campaign Launcher PRD, and the AEP Library PRD. All wizard step-level decisions are confirmed. Open questions remain around call recording, VOIP SLA, risk pipeline isolation, and two-party consent enforcement mechanics."
+  "source_data_path": "/Users/aadi/Downloads/data",
+  "confidence": "medium-high",
+  "confidence_notes": "No Figma designs exist yet. PRD updated 2026-06-10 to reflect actual backend data model from /Users/aadi/Downloads/data. Voice AEP architecture (Persona + Scenario + Facts) now matches production YAML structure. Open questions remain around facts population, suppression persistence, and compliance enforcement mechanics."
 }
