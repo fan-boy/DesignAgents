@@ -2,76 +2,79 @@
 
 **Feature:** `training-nudge`
 **Date:** 2026-06-25
+**Updated:** 2026-06-25 — Admin surface revised to All Users
 
 ---
 
-## Flow 1: Admin nudges a single user (BISO View → User Data table)
+## Flow 1: Admin nudges a single user (All Users > Actions dropdown)
 
 ```
-[BISO View - Admin]
-  └── Scroll to "User Data" section
-       └── Row: Seymour Brooks | Dept | Risk 56 | Assigned 3 | Completed 2 | Overdue 1 | +5
-            └── [Hover row]
-                 └── "Nudge" ghost button appears (right side, before chevron)
-                      ├── [Click Nudge]
-                      │    └── Button → "Sent ✓" (300ms)
-                      │    └── Button → "Nudged just now" (muted, disabled)
-                      │    └── Toast: "Reminder sent to Seymour Brooks"
-                      └── [User already recently nudged]
-                           └── No Nudge button — shows "Nudged 2d ago" (muted label)
-```
-
----
-
-## Flow 2: Admin bulk nudges all overdue users (BISO View → Training Data table)
-
-```
-[BISO View - Admin]
-  └── Training Data section → Training Status table
-       ├── Option A: Select individual overdue rows via checkbox
-       │    └── Contextual action bar appears above table
-       │         └── "Nudge selected (3)" button
-       │              └── [Click] → Confirmation modal:
-       │                   "Send reminders to 3 users about overdue trainings?"
-       │                   [Cancel] [Nudge 3 users →]
-       │                        └── Toast: "Reminders sent to 3 users"
-       │
-       └── Option B: "Nudge all overdue" shortcut at table header
-            └── [Click] → Confirmation modal:
-                 "Send reminders to 12 users with overdue trainings?"
-                 [Cancel] [Nudge 12 users →]
-                      └── Toast: "Reminders sent to 12 users"
-                      └── Overdue rows show "Nudged just now" inline
+[Risk Insights > Users]
+  └── Filter: "Overdue trainings" pill  (or sort Overdue column desc)
+       └── Table narrows to users with Overdue > 0
+            └── Row: Seymour Brooks | Operations | Risk 84 | Overdue 2 | ...
+                 └── Click Actions dropdown (▼)
+                      ├── Assign training
+                      ├── View profile
+                      └── Nudge   ← new item, only when Overdue > 0
+                           └── [Click Nudge]
+                                └── Toast: "Reminder sent to Seymour Brooks"
+                                └── Row sub-line: "Nudged just now" (muted)
 ```
 
 ---
 
-## Flow 3: Manager nudges a direct report (BISO non-admin → My Team table)
+## Flow 2: Admin bulk nudges selected users (All Users > bulk action bar)
+
+```
+[Risk Insights > Users]
+  └── Filter to overdue users
+       └── Select rows via checkboxes
+            └── Bulk bar appears:
+                 [SB CH] + 3 more selected  |  Cancel  |  Nudge (5 overdue)  |  Assign →
+                      └── [Click "Nudge (5 overdue)"]
+                           └── Confirmation modal:
+                                "Send training reminders to 5 users with overdue trainings?"
+                                [Cancel]  [Nudge 5 users →]
+                                     └── Toast: "Reminders sent to 5 users"
+                                     └── Overdue rows show "Nudged just now" sub-line
+```
+
+---
+
+## Flow 3: Manager nudges a direct report (BISO non-admin > My Team table)
 
 ```
 [BISO View - Manager / "Team Risk & Training Overview"]
-  └── User table: My Team
-       └── Row: [Name] | Dept | Risk Score | Assigned | Completed | Overdue 1 | Risk Change
+  └── Table: My Team
+       └── Row: [Name] | Dept | Risk | Assigned | Completed | Overdue 1 | Risk Change
             └── [Hover row]
-                 └── "Nudge" ghost button appears
-                      └── [Click]
-                           └── Button → "Sent ✓" → "Nudged just now"
+                 └── Ghost "Nudge" button appears (right side, before chevron)
+                      └── [Click Nudge]
+                           └── Button → "Sent" (briefly)
+                           └── Button → "Nudged just now" (muted, no longer clickable briefly)
                            └── Toast: "Reminder sent to [Name]"
 ```
 
 ---
 
-## Error states
+## Error / edge states
 
 ```
 Nudge fails (API error)
-  └── Button reverts to "Nudge"
   └── Toast (error): "Failed to send reminder. Try again."
+  └── "Last nudged" sub-line does not appear
 
-User has no email
-  └── Nudge button disabled with tooltip: "No email address on file"
+User has no email on file
+  └── "Nudge" item in Actions dropdown is disabled
+  └── Tooltip: "No email address on file"
 
 User completes training before nudge sends
-  └── Backend rejects → inline: "This training was already completed"
-  └── Row Overdue count drops to 0 on next refresh → Nudge button disappears
+  └── Backend rejects nudge
+  └── Toast: "This user has already completed the training"
+  └── Overdue count drops to 0 on next refresh → Nudge option disappears
+
+Bulk nudge: some users already recently nudged
+  └── Warning in confirmation modal: "3 of 5 users were already nudged recently. Proceed?"
+  └── [Cancel] [Nudge all 5] [Skip recently nudged (2)]
 ```
