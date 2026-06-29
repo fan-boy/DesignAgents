@@ -4,7 +4,7 @@
 
 ## Unresolved — MVP (AEP Manager)
 
-- [ ] [Eng] Is the Red Teaming dashboard a single route with an AEP tab, or does the AEP creation surface live at its own route? This affects where AEP Managers land on login and what the permission-denied state looks like for non-AEP surfaces.
+- [x] [Eng] Is the Red Teaming dashboard a single route with an AEP tab, or does the AEP creation surface live at its own route? — **Answer:** Red Teaming dashboard is a single route with AEP as a tab within it. AEP Managers land on the Red Teaming dashboard and see the AEP tab only. Other tabs within Red Teaming (if any) must be hidden or permission-denied for AEP Managers.
 - [ ] [PM] Does "manage" for the AEP Manager role include delete, or only create/edit? Affects whether a delete confirmation pattern is needed in MVP.
 - [ ] [Eng] When a Full Access user is downgraded to AEP Manager mid-session, must their session be invalidated immediately, or is enforcement on next page load/API call acceptable from a security standpoint?
 - [ ] [PM] What is the UX for a pending invite — can a Full Access admin change a user's role before they activate their account?

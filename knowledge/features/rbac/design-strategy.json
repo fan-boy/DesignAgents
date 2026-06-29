@@ -12,7 +12,7 @@
     "Last Full Access admin cannot downgrade their own role",
     "Bulk role operations out of scope for MVP",
     "SCIM/IdP provisioning out of scope for MVP",
-    "AEP Manager lands in Red Teaming dashboard (AEP tab) — confirm route structure with Eng before designing landing state"
+    "AEP Manager lands on the Red Teaming dashboard route — AEP is a tab within it. Any other tabs in Red Teaming must be hidden for AEP Managers. AEP Manager cannot navigate to any other top-level route."
   ],
   "selected_strategy": "Inline Role Assignment + First-Login Awareness",
   "selected_strategy_rationale": "User-first assignment pattern (inline badge click → popover → confirmation modal) is simpler than role-first flows and matches Adaptive Security's observed best practice. First-login awareness banner addresses the most critical anti-pattern in the category — scoped users with no awareness of their permission boundary. Permission-denied state with 'Request access' CTA closes the escalation dead end no competitor currently solves.",
