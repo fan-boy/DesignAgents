@@ -1,0 +1,142 @@
+{
+  "feature_name": "Role-Based Access Control (RBAC)",
+  "feature_slug": "rbac",
+  "analyzed_at": "2026-06-29",
+  "direct_competitors": ["KnowBe4", "Adaptive Security", "Proofpoint SAT"],
+  "adjacent_competitors": ["Hoxhunt"],
+  "workflow_stages": [
+    "Role model definition",
+    "Role assignment during invite",
+    "Role change for existing user",
+    "Surface gating at navigation level",
+    "Surface gating at URL/API level",
+    "Scoped dashboard data",
+    "Permission-denied state"
+  ],
+  "competitors": [
+    {
+      "name": "KnowBe4",
+      "url": "knowbe4.com",
+      "tier": "direct",
+      "entry_point": "Users tab → select user → Assign Admin Functions; or Security Roles tab → create role → attach groups",
+      "setup_friction": "Base roles (Account Owner, Full Admin, Group Admin) require no setup. Security Roles require creating a named role, attaching groups, and configuring permission toggles — available on Advanced/Platinum/Diamond tiers only",
+      "core_flow": [
+        "Navigate to Users tab or Security Roles tab",
+        "Select user or create new role",
+        "Assign role (base tier) or configure permission toggles (Security Roles)",
+        "Attach groups for scoped access",
+        "Role takes effect immediately"
+      ],
+      "feedback_states": ["Immediate effect on assignment", "No confirmation modal documented", "No public audit log UI"],
+      "error_prevention": "Additive permissions model — multiple roles stack, permissions are never removed by adding a second role",
+      "trust_model": "Admin-only role creation. No self-serve escalation path.",
+      "rbac_notes": "Three fixed roles plus custom Security Roles layer (tier-gated). Group Admin is scoped to assigned groups — data filtered at query level, not separate UI. Permissions are additive across groups.",
+      "repeat_use_efficiency": "Security Roles creation is reusable — create once, attach to any group. Group Admins are role-scoped by group membership, which updates dynamically.",
+      "ai_personalization": "absent from RBAC surface",
+      "risk_score_surface": "absent from RBAC surface",
+      "remediation_path": "absent from RBAC surface",
+      "confidence": "high",
+      "source_notes": "Role model observed via Stitchflow user management guide and public KnowBe4 blog post on delegated permissions. Security Roles UI specifics are inferred from documentation structure, not direct product observation."
+    },
+    {
+      "name": "Adaptive Security",
+      "url": "adaptivesecurity.com",
+      "tier": "direct",
+      "entry_point": "Admin portal → Admin Access section → Add an Admin (new) or three-dot menu → Change Role (existing)",
+      "setup_friction": "Low — six fixed roles, no custom role configuration required",
+      "core_flow": [
+        "Navigate to Admin Access in admin portal",
+        "Click 'Add an Admin' or open three-dot menu on existing user",
+        "Select role from fixed list of six",
+        "Role takes effect immediately"
+      ],
+      "feedback_states": ["Role change via three-dot menu — immediate effect inferred"],
+      "error_prevention": "Only Account Owners and Team Admins can modify roles — prevents accidental escalation by scoped users",
+      "trust_model": "Owner and Team Admin only can assign roles. No self-serve escalation path observed.",
+      "rbac_notes": "Six functional roles: Account Owner, Team Admin, Training Manager, Content Manager, Phishing Manager, Report Viewer. Training and Phishing are separate roles — unlike Dune's bundle. Report Viewer is a first-class read-only role.",
+      "repeat_use_efficiency": "Fixed role set requires no setup — role assignment is a one-step action per user",
+      "ai_personalization": "absent from RBAC surface",
+      "risk_score_surface": "absent from RBAC surface",
+      "remediation_path": "absent from RBAC surface",
+      "confidence": "high",
+      "source_notes": "Role names and assignment flow observed from Adaptive Security product blog post announcing RBAC. Permission boundaries within each role are inferred from role descriptions."
+    },
+    {
+      "name": "Proofpoint SAT",
+      "url": "proofpoint.com/us/products/security-awareness-training",
+      "tier": "direct",
+      "entry_point": "Administration → Account Management → Access Control",
+      "setup_friction": "Module-level toggles per role — requires admin to configure each module's visibility per role type",
+      "core_flow": [
+        "Navigate to Access Control settings",
+        "Select role tier",
+        "Toggle show/hide per module",
+        "User-level override takes priority over global settings"
+      ],
+      "feedback_states": ["User-level override documented — global defaults can be overridden per user"],
+      "error_prevention": "User-level access control overrides global — prevents global setting changes from accidentally locking out specific users",
+      "trust_model": "Admin-configured via settings panel. No self-serve escalation.",
+      "rbac_notes": "Named tiers: Super Admin, Training Admin, User Admin. Read-only admin user is a first-class role in Proofpoint Essentials. 5 roles with customizable module toggles.",
+      "repeat_use_efficiency": "Module toggles are persistent — configure once per role tier",
+      "ai_personalization": "absent from RBAC surface",
+      "risk_score_surface": "absent from RBAC surface",
+      "remediation_path": "absent from RBAC surface",
+      "confidence": "medium",
+      "source_notes": "Role names from training course materials and Proofpoint Essentials admin guide. UI flow for role assignment, confirmation states, and dashboard scoping are inferred, not directly observed."
+    },
+    {
+      "name": "Hoxhunt",
+      "url": "hoxhunt.com",
+      "tier": "adjacent",
+      "entry_point": "Admin portal — specific RBAC entry point not documented publicly",
+      "setup_friction": "SCIM provisioning supported — role attributes mapped from IdP (Microsoft Entra ID documented)",
+      "core_flow": ["SCIM provisioning from IdP", "Multi-tenant Admin has cross-org access to Admin Portal and Insights"],
+      "feedback_states": ["Not documented publicly"],
+      "error_prevention": "Not documented publicly",
+      "trust_model": "Multi-tenant model with Owner Organization admin controlling cross-org access",
+      "rbac_notes": "Primary documented model is multi-tenancy. Single-tenant role granularity is sparse in public docs.",
+      "repeat_use_efficiency": "SCIM ensures role sync stays current without manual updates",
+      "ai_personalization": "absent from RBAC surface",
+      "risk_score_surface": "absent from RBAC surface",
+      "remediation_path": "absent from RBAC surface",
+      "confidence": "low",
+      "source_notes": "Most RBAC documentation is behind authentication. SCIM support confirmed via Microsoft Learn provisioning tutorial. Role granularity for single-tenant accounts is inferred."
+    }
+  ],
+  "observed_patterns": [
+    "Functional role names (Training Manager, Phishing Manager, Report Viewer) over permission-level labels",
+    "User-first role assignment via context menu or user row action",
+    "Scoped dashboard data filtered at query level — same UI surface across roles",
+    "Read-only as a first-class named role, not an implied state",
+    "SCIM provisioning supported by all enterprise-tier competitors",
+    "Fixed role sets for standard deployments; custom role builders for enterprise tiers"
+  ],
+  "anti_patterns": [
+    "Role-first assignment flow (create role → attach groups → configure permissions) adds unnecessary abstraction for small fixed role sets",
+    "Hiding gated nav items without first-login onboarding leaves scoped users assuming setup is broken",
+    "'Contact your admin' dead-end at permission-denied state with no structured access request path",
+    "Additive permission stacking (KnowBe4) creates hard-to-predict permission states in multi-group scenarios",
+    "Session behavior on role change is universally undocumented — a security gap across the category"
+  ],
+  "differentiation_opportunities": [
+    "AEP as a first-class named surface in the role model signals AI personalization differentiation at the permission layer",
+    "Role-change warning when user has an active campaign — no competitor surfaces this explicitly",
+    "In-product access request flow from the permission-denied state — unmet need across the category",
+    "First-login role onboarding modal or banner to surface permission boundaries — absent from all competitors reviewed",
+    "Explicit audit log UI accessible to Full Access admins — treat role history as a trust signal, not just a compliance log"
+  ],
+  "design_implications": [
+    "Build role × surface × action type state matrix before any Figma work begins",
+    "Use user-first role assignment (inline selector on user row) — not role-first configuration screen",
+    "Design dashboard as a single component with role-scoped data — do not build separate dashboard UIs per role",
+    "Add an action to the permission-denied empty state — at minimum a 'Request access' CTA",
+    "Plan for SCIM in v1 scope or explicitly defer it and define the bulk onboarding workaround",
+    "Add first-login role awareness banner or modal for scoped users"
+  ],
+  "confidence_notes": [
+    "KnowBe4 and Adaptive Security role models are high confidence from public documentation",
+    "Proofpoint SAT is medium confidence — role names confirmed but UI flow is inferred",
+    "Hoxhunt is low confidence for RBAC specifics — documentation is mostly behind authentication",
+    "No competitor's permission-denied UX, session invalidation behavior, or dashboard scoping visuals were directly observed"
+  ]
+}
