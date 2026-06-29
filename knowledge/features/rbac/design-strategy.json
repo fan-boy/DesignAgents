@@ -1,0 +1,69 @@
+{
+  "feature_name": "Role-Based Access Control (RBAC)",
+  "feature_slug": "rbac",
+  "design_goal": "Make role assignment feel like a one-second decision during onboarding, and make role enforcement feel invisible during normal work — surfacing only when a scoped user needs to understand or escalate their access.",
+  "user_segments": ["Full Access Admin", "AEP Manager", "Training & Simulations Manager", "Dashboard Viewer"],
+  "constraints": [
+    "Only Full Access admins can assign or change roles",
+    "Role enforcement at both UI and API layers — no client-only gating",
+    "Last Full Access admin cannot downgrade their own role",
+    "Four fixed roles — no custom role builder in v1",
+    "Bulk role operations out of scope for v1",
+    "SCIM/IdP provisioning out of scope for v1",
+    "Dashboard Viewer scope (cross-surface vs. scoped) unresolved — strategy assumes cross-surface read-only pending PM confirmation"
+  ],
+  "selected_strategy": "Inline Role Assignment + First-Login Awareness",
+  "selected_strategy_rationale": "User-first assignment pattern (inline badge click → popover → confirmation modal) is simpler than role-first flows and matches Adaptive Security's observed best practice. First-login awareness banner addresses the most critical anti-pattern in the category — scoped users with no awareness of their permission boundary. Permission-denied state with 'Request access' CTA closes the escalation dead end no competitor currently solves.",
+  "alternative_strategies": [
+    {
+      "name": "Dedicated Role Management Screen",
+      "summary": "Standalone settings screen where admins configure role definitions and assign users by role",
+      "rejected_because": "Adds unnecessary abstraction for four fixed roles. Splits user and role management into separate contexts. Only justified when the role model becomes customizable — not for v1."
+    },
+    {
+      "name": "Role Assignment in User Detail Drawer",
+      "summary": "Clicking a user row opens a right-anchored drawer with full user details including role selector",
+      "rejected_because": "Too heavyweight as the primary invite-time assignment path. Appropriate as an edit sub-flow for existing users but not the default. The inline table approach is faster for bulk invites."
+    }
+  ],
+  "tradeoffs": [
+    "Hidden navigation (vs. disabled with tooltip) means new scoped users have no passive awareness of gated surfaces — first-login banner partially mitigates this but is dismissible",
+    "Dashboard Viewer as cross-surface read-only creates a data inversion vs. functional managers — requires PM confirmation before design begins",
+    "No SCIM in v1 is an enterprise objection risk — requires explicit 'Directory sync coming soon' messaging in the product",
+    "'Request access' CTA requires either an in-app notification center or a mailto: fallback — decision blocks escalation screen design"
+  ],
+  "assumptions": [
+    "Dashboard Viewer is cross-surface read-only (org-wide data visibility) — pending PM confirmation",
+    "Dashboard is a single component with role-filtered data at the API layer, not separate UI surfaces per role",
+    "Audit log lives as a sub-tab in User Management, not a standalone surface",
+    "First-login banner is sufficient awareness for scoped users — no blocking modal required",
+    "Export is available to Dashboard Viewers as a read-only action"
+  ],
+  "open_issues": [
+    "[PM — Blocks dashboard design] Dashboard Viewer cross-surface vs. scoped access — strategy assumes cross-surface",
+    "[PM — Blocks dashboard design] Can Dashboard Viewers export reports?",
+    "[PM] Does 'manage' for scoped roles include delete or only create/edit/assign?",
+    "[Both] Is SCIM explicitly deferred to post-v1?",
+    "[Eng] Does Full Access downgrade require immediate session invalidation or is next-page-load acceptable?",
+    "[PM] Does Dune have an in-app notification center for 'Request access' CTA, or is mailto: fallback required for v1?"
+  ],
+  "risks": [
+    "Dashboard Viewer scope ambiguity is the highest-risk open question — begins Figma work on wrong model if not resolved first",
+    "No SCIM in v1 will surface in enterprise sales conversations — product should proactively address this with roadmap messaging",
+    "Hidden nav leaves scoped users without passive awareness of what they're missing — first-login banner is the only mitigation and it's dismissible"
+  ],
+  "ds_patterns_used": ["table", "badge", "modal", "drawer", "empty-state", "banner"],
+  "new_patterns_required": [
+    "Four new role badge variants (Full Access, AEP Manager, Training & Simulations Manager, Dashboard Viewer) — requires DS review before implementation",
+    "Inline role selector popover anchored to a badge — confirm whether existing DS popover component covers this or a new pattern is needed"
+  ],
+  "next_actions": [
+    "Confirm Dashboard Viewer scope with PM before designing any dashboard screens",
+    "Audit current User Management table before extending it",
+    "Build role × surface × action type permission matrix as first design artifact",
+    "Confirm Stillsuit DS v2 badge variants with design system owner",
+    "Decide v1 escalation mechanism: in-app notification center vs. mailto: fallback",
+    "Design Screen 1 (User Management table) first — it is the hub of all RBAC flows"
+  ],
+  "last_updated": "2026-06-29"
+}

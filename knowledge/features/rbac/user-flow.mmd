@@ -1,0 +1,54 @@
+flowchart TD
+
+%% ── FLOW A: INVITE ──────────────────────────────────────────
+    A_START([Full Access Admin:\nOpens User Management]) --> A1[Clicks 'Invite users' CTA]
+    A1 --> A2[Drawer opens:\nEmail input + Role selector\nper row, default Dashboard Viewer]
+    A2 --> A3[Admin enters email and selects role\nper invitee]
+    A3 --> A4{More invitees?}
+    A4 -- Yes --> A3
+    A4 -- No --> A5[Clicks 'Send invites']
+    A5 --> A6{Validation passes?}
+    A6 -- No: missing role\nor invalid email --> A7[Inline error per row\nDrawer stays open]
+    A7 --> A3
+    A6 -- Yes --> A8[API: send invites]
+    A8 --> A9{All invites sent\nsuccessfully?}
+    A9 -- Partial failure --> A10[Per-row error indicators\nDrawer stays open]
+    A10 --> A3
+    A9 -- Yes --> A11[Drawer closes\nToast: 'N invites sent'\nPending rows appear in table]
+
+%% ── FLOW B: ROLE CHANGE ─────────────────────────────────────
+    B_START([Full Access Admin:\nViews User Management]) --> B1[Locates user via search\nor role filter]
+    B1 --> B2[Clicks role badge on user row]
+    B2 --> B3{Is this the last\nFull Access admin\nchanging their own role?}
+    B3 -- Yes --> B4[Badge popover shows Full Access\ndisabled with tooltip:\n'You're the only Full Access admin']
+    B4 --> B_END_BLOCKED([Blocked — no change])
+    B3 -- No --> B5[Inline role selector popover\nCurrent role checked\nThree other options shown]
+    B5 --> B6[Admin selects new role]
+    B6 --> B7{User has active\ncampaign?}
+    B7 -- Yes --> B8[Confirmation modal\nwith active campaign warning]
+    B7 -- No --> B9[Standard confirmation modal]
+    B8 --> B10{Admin confirms?}
+    B9 --> B10
+    B10 -- Cancel --> B11[Modal closes\nNo change]
+    B10 -- Confirm --> B12[API: update role]
+    B12 --> B13{API success?}
+    B13 -- Failure --> B14[Modal stays open\nInline error + retry]
+    B14 --> B10
+    B13 -- Success --> B15[Modal closes\nRole badge updates\nAudit log entry created\nToast: 'Role updated']
+
+%% ── FLOW C: FIRST LOGIN ─────────────────────────────────────
+    C_START([Scoped User:\nActivates invite]) --> C1[Completes account setup]
+    C1 --> C2[Lands on platform home]
+    C2 --> C3[First-login banner shown:\nRole name + one-line access summary]
+    C3 --> C4{User dismisses banner?}
+    C4 -- Yes --> C5[Banner removed permanently\nScoped session continues]
+    C4 -- No: banner persists --> C6[User works in their\npermitted surfaces]
+    C5 --> C6
+
+%% ── FLOW D: PERMISSION DENIED ───────────────────────────────
+    D_START([Scoped User:\nNavigates to gated surface\nvia direct URL]) --> D1[Platform renders\nPermission-Denied empty state\nnot 404]
+    D1 --> D2{User action?}
+    D2 -- Clicks 'Request access' --> D3[In-app notification sent\nto all Full Access admins\nOR mailto: pre-filled]
+    D3 --> D4[Toast: 'Request sent'\nUser remains on denied state]
+    D2 -- Clicks 'Go back' --> D5[Navigate to last\naccessible surface]
+    D2 -- No action --> D6[User stays on\ndenied state]
