@@ -1,16 +1,18 @@
 {
   "feature_name": "Role-Based Access Control (RBAC)",
   "feature_slug": "rbac",
-  "design_goal": "Make role assignment feel like a one-second decision during onboarding, and make role enforcement feel invisible during normal work — surfacing only when a scoped user needs to understand or escalate their access.",
-  "user_segments": ["Full Access Admin", "AEP Manager", "Training & Simulations Manager", "Dashboard Viewer"],
+  "design_goal": "Give Full Access admins a frictionless way to assign AEP-only access, while designing the permission layer to extend cleanly to future roles without structural rework.",
+  "mvp_scope_note": "MVP covers AEP Manager role only. Full Access is unchanged. Future roles deferred.",
+  "user_segments": ["Full Access Admin", "AEP Manager"],
   "constraints": [
+    "MVP: two roles only — Full Access (unchanged) and AEP Manager (new)",
+    "Role selector component must accommodate future roles without rework",
     "Only Full Access admins can assign or change roles",
     "Role enforcement at both UI and API layers — no client-only gating",
     "Last Full Access admin cannot downgrade their own role",
-    "Four fixed roles — no custom role builder in v1",
-    "Bulk role operations out of scope for v1",
-    "SCIM/IdP provisioning out of scope for v1",
-    "Dashboard Viewer scope (cross-surface vs. scoped) unresolved — strategy assumes cross-surface read-only pending PM confirmation"
+    "Bulk role operations out of scope for MVP",
+    "SCIM/IdP provisioning out of scope for MVP",
+    "AEP Manager lands in Red Teaming dashboard (AEP tab) — confirm route structure with Eng before designing landing state"
   ],
   "selected_strategy": "Inline Role Assignment + First-Login Awareness",
   "selected_strategy_rationale": "User-first assignment pattern (inline badge click → popover → confirmation modal) is simpler than role-first flows and matches Adaptive Security's observed best practice. First-login awareness banner addresses the most critical anti-pattern in the category — scoped users with no awareness of their permission boundary. Permission-denied state with 'Request access' CTA closes the escalation dead end no competitor currently solves.",

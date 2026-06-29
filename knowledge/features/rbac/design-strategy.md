@@ -1,19 +1,22 @@
 # Design Strategy — Role-Based Access Control (RBAC)
 Last updated: 2026-06-29
+MVP scope revision: 2026-06-29
+
+> **MVP scope:** Design covers the AEP Manager role only. Full Access is unchanged. Future roles (Training & Simulations Manager, Dashboard Viewer, and others) are deferred. All structural decisions — role badge component, permission-denied state, invite flow role selector — must be designed to extend cleanly to additional roles without rework.
 
 ---
 
 ## Feature Context
 
-**Goal:** Introduce four distinct roles that gate platform surface access and write permissions so each user only operates within their functional boundary.
+**Goal:** Give Full Access admins the ability to grant a user AEP-only access — they can create and manage AEP campaigns in the Red Teaming dashboard, and nothing else is visible to them.
 
-**Primary actor:** Full Access admin — assigns and manages roles, onboards users, resolves access issues.
+**Primary actor:** Full Access admin — assigns the AEP Manager role when inviting users or from the User Management table.
 
-**Secondary actors:** AEP Manager, Training & Simulations Manager, and Dashboard Viewer — each experiencing the platform through the lens of their role.
+**Secondary actor:** AEP Manager — logs in, lands in the Red Teaming dashboard (AEP tab), does their work. No other surface is visible or accessible.
 
-**Trigger:** Admin invites a new user or changes an existing user's role.
+**Trigger:** Admin invites a new user or changes an existing user's role to AEP Manager.
 
-**Success:** A scoped user logs in and sees only the surfaces relevant to their role. They can complete their work without encountering unnecessary friction. If they hit a gated surface, they understand why and have a path forward.
+**Success:** An AEP Manager logs in and lands directly in the Red Teaming dashboard. They can create and manage AEP campaigns without friction. Every other surface — Org Dashboard, Users, Training, Simulations, Settings — is hidden from their navigation and returns a permission-denied state on direct URL access.
 
 ---
 
@@ -29,10 +32,11 @@ Make role assignment feel like a one-second decision during onboarding, and make
 - Role enforcement is at both UI and API layers — design must not assume client-only enforcement.
 - Last Full Access admin cannot downgrade their own role — the system prevents this.
 - Role changes must be recorded in the audit log.
-- Four fixed roles — no custom role builder in v1.
-- Bulk role operations are out of scope for v1.
-- SCIM/IdP provisioning is out of scope for v1.
-- Dashboard Viewer scope (cross-surface vs. role-scoped) is an **open question** that materially affects the dashboard design. The strategy below treats Dashboard Viewer as a **cross-surface read-only role** (org-wide dashboard data, no write access) — based on the PRD as written. If PM resolves this differently, the scoped dashboard section must be revisited.
+- MVP: two roles only — Full Access (unchanged) and AEP Manager (new).
+- Role selector component must be designed to accommodate additional roles in future iterations without structural rework.
+- Bulk role operations are out of scope for MVP.
+- SCIM/IdP provisioning is out of scope for MVP.
+- AEP Manager entry point is the **Red Teaming dashboard, AEP tab** — confirm with Eng whether this is a standalone route or a tab within an existing Red Teaming view before designing the landing state.
 
 ---
 

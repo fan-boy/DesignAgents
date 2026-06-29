@@ -1,19 +1,17 @@
-Role-Based Access Control (RBAC) governs which platform surfaces and actions are available to each user of the Dune Security platform. Rather than giving every admin unrestricted access, RBAC introduces four distinct roles — **Full Access**, **AEP Manager**, **Training & Simulations Manager**, and **Dashboard Viewer** — each scoped to the specific capabilities a user's function requires. The system is managed by Full Access admins and applies across the entire platform: campaign creation, training assignment, simulated attack management, and reporting.
+Role-Based Access Control (RBAC) governs which platform surfaces and actions are available to each user of the Dune Security platform. The MVP introduces one scoped role — **AEP Manager** — alongside the existing **Full Access** admin. The architecture is designed to support additional roles in future iterations. The system is managed by Full Access admins.
+
+> **MVP scope:** This PRD covers the AEP Manager role only. Future roles (Training & Simulations Manager, Dashboard Viewer, and others) are deferred and should be additive to this foundation.
 
 ---
 
-**Role Definitions**
-
-The platform defines four roles, each with a distinct permission boundary:
+**Role Definitions (MVP)**
 
 | Role | Platform Access | Write Access |
 |---|---|---|
-| Full Access | All surfaces: AEP, Training, Simulations, Dashboards, User Management | Full — create, edit, delete, assign across all surfaces |
-| AEP Manager | AI spear phishing campaign creation and management only | Create and manage AEP campaigns; no access to training, simulations, or org-level dashboards |
-| Training & Simulations Manager | Training modules and simulated attack campaigns | Create, assign, and manage training and simulated phishing campaigns; no AEP access |
-| Dashboard Viewer | Reporting and dashboards across all surfaces | None — read-only access to all dashboard views; cannot create, assign, or modify any content |
+| Full Access | All surfaces: Red Teaming (AEP tab), Org Dashboard, Users, Training, Simulations, Settings | Full — create, edit, delete, assign across all surfaces |
+| AEP Manager | Red Teaming dashboard — AEP tab only | Create and manage AEP campaigns; no access to Org Dashboard, Users, Training, Simulations, or Settings |
 
-**Full Access** admins are the only role that can invite users, assign or change roles, and access User Management. All other roles are scoped to their platform surface and cannot view or modify users or roles.
+**Full Access** admins are the only role that can invite users, assign or change roles, and access User Management. The AEP Manager role is scoped to the AEP tab within the Red Teaming dashboard and cannot view or navigate to any other platform surface.
 
 ---
 
