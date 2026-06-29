@@ -1,0 +1,56 @@
+{
+  "feature_name": "Role-Based Access Control (RBAC)",
+  "feature_slug": "rbac",
+  "written_at": "2026-06-29",
+  "flows": [
+    "Role Assignment During User Invite",
+    "Changing a User's Role",
+    "Platform Surface Gating",
+    "Role Badge and Navigation State"
+  ],
+  "actors": ["Full Access Admin", "AEP Manager", "Training & Simulations Manager", "Dashboard Viewer"],
+  "roles": {
+    "Full Access": "All platform surfaces, full write access including User Management",
+    "AEP Manager": "AEP campaign creation and management only; AEP-scoped dashboard",
+    "Training & Simulations Manager": "Training and simulated attack campaigns; training-scoped dashboard",
+    "Dashboard Viewer": "Read-only access to dashboards; no write access on any surface"
+  },
+  "wizard_steps": {
+    "User Invite": [
+      "Step 1 — Enter email address(es)",
+      "Step 2 — Select role per user (defaults to Dashboard Viewer)",
+      "Step 3 — Send invite"
+    ],
+    "Role Change": [
+      "Step 1 — Click role badge in User Management table",
+      "Step 2 — Select new role from inline selector",
+      "Step 3 — Confirm in modal"
+    ]
+  },
+  "key_fields": [
+    "User email",
+    "Role selector (Full Access / AEP Manager / Training & Simulations Manager / Dashboard Viewer)",
+    "Role badge (header / account menu)",
+    "Confirmation modal for role change"
+  ],
+  "integrations": [
+    "Risk Scoring Engine",
+    "Smart Groups",
+    "Adaptive Workflows",
+    "Email Notifications",
+    "Audit Log",
+    "Stillsuit DS v2"
+  ],
+  "edge_cases_count": 9,
+  "open_questions_flagged": [
+    "Can a Full Access admin self-assign a scoped role (effectively a self-demotion)?",
+    "Is there a concept of a Super Admin distinct from Full Access (e.g., for multi-tenant or MSP contexts)?",
+    "Does the Dashboard Viewer role have access to export/download reports, or is that a write action?",
+    "Should scoped dashboard views (AEP-only, training-only) be a separate permission flag or implied by role?",
+    "What is the deactivation vs. deletion model for users — does deactivation preserve role history in audit log?"
+  ],
+  "figma_used": false,
+  "source_docs_used": true,
+  "confidence": "medium",
+  "confidence_notes": "No Figma provided. Role definitions and surface gating are well-specified from the brief. Invite flow and role-change flow are inferred from platform conventions — confirm with Figma or PM before treating those UX details as final. Scoped dashboard behavior (what AEP Manager vs. Training Manager sees) is a material gap that needs explicit confirmation."
+}
