@@ -1,0 +1,74 @@
+{
+  "feature_name": "Role-Based Access Control (RBAC)",
+  "feature_slug": "rbac",
+  "goal": "Introduce four distinct roles that gate platform surface access and write permissions so each user only operates within their functional boundary.",
+  "user_segments": ["Full Access Admin", "AEP Manager", "Training & Simulations Manager", "Dashboard Viewer"],
+  "success_metrics": [
+    "Scoped users cannot access surfaces outside their role boundary via UI or direct URL",
+    "Full Access admins can assign and change roles without friction during invite and from User Management",
+    "Role changes take effect immediately without delayed sync"
+  ],
+  "constraints": [
+    "Only Full Access admins can invite users, assign roles, and access User Management",
+    "Role enforcement must be at both UI and API layers — no client-only gating",
+    "Last Full Access admin cannot downgrade their own role",
+    "Role changes must be recorded in the audit log"
+  ],
+  "assumptions": [
+    "Scoped managers (AEP, Training & Simulations) have no cross-surface dashboard visibility",
+    "Dashboard Viewers see all dashboard data across surfaces (not scoped) — creates an inversion vs. functional managers",
+    "Training and Simulations access is intentionally bundled into one role",
+    "Role change takes effect on next page load or API call, not via forced logout",
+    "SSO/SCIM provisioning is out of scope for v1",
+    "Bulk role operations are not required in v1"
+  ],
+  "gaps": [
+    "Dashboard Viewer 'all dashboard views' contradicts scoped manager dashboard filtering — scope must be reconciled",
+    "Export permissions for Dashboard Viewer are undefined — export is a read action not a write action",
+    "Granular write permissions within a surface (delete, archive, remove assignment) are unspecified for scoped managers",
+    "SSO/SCIM provisioning not addressed — enterprise buyers will ask immediately",
+    "Bulk role assignment flow not specified",
+    "Audit log surface location in UI not described",
+    "No access request path for scoped users who need elevated permissions",
+    "No first-login onboarding state for scoped users to understand their access boundary",
+    "Pending invite state (role change before activation) not addressed"
+  ],
+  "edge_cases": [
+    "Full Access admin downgrades own role — prevented only if last Full Access; otherwise allowed",
+    "Role downgrade for active session user — takes effect on next page load, not immediately",
+    "Scoped user navigates to gated URL — permission-denied empty state, not 404",
+    "Role change while user has active write-capable surface open",
+    "User with pending invite (unactivated) — can role be changed before activation?",
+    "Organization with only Dashboard Viewers — no functional work possible",
+    "User Management table with 100+ users — filtering by role not specified",
+    "Deactivation of Full Access admin — another Full Access admin must exist first",
+    "AEP Manager views Dashboards — sees AEP-scoped data only, not org-wide risk",
+    "Role change API call fails mid-confirmation — error state not defined"
+  ],
+  "critical_questions": [
+    { "owner": "PM", "question": "Is Dashboard Viewer access to all dashboard views intentional — giving them broader data visibility than functional managers?" },
+    { "owner": "PM", "question": "Can Dashboard Viewers export reports and data?" },
+    { "owner": "PM", "question": "Does 'manage' for scoped roles include delete, or only create/edit/assign?" },
+    { "owner": "Both", "question": "Is SCIM/IdP provisioning in scope for v1? If yes, what is the role attribute mapping schema?" },
+    { "owner": "PM", "question": "Is the Training and Simulations bundle intentional, or should simulation-only access be a separate role?" },
+    { "owner": "Eng", "question": "Must Full Access downgrade trigger immediate session invalidation, or is next-page-load acceptable from a security standpoint?" },
+    { "owner": "PM", "question": "Where does the audit log surface in the UI? Is it a dedicated admin surface or a sub-section of User Management?" },
+    { "owner": "Both", "question": "Is bulk role-change in scope for v1, or is single-user change the only supported pattern?" }
+  ],
+  "design_risks": [
+    "Dashboard Viewer vs. scoped manager data inversion will confuse admins assigning roles and may result in wrong role assignments",
+    "Hidden navigation (vs. disabled with tooltip) leaves new scoped users with no visibility into what they're missing — creates perceived setup errors",
+    "Dashboard Viewer default on invite is correct for least-privilege but may create a support burden when admins forget to change it",
+    "Permission-denied 'contact your admin' message dead-ends scoped users with no in-product access request path",
+    "Role downgrade without session invalidation allows a short window of unauthorized write access for destructive actions"
+  ],
+  "teaching_notes": [
+    "RBAC ships as UX: build a state matrix (role × surface × action type) as the first design artifact before opening Figma",
+    "Start from the existing User Management table — RBAC extends it with a role column, badge, and inline selector",
+    "Role badges should use Stillsuit DS v2 status badge component — confirm whether four new variants are needed before designing",
+    "Permission-denied state should use the standard Stillsuit DS v2 empty-state pattern with a consistent message structure",
+    "Audit log may be a net-new surface — check for existing activity log patterns in campaign history or elsewhere",
+    "API-layer enforcement (403 responses) is a backend concern — confirm Eng ownership before designing UI that assumes it"
+  ],
+  "last_updated": "2026-06-29"
+}
