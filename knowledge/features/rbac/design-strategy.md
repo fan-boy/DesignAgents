@@ -247,19 +247,19 @@ This is a differentiated pattern — no competitor provides a structured escalat
 
 ---
 
-### Screen 6: Scoped Dashboard (Role-Filtered)
+### Screen 6: AEP Manager Landing State (Red Teaming → AEP Library tab)
 
-**Role:** Dashboard surface adapted for scoped managers and Dashboard Viewers. Same UI component, different data scope.
+**Role:** The surface an AEP Manager sees after login. They land on the Red Teaming route with the AEP Library tab pre-selected. The Dashboard tab (org-level metrics: active campaigns, complicit rates, action required, all campaigns table) is hidden entirely — it is a reporting surface outside their scope.
 
-**AEP Manager view:** Shows AEP campaign performance metrics only. Charts, tables, and filters are scoped to AEP data. No training completion, simulation, or org-level risk data. Empty state if no campaigns yet: "No AEP campaigns yet. Create your first campaign to see data here."
+**Left nav for AEP Manager:** Only the Red Teaming item is visible under Agentic Simulations. All other nav sections (Risk Insights: Organization, Departments, Users, Groups, Reporting; other Agentic Simulation items: Email Phishing, AI Spearphishing, Smishing; Training; Campaign; Dynamic Workflows; Settings) are hidden.
 
-**Training & Simulations Manager view:** Shows training completion rates, simulation results, and related metrics. No AEP data. Empty state scoped to their surface.
+**Tab strip:** Only the AEP Library tab is visible. The Dashboard tab is not rendered for AEP Manager sessions.
 
-**Dashboard Viewer view:** Shows cross-surface data (all surfaces' metrics) in read-only mode. All interactive filters and chart controls work. Export is available (read-only action). Configuration and edit actions for dashboard widgets are hidden.
+**AEP Library content:** Unchanged from Full Access view — AEP Managers can create and manage AEPs as they do today. No data is filtered within this tab.
 
-**Full Access view:** Unchanged from current dashboard — full data, full write access.
+**Empty state:** If no AEPs have been created yet, standard AEP Library empty state applies.
 
-**Design note:** These are not four separate dashboard screens — they are the same dashboard component rendering role-filtered data. The role filter is applied at the API layer. The only visual difference is the presence or absence of data categories and the export/configure controls.
+**Design note:** This is a navigation and tab visibility change, not a data filtering change. The AEP Library tab content is identical for AEP Managers and Full Access admins. The only difference is what surrounds it.
 
 ---
 
