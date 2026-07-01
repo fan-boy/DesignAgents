@@ -1,0 +1,53 @@
+{
+  "feature_name": "Training Nudge",
+  "feature_slug": "training-nudge",
+  "written_at": "2026-06-25",
+  "last_updated": "2026-07-01",
+  "flows": [
+    "Org Dashboard — Nudge overdue training users (bulk, card-level)",
+    "All Users — Per-row nudge via Actions dropdown",
+    "All Users — Bulk nudge via contextual action bar",
+    "User Profile — Individual nudge",
+    "Risky BISO Teams (Clusters) — Team-level nudge via Actions dropdown"
+  ],
+  "actors": ["Admin", "Manager (BISO non-admin)"],
+  "wizard_steps": {
+    "Bulk nudge (All Users or Org Dashboard)": [
+      "Step 1 — Select users (checkboxes) or click bulk CTA",
+      "Step 2 — Confirmation modal with user count",
+      "Step 3 — Toast confirmation + row state update"
+    ],
+    "Cluster nudge (Risky BISO Teams)": [
+      "Step 1 — Open ··· Actions dropdown on cluster row",
+      "Step 2 — Select Nudge overdue users",
+      "Step 3 — Confirmation modal",
+      "Step 4 — Toast confirmation"
+    ]
+  },
+  "key_fields": [
+    "Overdue count (per user)",
+    "Training Status = Overdue (per training row)",
+    "Last nudged timestamp",
+    "Nudge overdue users CTA",
+    "Nudge (Actions dropdown item)",
+    "Bulk Nudge ([N] overdue) action bar button"
+  ],
+  "integrations": [
+    "Email Notifications (Training Sender Email Domain)",
+    "Risk Scoring Engine",
+    "Overdue Training Data",
+    "Audit / Last Nudged State"
+  ],
+  "edge_cases_count": 14,
+  "open_questions_flagged": [
+    "What does the nudge actually send — new template or re-trigger existing overdue email?",
+    "Rate limiting — is there a cooldown window and does it lock or just inform?",
+    "Manager attribution — email from manager name or Dune system?",
+    "Bulk nudge scope — one consolidated email or one per overdue training?",
+    "Last nudged display duration — how long does the timestamp show?"
+  ],
+  "figma_used": false,
+  "source_docs_used": true,
+  "confidence": "medium",
+  "confidence_notes": "All four confirmed surfaces are covered. Five open questions remain unresolved — particularly nudge email content and rate limiting — which affect how confirmation copy and disabled states are described. User Profile section is written from description only; no Figma frame was provided for that surface. Confidence would be high if open questions were resolved."
+}
