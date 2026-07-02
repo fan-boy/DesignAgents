@@ -1,9 +1,9 @@
 ## Last updated
-2026-07-02 — Standardised all CTA labels to use "nudge" consistently: bulk/card-level actions use "Nudge overdue users"; single-user actions use "Nudge user"; All Users bulk bar uses "Nudge ([N] overdue)". Updated BISO View two-state design: card-level bulk button and per-user expanded row button. Removed "Assign training" from Clusters dropdown (not in designs). Confirmed User Profile "Trainings Overdue" stat display.
+2026-07-02 — Standardised all CTA labels to use "nudge" consistently. Added sixth surface: Settings > Notifications — "Nudge Users" button on the Overdue Trainings Overview row for immediate manual nudge outside the automated schedule.
 
 ---
 
-The Training Nudge feature gives admins and managers a way to nudge users with overdue trainings without leaving the Dune Security platform. Prior to this feature, follow-up happened out of band via email or Slack, creating manual overhead and inconsistent coverage. The feature adds nudge actions across five surfaces: the Org Dashboard Training Status card, the BISO View (Alice Brown's team), the All Users table, individual User Profiles, and the Risky BISO Teams (Clusters) page. Admins can nudge at the card level, per-user level, or per-cluster level. Managers with BISO non-admin access can nudge their direct reports. All nudge actions are scoped to users with at least one overdue training; the action is hidden or disabled where no overdue trainings exist.
+The Training Nudge feature gives admins and managers a way to nudge users with overdue trainings without leaving the Dune Security platform. Prior to this feature, follow-up happened out of band via email or Slack, creating manual overhead and inconsistent coverage. The feature adds nudge actions across six surfaces: the Org Dashboard Training Status card, the BISO View, the All Users table, individual User Profiles, the Risky BISO Teams (Clusters) page, and Settings > Notifications. Admins can nudge at the card level, per-user level, per-cluster level, or trigger an immediate org-wide nudge from the notification settings page. Managers with BISO non-admin access can nudge their direct reports. All nudge actions are scoped to users with at least one overdue training; the action is hidden or disabled where no overdue trainings exist.
 
 ---
 
@@ -18,6 +18,7 @@ The Training Nudge feature gives admins and managers a way to nudge users with o
 | Clusters ··· dropdown | Nudge overdue users |
 | All Users Actions dropdown (per row) | Nudge user |
 | All Users bulk action bar | Nudge ([N] overdue) |
+| Settings > Notifications | Nudge Users |
 
 ---
 
@@ -73,11 +74,25 @@ This action is available to admins across all clusters and to managers scoped to
 
 ---
 
+**Settings > Notifications — Immediate Org-Wide Nudge**
+
+Under Settings > Notifications, the Training Reminder Notifications section contains an **Overdue Trainings Overview** row. This row controls the automated weekly nudge that goes out to all users with overdue trainings on a configured schedule ("Overdue reminders are sent out on every week on Tuesday at 2pm"). The row has a toggle, a **View/Edit Template** link, a **Change Schedule** button, and a **Nudge Users** button.
+
+The **Nudge Users** button lets an admin trigger an immediate org-wide nudge to all users who are currently overdue, independent of the scheduled send. This is the manual override for the automated cadence — useful when an admin wants to nudge users now rather than waiting for the next scheduled run. Clicking it follows the same confirmation and toast pattern as other bulk nudge actions: a modal confirms the intended send and a toast confirms delivery.
+
+The **Change Schedule** button opens the Custom Email Schedule modal, which allows the admin to configure the automated nudge cadence. The modal offers three frequency options — Daily, Weekly, and Monthly — a day-of-week selector (for Weekly), a send time picker, and a note that all sends are in UTC time.
+
+**View Overdue rules** is a link on this row that navigates to the organisation's configured overdue thresholds and rules. This is existing functionality; the nudge feature does not change it.
+
+This surface is admin-only. Managers do not have access to Settings > Notifications.
+
+---
+
 **RBAC**
 
 | Role | Surfaces available | Scope |
 |---|---|---|
-| Admin | Org Dashboard, BISO View (any team), All Users, User Profile, Clusters | All users in org |
+| Admin | Org Dashboard, BISO View (any team), All Users, User Profile, Clusters, Settings > Notifications | All users in org |
 | Manager (BISO non-admin) | BISO View (own team only), Clusters (own cluster only) | Direct reports only |
 | Regular user | None | No access |
 
