@@ -1,0 +1,66 @@
+{
+  "feature_name": "Netskope Risk Score Integration",
+  "feature_slug": "netskope-integration",
+  "analyzed_at": "2026-07-07",
+  "direct_competitors": ["Living Security"],
+  "adjacent_competitors": [],
+  "workflow_stages": [
+    "Data ingestion / integration setup",
+    "Composite score model",
+    "Score visibility / dashboards",
+    "Bi-directional write-back",
+    "Weighting configurability",
+    "Overlap / double-counting handling"
+  ],
+  "competitors": [
+    {
+      "name": "Living Security",
+      "url": "livingsecurity.com",
+      "tier": "direct",
+      "entry_point": "Not directly observed; inferred to be an Integrations/Data Sources admin area within the Unify platform, analogous to Dune's Settings > Integrations pattern",
+      "setup_friction": "Not publicly documented in detail; product materials describe 20+ prebuilt integrations plus a custom push API, implying a connect-and-configure model similar to Dune's",
+      "core_flow": [
+        "Connect one or more data sources across Email, Endpoint, Web, IAM, HR/Change, SIEM, UEBA/DLP, Training/LMS categories",
+        "Unify ingests, aggregates, and correlates signals plus OSINT data",
+        "Composite Human Risk Index (0-1000) computed across three named dimensions: Behavior, Threat, Identity",
+        "Scores surfaced via dashboards at organization, segment, department, and individual level",
+        "Managers view team-level risk via role-based Manager Scorecards in the Human Risk Operations Center (HROC)",
+        "For Netskope specifically: named human risk signals (phishing susceptibility, credential hygiene, DLP violations) are written back into Netskope's User Confidence Index to drive Netskope's own access-control enforcement"
+      ],
+      "feedback_states": ["Not publicly documented"],
+      "error_prevention": "Not publicly documented",
+      "trust_model": "Outcome-framed marketing ('adapts access controls to human, identity, and AI-driven risk'); no public disclosure of whether per-source weighting is admin-configurable or a black-box computation",
+      "rbac_notes": "Not publicly documented in detail; role-based Manager Scorecards imply at least a manager vs. admin distinction beyond a single admin tier",
+      "repeat_use_efficiency": "Not publicly documented",
+      "ai_personalization": "Described as 'AI-native' platform-wide; specific personalization mechanics not detailed in public materials",
+      "risk_score_surface": "Observed — Human Risk Index (0-1000), Behavior/Threat/Identity dimensions, multi-level dashboards (org/segment/department/individual), separate Manager Scorecards",
+      "remediation_path": "Implied via 'action plans' referenced in product materials; specific remediation mechanics not detailed publicly",
+      "confidence": "high for partnership existence and score architecture; medium for exact UI/configuration mechanics",
+      "source_notes": "Drawn from Living Security's own product pages (livingsecurity.com/solutions/unify-insights-overview, /platform, /humanriskmanagement), press release (prnewswire.com Unify Insights launch), and the Netskope partnership announcement (accessnewswire.com, Nov 2025). No live product session or screenshots observed; UI layout details are inferred from feature copy, not direct observation."
+    }
+  ],
+  "observed_patterns": [
+    "Named, grouped score dimensions (Behavior/Threat/Identity) rather than a flat per-vendor category list",
+    "Role-based rollup dashboards (Manager Scorecards, HROC) distinct from the individual score detail view",
+    "Write-back framed as exporting a computed signal to a downstream enforcement consumer, not as bidirectional score syncing"
+  ],
+  "anti_patterns": [
+    "Marketing a risk-signal partnership in outcome language without disclosing whether the underlying weighting is admin-configurable, undermining transparency as a differentiator",
+    "A flat, ungrouped category list that does not scale cleanly as more integrations are added"
+  ],
+  "differentiation_opportunities": [
+    "No competitor found, including Living Security, publicly documents a granular, admin-tunable weighting UI for external risk signal sources — confirmed true across both the CrowdStrike-adjacent and Netskope-adjacent competitive landscapes",
+    "Living Security ships a bi-directional Netskope integration today; no CrowdStrike-side competitor was found with an equivalent write-back capability, meaning Netskope write-back closes a competitive gap while CrowdStrike write-back (if ever built) would open a novel one — these two integrations should be framed differently in strategy, not treated as equivalent opportunities",
+    "A generalized signal-ingestion framework (raised independently in both CrowdStrike and Netskope technical research as an open question) is validated at scale by Living Security's actual product shape, strengthening the case for building it rather than maintaining parallel bespoke integrations"
+  ],
+  "design_implications": [
+    "Raise the flat-category-list scalability concern to design-strategist before a third integration makes restructuring more disruptive; consider named groupings analogous to Living Security's Behavior/Threat/Identity model",
+    "Frame Share Risk Signals as 'Dune exports a computed signal' rather than 'Dune and Netskope sync scores' in both internal docs and future customer-facing copy, to preserve the transparency differentiation and avoid the circular-framing problem the PRD already had to design around",
+    "Flag a future manager/team rollup view (distinct from the individual risk score detail view) as a v2 consideration, given Living Security treats this as a first-class, separately named feature rather than an afterthought"
+  ],
+  "confidence_notes": [
+    "High confidence on Living Security's Netskope partnership existence, data flow direction, and HRI composition — drawn directly from Living Security's own press release, product pages, and support documentation",
+    "Medium confidence on exact UI/dashboard layout and whether HRI weighting is admin-configurable — not observed directly, labeled as unconfirmed rather than observed-absent",
+    "No pricing or deep technical implementation detail was publicly available for the Living Security x Netskope write-back mechanics beyond solution-brief level detail"
+  ]
+}

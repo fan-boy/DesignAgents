@@ -85,6 +85,14 @@ Dune Security · Internal Knowledge · Last updated: 2026
 
 ---
 
+### Living Security
+**URL:** livingsecurity.com
+**Relevant for:** AI-native human risk management platform. Unify platform aggregates signals from a wide integration catalog (Email, Endpoint, Web, IAM, SIEM, UEBA/DLP, Training/LMS — including CrowdStrike, Netskope, Okta, Sophos, Tenable, Zscaler) into a composite Human Risk Index (0-1000, Behavior/Threat/Identity dimensions). Ships a live, named, bi-directional Netskope partnership (announced Nov 2025) — writes human risk signals back into Netskope's User Confidence Index to drive Netskope's adaptive access enforcement. Directly relevant any time a feature involves ingesting third-party security tool signals into a risk score, admin-configurable weighting, or bi-directional risk data exchange.
+**When to compare:** Risk-signal integration features (CrowdStrike, Netskope, or future EDR/SSE/IAM integrations), human risk scoring model design, bi-directional enforcement/write-back scoping, manager-facing risk scorecards.
+**When NOT to compare:** Training content quality, phishing simulation catalog depth, or SAT delivery mechanics — Living Security's platform is signal-aggregation and risk quantification first, not a content or simulation company.
+
+---
+
 ## Social Engineering Defense / Brand Protection
 
 ### Doppel
