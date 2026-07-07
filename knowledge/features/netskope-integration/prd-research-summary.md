@@ -1,5 +1,14 @@
 # PRD Research Summary — Netskope Risk Score Integration
 
+## Resolved with stakeholder — 2026-07-07
+RBAC stays Full Access-only. The Behavior Confidence/granular-category overlap stays a soft
+warning. Bi-directional write-back is **in scope for v1** — a scope expansion from consume-only,
+matching Living Security's shipped capability — via a new Share Risk Signals with Netskope flow.
+Because write-back and Behavior Confidence ingestion would otherwise create a circular scoring
+dependency, that specific combination is hard-blocked rather than soft-warned. See
+`open-questions.md` for the full resolution and the new questions write-back introduces
+(security review scope, remediation path for disputed signals).
+
 ## Feature summary
 A Full Access admin connects their organization's Netskope tenant so that Netskope-sourced
 behavioral, data-loss, threat, and app-usage signals become additional weighted inputs into each

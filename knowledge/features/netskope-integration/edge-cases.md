@@ -17,6 +17,8 @@
 - A user simultaneously flagged "No Endpoint Visibility" (CrowdStrike) and "No Netskope Visibility" (Netskope) — both sections would appear on one risk score detail view; combined framing/copy for this double-gap state is undefined.
 - Behavior Confidence enabled but the underlying UBA data hasn't populated yet for a new tenant — live preview and score breakdown behavior in this state is undefined, same class of gap flagged for CrowdStrike's category-weight-before-data-exists case.
 - Admin enables both Behavior Confidence and the five granular categories at meaningful weights — not blocked, only soft-warned; the resulting score movement compounds the same underlying behavior twice.
+- Admin's API token lacks write scope but they navigate to the Share Risk Signals page — shown locked with instructions to update token scope, rather than a broken or hidden page.
+- Admin attempts to enable Share Risk Signals while Behavior Confidence is active — Behavior Confidence is force-disabled with an explanation; this is a hard block, distinct from the soft-warned overlap case above.
 - Zero unmatched identities (clean mapping state) vs. very large unmatched identity list — same unresolved pagination/filter/empty-state question as CrowdStrike.
 - Client on base SSE tier only, without Advanced UEBA — Behavior Confidence row does not render; the five granular categories and No Netskope Visibility remain configurable.
 - Client has zero Netskope license coverage at all — connection fails at capability detection, integration never activates.
@@ -26,6 +28,9 @@
 - Setting all category weights (including Behavior Confidence) to 0% is functionally equivalent to disconnecting but has no equivalent confirmation or warning.
 - Admin disables Behavior Confidence after a period of active use — whether historical UCI-driven score contribution freezes (matching disconnect behavior) or immediately zeroes out is undefined.
 - Re-linking an already-mapped Netskope identity to a different Dune user (correcting a mismatch) is not restated in this PRD even though the equivalent CrowdStrike behavior exists — confirm rather than assume identical treatment.
+- A push of Dune-derived signals to Netskope's UCI Impact endpoint fails mid-cycle — surfaces as "Push delayed" on the Share Risk Signals page, distinct from ingestion sync errors, and Netskope continues enforcing on the last successfully pushed signal.
+- Admin disables Share Risk Signals after a period of active use — Dune cannot retract data already consumed by Netskope's scoring model; this irreversibility is stated to the admin at disable time rather than implied as a clean rollback.
+- A user's Dune risk signal is corrected or disputed after having already been pushed to Netskope and used in access enforcement there — no remediation path is described (see open-questions.md).
 - Admin changes weights while a sync is in progress — in-progress sync completes on old weights; new weights apply next cycle, matching the CrowdStrike pattern.
 - Saving new weights that would shift Smart Group membership or fire Adaptive Workflows automation has no described warning to the admin before saving, same unresolved gap as CrowdStrike.
 

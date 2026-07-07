@@ -1,7 +1,7 @@
 {
   "feature_name": "Netskope Risk Score Integration",
   "feature_slug": "netskope-integration",
-  "goal": "Let a Full Access admin connect Netskope and configure how Netskope-sourced signals weight into each user's Dune risk score, as the second integration in the risk-signal pattern established by CrowdStrike.",
+  "goal": "Let a Full Access admin connect Netskope to both pull Netskope-sourced signals into a user's Dune risk score and, optionally, push Dune-derived risk signals back into Netskope's User Confidence Index for its own enforcement.",
   "user_segments": ["Full Access Admin", "End User"],
   "success_metrics": [],
   "constraints": [
@@ -9,21 +9,21 @@
     "Netskope's data model is user-keyed via SCIM/SSO, unlike CrowdStrike's device-keyed model, so mapping is structurally simpler",
     "RBAC currently offers no admin persona narrower than Full Access, a gap now recurring for a second security-tooling integration",
     "Existing risk score recompute follows a scheduled cadence, not real-time",
-    "A second vendor now blends into the same risk score as CrowdStrike, introducing a cross-vendor normalization and correlation problem that did not exist with one integration"
+    "A second vendor now blends into the same risk score as CrowdStrike, introducing a cross-vendor normalization and correlation problem that did not exist with one integration",
+    "Write-back to Netskope's UCI requires write-scoped API credentials, a materially larger security review surface than read-only ingestion"
   ],
   "assumptions": [
-    "Architecture decisions (single blended score, IAM-identity mapping, Full Access-only RBAC, always-present no-visibility weight) were carried over from the CrowdStrike PRD by consistency, not freshly confirmed with a stakeholder for Netskope specifically",
+    "Single blended overall score and IAM-identity-based mapping are confirmed, carried over from the CrowdStrike precedent for consistency",
     "End users should see only a summary of what drives their score, not raw Netskope detail",
     "Weight changes apply on the next scheduled sync rather than instantly",
-    "Behavior Confidence (UCI) and the five granular categories may both be enabled at once; overlap is soft-warned, not blocked"
+    "Behavior Confidence (UCI) and the five granular categories may both be enabled at once (soft-warned, not blocked), except when Share Risk Signals is active, in which case Behavior Confidence is force-disabled to prevent a circular scoring dependency"
   ],
   "gaps": [
-    "Carried-over architecture decisions (RBAC scope, single blended score) not re-confirmed for Netskope specifically, despite plausible reasons to differ from the CrowdStrike answer",
-    "Behavior Confidence vs. granular category overlap handling is a soft warning, not a resolved product decision",
     "Cross-vendor signal correlation (CrowdStrike and Netskope both reporting the same real-world event) is unaddressed",
-    "Bi-directional write-back to Netskope's UCI is unresolved despite a live competitor precedent (Living Security)",
     "No combined normalization scheme across UCI's native scale, Netskope category severities, and CrowdStrike's category scores",
-    "No employee-facing disclosure update described for the new data source",
+    "No remediation path described for a user disputing a Dune signal already pushed to and consumed by Netskope",
+    "No stated security review process for write-back's expanded credential scope and third-party enforcement influence",
+    "No employee-facing disclosure update described for the new data source, now higher-stakes since Dune data also flows outward",
     "No success metric or rollout signal defined, same unresolved gap as CrowdStrike, now overdue across two integrations",
     "Capability re-detection and multi-tenant support unconfirmed, same open question as CrowdStrike, now recurring"
   ],
@@ -31,29 +31,31 @@
     "Netskope and CrowdStrike syncs both failing in the same window with no combined degraded-state view",
     "A user simultaneously flagged 'No Endpoint Visibility' and 'No Netskope Visibility'",
     "Behavior Confidence enabled before UBA data has populated for a new tenant",
-    "Admin disables Behavior Confidence after a period of use — historical contribution freeze vs. immediate zero-out is undefined",
+    "Admin attempts to enable Share Risk Signals while Behavior Confidence is active — force-disabled, not just warned",
+    "A push to Netskope's UCI Impact endpoint fails mid-cycle, distinct from an ingestion sync failure",
+    "Admin disables Share Risk Signals after active use — already-pushed data cannot be retracted from Netskope's own scoring model",
     "Re-linking a mismatched Netskope user mapping is not restated even though the equivalent CrowdStrike behavior exists"
   ],
   "critical_questions": [
-    { "owner": "PM", "question": "Should Full Access-only RBAC be reconsidered specifically for Netskope, given SSE/network teams are a more common real-world owner than SecOps?" },
-    { "owner": "PM", "question": "Should Behavior Confidence (UCI) and the granular categories be mutually exclusive, or is a soft warning the final answer?" },
-    { "owner": "Both", "question": "Is bi-directional write-back to Netskope's UCI in scope for any near-term version, given Living Security already ships this?" },
     { "owner": "Both", "question": "When CrowdStrike and Netskope both report signals traceable to the same real-world event for one user, should the blended score dampen, deduplicate, or allow compounding?" },
     { "owner": "Eng", "question": "What is the combined normalization method across UCI's native scale, Netskope category severities, and CrowdStrike's category scores?" },
+    { "owner": "Both", "question": "What security review is required before write-back ships, given Dune's risk data now directly influences a third-party system's access-control enforcement?" },
+    { "owner": "PM", "question": "What is the remediation path if a user disputes a Dune risk signal that has already been pushed to and consumed by Netskope?" },
     { "owner": "PM", "question": "Is there a defined success signal for this feature, now overdue across two risk-signal integrations?" },
     { "owner": "Eng", "question": "Does capability re-detection and multi-tenant support need to be solved generically across both integrations rather than per-vendor?" }
   ],
   "design_risks": [
-    "Silently inheriting CrowdStrike's architecture decisions risks shipping choices right for one vendor's ownership pattern and wrong for another's",
+    "Write-back materially raises the trust and security stakes of this feature beyond CrowdStrike's consume-only precedent — Dune is no longer just displaying a score, it is now feeding a third party's enforcement decisions",
     "A second vendor doubles the surface area for score opacity and for two vendors independently penalizing the same incident",
-    "Soft-warning the UCI/granular overlap normalizes double-counting and undermines Dune's stated differentiation of transparent, admin-visible weighting",
-    "Leaving bi-directional write-back unresolved without a stated rationale reads as an unaddressed competitive gap rather than a deliberate scope decision"
+    "Soft-warning the UCI/granular overlap normalizes double-counting for ingestion, even though the equivalent write-back combination was judged serious enough to hard-block — worth revisiting whether the ingestion-only overlap deserves the same treatment",
+    "Irreversibility of pushed signals (Dune cannot retract data Netskope has already consumed) needs to be surfaced clearly in the UI, not just documented in edge-cases.md, or admins will assume disabling the feature is a clean rollback"
   ],
   "teaching_notes": [
     "Treat crowdstrike-integration/design-strategy.md as the primary layout reference; reuse the settings page, category weight sliders, and score breakdown section directly rather than reinventing for Netskope",
     "knowledge/features/rbac/prd.json's open Super Admin question now has a second forcing function; this raises its priority rather than introducing a new consideration",
     "Netskope's UCI scale (1-1000, lower = riskier) is inverted relative to Dune's own risk score convention (higher = riskier) — never surface a raw UCI number without translating direction",
-    "Reuse the CrowdStrike 'who will this affect' live preview pattern rather than designing a second, differently-shaped preview"
+    "Reuse the CrowdStrike 'who will this affect' live preview pattern rather than designing a second, differently-shaped preview",
+    "Share Risk Signals is a net-new flow shape (outbound data configuration) that has no precedent elsewhere in Dune's product — design-strategist should treat it as a distinct pattern, not force it into the inbound weighting UI's shape"
   ],
   "last_updated": "2026-07-07"
 }

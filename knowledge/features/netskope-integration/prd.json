@@ -2,9 +2,11 @@
   "feature_name": "Netskope Risk Score Integration",
   "feature_slug": "netskope-integration",
   "written_at": "2026-07-07",
+  "last_updated": "2026-07-07",
   "flows": [
     "Connect Netskope",
     "Configure Risk Score Weights",
+    "Share Risk Signals with Netskope",
     "Review User Mapping",
     "Full Access Admin view of Netskope contribution to risk score",
     "End User view"
@@ -13,7 +15,7 @@
   "wizard_steps": {
     "Connect Netskope": [
       "Step 1 — Enter credentials (Tenant URL, API Token)",
-      "Step 2 — Test connection & detect capabilities",
+      "Step 2 — Test connection & detect capabilities (read and write scope)",
       "Step 3 — Set sync cadence & confirm"
     ]
   },
@@ -22,6 +24,7 @@
     "API Token",
     "Sync frequency",
     "Category weight sliders (Behavior Confidence, Data Loss Risk, Threat Exposure, Compromised Credentials, Shadow IT & App Risk, Enforcement & Watchlist Activity, No Netskope Visibility)",
+    "Share Risk Signals toggle and per-signal-type toggles (Training Overdue Status, Simulation Failure Events, Overall Dune Risk Tier)",
     "User mapping status (Matched / Unmatched Netskope identity / No Netskope data)"
   ],
   "integrations": [
@@ -34,16 +37,16 @@
     "Identity Provider / SSO",
     "CrowdStrike Integration"
   ],
-  "edge_cases_count": 10,
+  "edge_cases_count": 14,
   "open_questions_flagged": [
     "Should Dune build a generalized external risk signal ingestion framework shared with CrowdStrike, or treat Netskope as a second bespoke integration?",
-    "Should Behavior Confidence (UCI) and the granular categories be mutually exclusive, or is a soft warning sufficient?",
-    "Is bi-directional write-back (matching Living Security's shipped Netskope integration) in scope for any near-term version?",
     "What is the exact scoring/escalation math for the No Netskope Visibility weight?",
-    "Does Dune's credential storage handle Netskope's single-token model without new engineering work, given it already handles CrowdStrike's OAuth2 model?"
+    "Does Dune's credential storage handle Netskope's single-token model (including write scope) without new engineering work, given it already handles CrowdStrike's OAuth2 model?",
+    "What security review is required for write-back given Dune's risk data now influences a third-party enforcement system?",
+    "When CrowdStrike and Netskope both report signals traceable to the same real-world event, should the blended score dampen, deduplicate, or allow compounding?"
   ],
   "figma_used": false,
   "source_docs_used": true,
   "confidence": "medium",
-  "confidence_notes": "No Figma exists yet. Feature intent, signal categories, and licensing-gating behavior are well-grounded in Netskope API and product research, including a confirmed live competitor precedent (Living Security x Netskope). Architectural decisions were carried over from the CrowdStrike integration for consistency (single blended score, IAM-identity-based mapping, Full Access-only RBAC, always-present no-visibility weight) rather than re-confirmed fresh with the stakeholder for this feature specifically — flagged in open-questions.md as needing explicit sign-off rather than assumed. The Behavior Confidence / granular-category overlap handling and the generalized-framework question are net-new open questions specific to Netskope's two-shapes-of-signal structure."
+  "confidence_notes": "No Figma exists yet. Feature intent, signal categories, and licensing-gating behavior are well-grounded in Netskope API and product research, including a confirmed live competitor precedent (Living Security x Netskope). Following prd-research critique, three architectural decisions were resolved directly with the stakeholder: RBAC stays Full Access-only (matching CrowdStrike); the Behavior Confidence/granular-category overlap stays a soft warning; and bi-directional write-back is in scope for v1, a scope expansion from the original consume-only draft. Write-back introduces a new Share Risk Signals flow and a hard (not soft) constraint blocking Behavior Confidence and write-back from being enabled together, to prevent a circular scoring dependency. Exact UI layout, the No Netskope Visibility scoring formula, and the security review implications of write-back still need design-strategist input, Eng estimation, and eventual Figma validation."
 }
