@@ -1,0 +1,117 @@
+{
+  "feature_name": "CrowdStrike Risk Score Integration",
+  "feature_slug": "crowdstrike-integration",
+  "analyzed_at": "2026-07-07",
+  "direct_competitors": ["CybSafe", "SoSafe", "Hoxhunt"],
+  "adjacent_competitors": ["KnowBe4 (integration pattern reference only, not benchmarked)"],
+  "workflow_stages": [
+    "Configure risk score weighting",
+    "Ingest third-party signal",
+    "Blend signal into score",
+    "Surface score to admin"
+  ],
+  "competitors": [
+    {
+      "name": "CybSafe",
+      "url": "cybsafe.com",
+      "tier": "direct",
+      "entry_point": "Admin-only Risk Quantification Impact Settings screen",
+      "setup_friction": "None described beyond admin access; defaults exist out of the box (Major impact category)",
+      "core_flow": [
+        "Set Expected Monetary Loss (1-4) via slider or text box",
+        "Set Expected Level of Effort (1-4) via slider or text box",
+        "Set Expected Level of Disruption (1-4) via slider or text box",
+        "Click Apply to recalculate combined score (values multiply, 1x1x1 to 4x4x4) mapped to Minor/Moderate/Major/Extreme"
+      ],
+      "feedback_states": ["Immediate retroactive recalculation on Apply"],
+      "error_prevention": "Slider and text box paired for precise input; not observed to have confirmation step",
+      "trust_model": "Historical trend-over-time charts are explicitly protected from retroactive recalculation artifacts, preventing admin tuning from appearing as real score volatility",
+      "rbac_notes": "Not detailed in source material beyond 'admin' access",
+      "repeat_use_efficiency": "Single Apply action; no bulk or multi-step wizard needed",
+      "ai_personalization": "Not observed in this workflow",
+      "risk_score_surface": "Observed — impact category (Minor/Moderate/Major/Extreme) surfaced from weighted consequence factors, not third-party telemetry categories",
+      "remediation_path": "Not observed in this workflow",
+      "confidence": "medium",
+      "source_notes": "CybSafe Help Center article on risk quantification impact settings; no live product access"
+    },
+    {
+      "name": "SoSafe",
+      "url": "sosafe-awareness.com",
+      "tier": "direct",
+      "entry_point": "Human Risk OS product surface (marketing-described, not observed directly)",
+      "setup_friction": "Integrations with Okta, Microsoft Entra, Google Workspace for provisioning and targeting",
+      "core_flow": ["Not documented publicly at the admin-UI level"],
+      "feedback_states": ["Not documented publicly"],
+      "error_prevention": "Not documented publicly",
+      "trust_model": "Not documented publicly",
+      "rbac_notes": "Not documented publicly",
+      "repeat_use_efficiency": "Not documented publicly",
+      "ai_personalization": "Not specifically evidenced for this workflow",
+      "risk_score_surface": "Observed — Human Security Index blends behavioral telemetry with contextual modifiers (seniority, tenure, access level, functional criticality); no EDR/device telemetry ingestion evidenced",
+      "remediation_path": "Not documented publicly for this workflow",
+      "confidence": "low-medium",
+      "source_notes": "Product marketing and press release pages only; no admin help documentation found"
+    },
+    {
+      "name": "Hoxhunt",
+      "url": "hoxhunt.com",
+      "tier": "direct",
+      "entry_point": "Not documented publicly at the admin-UI level",
+      "setup_friction": "SCIM provisioning mentioned for Microsoft 365 environments",
+      "core_flow": ["Not documented publicly"],
+      "feedback_states": ["Not documented publicly"],
+      "error_prevention": "Not documented publicly",
+      "trust_model": "Not documented publicly",
+      "rbac_notes": "Not documented publicly",
+      "repeat_use_efficiency": "Not documented publicly",
+      "ai_personalization": "Not evidenced for this workflow",
+      "risk_score_surface": "Not evidenced as weighted or EDR-fed; behavior-based nudges described as triggered from Microsoft Defender signals",
+      "remediation_path": "Behavior-based nudge triggered from EDR signal, not a persistent score change",
+      "confidence": "low",
+      "source_notes": "Marketing/comparison pages only; no admin documentation found"
+    },
+    {
+      "name": "KnowBe4 (SecurityCoach x CrowdStrike)",
+      "url": "knowbe4.com",
+      "tier": "adjacent",
+      "entry_point": "Not benchmarked — referenced for integration architecture only per registry guidance",
+      "setup_friction": "Not documented at technical level in available source",
+      "core_flow": ["CrowdStrike detects a security event", "KnowBe4 triggers real-time coaching content to the affected user"],
+      "feedback_states": ["Not documented"],
+      "error_prevention": "Not documented",
+      "trust_model": "Not documented",
+      "rbac_notes": "Not documented",
+      "repeat_use_efficiency": "Not documented",
+      "ai_personalization": "Not evidenced for this workflow",
+      "risk_score_surface": "Not evidenced as blended; this integration is a trigger-based coaching mechanism, distinct from a weighted score input",
+      "remediation_path": "Real-time coaching content delivered on detected event",
+      "confidence": "low",
+      "source_notes": "Press release only, no technical documentation; intentionally not benchmarked on risk-scoring quality or catalog per knowledge/competitor-list.md 'when NOT to compare' guidance"
+    }
+  ],
+  "observed_patterns": [
+    "Decoupling retroactive weight recompute from historical trend chart continuity (CybSafe)",
+    "Pairing a slider with a precise numeric text input for every weighted factor (CybSafe)",
+    "Applying contextual risk modifiers based on role, seniority, or access level rather than uniform weighting (SoSafe, CybSafe)"
+  ],
+  "anti_patterns": [
+    "Trigger-only EDR integrations (KnowBe4, Hoxhunt) marketed adjacent to 'risk score' language without actually feeding a persistent, weighted score",
+    "Opaque 'combining telemetry' marketing language with no admin-visible explanation of the resulting calculation (SoSafe, and previously flagged for Right-Hand Cybersecurity in technical research)"
+  ],
+  "differentiation_opportunities": [
+    "No registry competitor publishes a documented, admin-tunable weighting model for third-party security-signal categories feeding a human risk score",
+    "No competitor publicly addresses how a person with zero instrumented telemetry (no EDR coverage) is treated in their score, making Dune's 'No Endpoint Visibility' signal a defensible, differentiated design choice"
+  ],
+  "design_implications": [
+    "Decouple live weight recompute from historical trend chart integrity when designing the risk score breakdown and any trend visualization",
+    "Pair every weight slider with a numeric input, not slider-only, in the Configure Risk Score Weights page",
+    "Write plain-language copy explaining what a weight change actually does to a score, since no competitor has solved this transparency gap",
+    "Flag role/access-based risk modifiers as a named future-phase idea, not required for v1"
+  ],
+  "confidence_notes": [
+    "CybSafe: medium confidence from a dedicated admin help center article",
+    "SoSafe and Hoxhunt: low-medium and low confidence respectively, marketing pages only, no admin documentation found",
+    "KnowBe4: low confidence, press release only, intentionally not benchmarked on risk-scoring quality per registry guidance",
+    "No live product trials or screenshots were available; all findings are from public marketing and help-center pages"
+  ]
+}
