@@ -1,0 +1,48 @@
+{
+  "feature_name": "CrowdStrike Risk Score Integration",
+  "feature_slug": "crowdstrike-integration",
+  "written_at": "2026-07-07",
+  "flows": [
+    "Connect CrowdStrike",
+    "Configure Risk Score Weights",
+    "Review User Mapping",
+    "Full Access Admin view of CrowdStrike contribution to risk score",
+    "End User view"
+  ],
+  "actors": ["Full Access Admin", "End User"],
+  "wizard_steps": {
+    "Connect CrowdStrike": [
+      "Step 1 — Enter credentials (region, Client ID, Client Secret)",
+      "Step 2 — Test connection & detect capabilities",
+      "Step 3 — Set sync cadence & confirm"
+    ]
+  },
+  "key_fields": [
+    "CrowdStrike Cloud Region",
+    "Client ID",
+    "Client Secret",
+    "Sync frequency",
+    "Category weight sliders (Identity Risk, Device Posture, Detected Threats, Unpatched Vulnerabilities, Account Hygiene)",
+    "User mapping status (Matched / Unmatched CrowdStrike identity / No CrowdStrike data)"
+  ],
+  "integrations": [
+    "Risk Scoring Engine",
+    "RBAC",
+    "Audit Log",
+    "Smart Groups",
+    "Adaptive Workflows",
+    "Email Notifications"
+  ],
+  "edge_cases_count": 9,
+  "open_questions_flagged": [
+    "Does Dune need a generalized external risk signal ingestion framework, or is this a CrowdStrike-specific build?",
+    "What is Dune's security posture for storing customer-provided CrowdStrike API credentials?",
+    "Is device-login-history-based user attribution accurate enough to trust for clients without Identity Protection licensed?",
+    "Should device-posture signals (ZTA, vulnerabilities) count toward individual user risk score, or a separate environment-level concept?",
+    "Should real-time streaming (vs. scheduled polling) be in scope for v1?"
+  ],
+  "figma_used": false,
+  "source_docs_used": true,
+  "confidence": "medium",
+  "confidence_notes": "No Figma exists yet. Feature intent, weighting model, and licensing-gating behavior are well-grounded in CrowdStrike API research. Exact UI layout (settings page structure, breakdown view placement) is inferred from Dune platform conventions and needs design-strategist input and eventual Figma validation. End user visibility of CrowdStrike-derived detail is assumed conservative (summary only) pending explicit product confirmation."
+}
