@@ -1,0 +1,69 @@
+flowchart TD
+    A[Settings > Integrations] --> B[Select Netskope tile]
+    B --> C[Connect wizard Step 1: Tenant URL, API Token]
+    C --> D[Connect wizard Step 2: test connection & detect read/write capabilities]
+    D --> E{Capability result?}
+    E -- Zero categories accessible --> F[Blocked: error message, cannot proceed]
+    F --> A
+    E -- Full or partial capability --> G[Connect wizard Step 3: set sync cadence]
+    G --> H[Confirm & activate integration]
+    H --> I[Redirect to Configure Risk Score Weights]
+    I --> J[One-time callout + recommended default weights shown, grouped into 3 clusters]
+    J --> K[Admin adjusts category weights via slider or numeric input]
+    K --> L[No Netskope Visibility row always present below second divider]
+    K --> M[Click Estimate impact - async preview]
+    M --> K
+    K --> N[Click Save]
+    N --> O{Would save cross a Smart Group threshold or fire an Adaptive Workflow?}
+    O -- Yes --> P[Cascade warning modal: plain-language impact summary]
+    P -- Cancel --> K
+    P -- Save Anyway --> Q[Weights saved]
+    O -- No --> Q[Weights saved]
+    Q --> R[Toast: applies starting next sync]
+
+    A --> S[Open Share Risk Signals with Netskope]
+    S --> T{Token has write scope?}
+    T -- No --> U[Page locked: instructions to update token scope and reconnect]
+    T -- Yes --> V[Admin enables master toggle]
+    V --> W{Is Behavior Confidence currently active?}
+    W -- Yes --> X[Confirmation modal: explains circular-dependency, Behavior Confidence will turn off]
+    X -- Cancel --> S
+    X -- Turn on Share Risk Signals --> Y[Behavior Confidence disabled on Weights page; master toggle commits]
+    W -- No --> Y
+    Y --> Z[Admin toggles individual signals: Training Overdue, Simulation Failure, Overall Risk Tier]
+    Z --> AA[Click Save]
+    AA --> AB[Toast: signals share starting next sync]
+
+    R --> AC[Scheduled sync runs]
+    AB --> AC
+    AC --> AD[Risk scores recompute with new weights; selected signals pushed to Netskope UCI]
+    AD --> AE[Admin views user risk score breakdown]
+    AE --> AF[Netskope source section: per-category badges + delta, translated from UCI scale]
+
+    AC --> AG{Sync/push outcome?}
+    AG -- Ingestion success --> AD
+    AG -- Ingestion partial category failure --> AH[Affected category flagged, others recompute normally]
+    AG -- Ingestion credential/connection failure --> AI[Connection error badge, scores hold at last-known values]
+    AG -- Push failure --> AJ[Push delayed status on Share Risk Signals page]
+    AG -- License downgrade removes a category --> AK[Category moves to No longer available section]
+
+    A --> AL[Open Review User Mapping]
+    AL --> AM{Match status per Netskope identity}
+    AM -- Auto-matched via SCIM/SSO identity --> AN[Contributes to that user's score]
+    AM -- Unmatched --> AO[Appears in mapping table for manual link]
+    AO --> AP[Admin links to a Dune user via drawer]
+    AP --> AN
+    AM -- No Netskope data for a Dune user --> AQ[Scored under No Netskope Visibility]
+
+    I --> AR[Admin sets all weights to 0%]
+    AR --> AS[Non-blocking banner suggests disconnect instead]
+
+    S --> AT[Admin disables Share Risk Signals master toggle after active use]
+    AT --> AU[Confirmation modal: past pushed data cannot be retracted from Netskope]
+    AU -- Cancel --> S
+    AU -- Turn off --> AV[Write-back stops; historical influence in Netskope remains]
+
+    A --> AW[Admin disconnects integration]
+    AW --> AX[Confirmation modal: historical contributions freeze; past pushed data cannot be retracted if Share Risk Signals was active]
+    AX -- Cancel --> A
+    AX -- Disconnect --> AY[Integration disconnected, scores hold at last computed value]

@@ -1,0 +1,53 @@
+{
+  "feature_name": "Netskope Risk Score Integration",
+  "feature_slug": "netskope-integration",
+  "design_goal": "Let an admin connect Netskope, tune its influence on risk score, and optionally share Dune's own risk signals outward, with full visibility into what each control does, without the two-vendor category list feeling cluttered or the write-back flow feeling opaque.",
+  "user_segments": ["Full Access Admin", "End User"],
+  "constraints": [
+    "RBAC scope is Full Access admin only, confirmed with stakeholder, matching the CrowdStrike precedent",
+    "Netskope base tier covers 5 of 7 categories; UI must render correctly for 1 to 7 available categories and should expect a fuller panel than CrowdStrike's by default",
+    "Connect credential model is a single API token, structurally simpler than CrowdStrike's OAuth2 flow; Step 1 should read as intentionally simpler, not a trimmed copy",
+    "Write-back requires write scope on the same token, detected separately from read-scope capability and must use distinct unavailable-reason copy (license vs. token scope)",
+    "Behavior Confidence and Share Risk Signals are mutually exclusive by hard block, not soft warning, and the UI must surface this as an active decision, not passive disabled-state copy alone",
+    "Sync and push both run on the same scheduled cadence as Connect Step 3; no real-time implication in either direction",
+    "Combined CrowdStrike (6) + Netskope (7) category rows approach the scalability limit of a flat list per competitor-analysis.md; this strategy groups Netskope's own page locally but defers cross-integration restructuring",
+    "No competitor, including Living Security, publicly documents admin-tunable weighting or write-back configurability to defer to as a convention"
+  ],
+  "selected_strategy": "Two distinct settings pages (Configure Risk Score Weights, Share Risk Signals with Netskope) with an explicit cross-reference at the point of conflict (Option C)",
+  "selected_strategy_rationale": "Sliders and toggles represent structurally different decisions (how much vs. whether); collapsing them into one page or one control style would misrepresent Share Risk Signals as a weighting decision. Separate pages with an active, modal-driven cross-reference at the exact moment the Behavior Confidence conflict triggers makes the outbound nature and stakes of write-back legible on its own terms, directly countering the competitor-analysis finding that Living Security's public materials describe write-back in outcome language without disclosing configurability.",
+  "alternative_strategies": [
+    { "name": "Mirrored twin page", "summary": "Build Share Risk Signals as a visually identical settings page to the weights page, differing only in data direction", "rejected_because": "Risks the two pages being mistaken for one continuous configuration surface, obscuring the important incoming-vs-outgoing distinction" },
+    { "name": "Single combined page with tab/section split", "summary": "One Netskope settings page with 'Pull from Netskope' and 'Push to Netskope' sections", "rejected_because": "Makes the hard-block Behavior Confidence conflict easier to miss in a long scrolling page rather than requiring the admin to confront it directly" }
+  ],
+  "tradeoffs": [
+    "Two separate pages risk under-discovery of the second page; mitigated with a status summary on the Integrations list tile showing both pull-category-count and push-signal-count at a glance",
+    "The explicit cross-reference callout and confirmation modal add UI surface area, deliberately, given write-back's third-party enforcement stakes",
+    "Deferring cross-integration category grouping (CrowdStrike + Netskope under named dimensions) means this feature ships a locally organized but globally still-flat two-integration surface"
+  ],
+  "assumptions": [
+    "Admins benefit from a page-local three-cluster grouping (Behavior Confidence / granular categories / No Netskope Visibility) on the weights page, short of full named-dimension restructuring",
+    "A confirmation modal, not just disabled-state copy, is warranted for the Behavior Confidence / Share Risk Signals conflict given it silently changes another page's configuration",
+    "Dashboard Viewer's read access question should be resolved jointly with CrowdStrike's identical open question, not answered twice"
+  ],
+  "open_issues": [
+    "Cross-integration category grouping across CrowdStrike and Netskope is out of scope for this strategy and should be its own design pass",
+    "No recommended default weight values defined for Netskope's categories",
+    "Whether Dashboard Viewer sees a read-only Netskope section on the risk score breakdown is unresolved, mirrors the same open CrowdStrike question",
+    "Exact UCI-to-Dune-badge-scale translation formula is an Eng question this strategy explicitly defers",
+    "Security review scope for write-back may surface new requirements (e.g. an audit trail of pushed data) not yet designed for"
+  ],
+  "risks": [
+    "Under-discovery of the Share Risk Signals page if an admin only ever visits the weights page",
+    "Getting the UCI-to-Dune-scale translation direction wrong at the display layer would silently invert risk severity for any admin reading the score",
+    "Softening the irreversibility warning copy (data already pushed to Netskope cannot be retracted) to match a generic settings-change pattern would understate real stakes"
+  ],
+  "ds_patterns_used": ["wizard", "table", "drawer", "modal", "badge", "toggle list"],
+  "new_patterns_required": ["Outbound signal configuration page (Share Risk Signals) — first instance of this pattern in Dune's product"],
+  "next_actions": [
+    "Build Connect wizard and Configure Risk Score Weights in Figma first, reusing CrowdStrike's components directly",
+    "Design Share Risk Signals as the first outbound-signal-configuration pattern instance; treat it as deserving dedicated design review, not a quick derivative of the weights page",
+    "Validate the conflict-modal copy with Eng once write-back's security review clarifies consent/audit requirements",
+    "Resolve recommended default weights and Dashboard Viewer visibility jointly with the equivalent open CrowdStrike items"
+  ],
+  "last_updated": "2026-07-07"
+}
