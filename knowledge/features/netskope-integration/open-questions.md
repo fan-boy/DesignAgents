@@ -1,0 +1,20 @@
+# Open Questions — Netskope Risk Score Integration
+
+## Unresolved
+- [ ] [PM] Should Full Access-only RBAC be reconsidered specifically for Netskope, given SSE/network teams are a more common real-world owner of this credential than SecOps (CrowdStrike's owner)?
+- [ ] [PM] Should Behavior Confidence (UCI) and the five granular categories be mutually exclusive, or is a soft inline warning the final answer?
+- [ ] [Both] Is bi-directional write-back to Netskope's UCI (matching Living Security's shipped integration) in scope for any near-term version? If out of scope for v1, the rationale should be stated explicitly rather than left silent.
+- [ ] [Both] When CrowdStrike and Netskope both report signals traceable to the same real-world security event for one user (e.g. a compromised credential flagged by both), should the blended score dampen, deduplicate, or allow compounding?
+- [ ] [Eng] What is the combined normalization method across Netskope's UCI native scale, Netskope category severities, and CrowdStrike's category scores, now that a common sub-score basis must support two vendors?
+- [ ] [PM] Does this feature require updating employee-facing risk score transparency messaging to disclose a second external data source?
+- [ ] [PM] Can a Dune organization connect more than one Netskope tenant (multi-tenant enterprises)?
+- [ ] [Eng] Is a bulk resolution path needed for user mapping at scale, or is one-at-a-time linking acceptable for v1?
+- [ ] [Eng] Does capability detection automatically re-run when a client's Netskope license changes, or is it a manual admin action?
+- [ ] [PM] Is there a defined success signal for this feature (adoption, score accuracy, support ticket volume), now overdue across two risk-signal integrations sharing this same open gap?
+- [ ] [Eng] Should Dune build a generalized external risk signal ingestion framework shared between CrowdStrike and Netskope, rather than maintaining two parallel bespoke builds? (carried from technical research, now reinforced by Living Security's own generalized-integration product shape)
+- [ ] [Both] What is Dune's security posture for storing a customer-provided Netskope API token (single static token, broad scope) — does existing credential storage handle this pattern without new engineering work? (carried from technical research)
+- [ ] [Eng] What is the exact scoring/escalation math for the No Netskope Visibility weight? (carried from technical research, mirrors the still-open equivalent CrowdStrike question)
+
+## Resolved
+- [x] [Eng] How is a Netskope user tied to a specific Dune person? — **Answer:** Directly, via the same IAM identity (email/UPN) Dune already resolves through SSO/SCIM provisioning, matched against Netskope's own SCIM/SAML-provisioned user record. This is structurally simpler than CrowdStrike's device-login heuristic and is stated explicitly in prd.md.
+- [x] [PM] Should Netskope categories be split into a separate score from CrowdStrike and training/simulation inputs, or blended into one score? — **Answer:** Blended into one overall score, for consistency with the CrowdStrike precedent. Carried over by assumption rather than freshly confirmed — flagged above as worth a deliberate re-check now that a second vendor is involved, not fully closed.
