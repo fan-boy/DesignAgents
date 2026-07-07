@@ -1,0 +1,48 @@
+flowchart TD
+    A[Settings > Integrations] --> B[Select CrowdStrike tile]
+    B --> C[Connect wizard Step 1: region, Client ID, Client Secret]
+    C --> D[Connect wizard Step 2: test connection & detect capabilities]
+    D --> E{Capability result?}
+    E -- Zero categories accessible --> F[Blocked: error message, cannot proceed]
+    F --> A
+    E -- Full or partial capability --> G[Connect wizard Step 3: set sync cadence]
+    G --> H[Confirm & activate integration]
+    H --> I[Redirect to Configure Risk Score Weights]
+    I --> J[One-time callout + recommended default weights shown]
+    J --> K[Admin adjusts category weights via slider or numeric input]
+    K --> L[No Endpoint Visibility row always present below divider]
+    K --> M[Click Estimate impact - async preview]
+    M --> K
+    K --> N[Click Save]
+    N --> O{Would save cross a Smart Group threshold or fire an Adaptive Workflow?}
+    O -- Yes --> P[Cascade warning modal: plain-language impact summary]
+    P -- Cancel --> K
+    P -- Save Anyway --> Q[Weights saved]
+    O -- No --> Q[Weights saved]
+    Q --> R[Toast: applies starting next sync]
+    R --> S[Scheduled sync runs]
+    S --> T[Risk scores recompute with new weights]
+    T --> U[Admin views user risk score breakdown]
+    U --> V[CrowdStrike source section: per-category badges + delta]
+
+    S --> W{Sync outcome?}
+    W -- Success --> T
+    W -- Partial category failure --> X[Affected category flagged, others recompute normally]
+    W -- Credential/connection failure --> Y[Connection error badge, scores hold at last-known values]
+    W -- License downgrade removes a category --> Z[Category moves to No longer available section]
+
+    A --> AA[Open Review User Mapping]
+    AA --> AB{Match status per CrowdStrike identity/device}
+    AB -- Auto-matched --> AC[Contributes to that user's score]
+    AB -- Unmatched --> AD[Appears in mapping table for manual link]
+    AD --> AE[Admin links to a Dune user via drawer]
+    AE --> AC
+    AB -- No CrowdStrike data for a Dune user --> AF[Scored under No Endpoint Visibility]
+
+    I --> AG[Admin sets all weights to 0%]
+    AG --> AH[Non-blocking banner suggests disconnect instead]
+
+    A --> AI[Admin disconnects integration]
+    AI --> AJ[Confirmation modal: historical contributions freeze, not deleted]
+    AJ -- Cancel --> A
+    AJ -- Disconnect --> AK[Integration disconnected, scores hold at last computed value]

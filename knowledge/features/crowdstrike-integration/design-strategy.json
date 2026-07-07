@@ -1,0 +1,49 @@
+{
+  "feature_name": "CrowdStrike Risk Score Integration",
+  "feature_slug": "crowdstrike-integration",
+  "design_goal": "Let an admin connect CrowdStrike and tune its influence on risk score with full visibility into what each weight does and what it will affect, without making an employee's score feel arbitrary or punitive.",
+  "user_segments": ["Full Access Admin", "End User"],
+  "constraints": [
+    "RBAC scope is Full Access admin only for v1",
+    "CrowdStrike module licensing varies per client tenant; UI must render correctly for 0 to 5 available categories",
+    "Sync is scheduled/polling-based, not real-time",
+    "Score composition, missing-coverage treatment, and mapping mechanism are already decided and must not be redesigned",
+    "No Endpoint Visibility escalation math is unresolved; UI must not assume a specific formula",
+    "No comparable admin-tunable third-party weighting UI exists in the competitor registry to defer to"
+  ],
+  "selected_strategy": "Guided handoff into a persistent settings page (Option C)",
+  "selected_strategy_rationale": "Matches the exact 3-step Connect wizard already specified in prd.md, avoids permanently treating ongoing weight tuning as a wizard step, and directly targets the misconfiguration risk flagged in prd-research-summary.md by starting admins from non-zero recommended defaults with a one-time explanatory callout.",
+  "alternative_strategies": [
+    { "name": "Wizard-only setup", "summary": "Fold weight configuration into the Connect wizard as additional steps", "rejected_because": "Couples an ongoing-tuning task to a one-time setup metaphor; revisiting weights later reads as re-onboarding" },
+    { "name": "Fully decoupled settings page", "summary": "Weight configuration lives as an independent page with no onboarding guidance beyond a toast link", "rejected_because": "Loses the opportunity to explain what each category measures at the moment the admin is most attentive" }
+  ],
+  "tradeoffs": [
+    "Requires a new PM/Eng decision on recommended default weight values for the pre-populated baseline",
+    "A permanently-dismissible callout means an admin who skims past it has no easy re-surface path without a persistent info affordance"
+  ],
+  "assumptions": [
+    "Admins benefit from non-zero recommended default weights rather than blank/zero sliders on first visit",
+    "Dashboard Viewer should see a read-only CrowdStrike section on the risk score breakdown by default, pending PM confirmation"
+  ],
+  "open_issues": [
+    "No recommended default weight values defined yet",
+    "Whether Dashboard Viewer sees a read-only CrowdStrike section on the risk score breakdown is unresolved",
+    "Bulk resolution UI for user mapping is deferred pending an open Eng question",
+    "Exact escalation math for No Endpoint Visibility remains open for Eng",
+    "Employee-facing disclosure copy update is unresolved and out of scope for this strategy's admin-facing screens"
+  ],
+  "risks": [
+    "Score volatility from weight changes could undermine trust if not decoupled from historical trend chart continuity",
+    "Admin misconfiguration (e.g., all weights at 0%) without recommended defaults could functionally disable the integration unnoticed",
+    "Cascade effects on Smart Groups and Adaptive Workflows could fire unnoticed without an explicit save-time warning"
+  ],
+  "ds_patterns_used": ["wizard", "table", "drawer", "modal", "badge"],
+  "new_patterns_required": [],
+  "next_actions": [
+    "Confirm recommended default weight values with PM/Eng before wireframing in Figma",
+    "Resolve the Dashboard Viewer visibility question before finalizing the risk score breakdown section",
+    "Build Connect wizard and Configure Weights page first in Figma as the critical path",
+    "Validate cascade-warning modal copy against real Smart Group/Adaptive Workflow data shapes with Eng"
+  ],
+  "last_updated": "2026-07-07"
+}
