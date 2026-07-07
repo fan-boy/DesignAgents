@@ -1,0 +1,66 @@
+Dune's Risk Scoring Engine currently derives a user's risk score from training completion, simulation performance, overdue status, and — following the CrowdStrike integration — endpoint and identity signals. This feature adds Netskope as a second risk score input source: a Full Access admin connects their organization's Netskope tenant, Dune pulls per-user behavioral, data-loss, threat, and app-usage signals for each mapped user, and the admin sets weights controlling how much each category of Netskope signal contributes to that user's overall risk score. Unlike CrowdStrike, Netskope's data model is natively user-centric, so the same IAM identity Dune already resolves through SSO/SCIM maps directly to Netskope's user records without a device-login heuristic. Because Netskope licensing varies by client (base SSE tier versus the separate Advanced UEBA add-on that powers Netskope's own User Confidence Index), the integration detects which data categories a given tenant can actually supply and only exposes weight controls for those categories. The feature covers connecting the integration, configuring category weights, reviewing user mapping, and viewing the Netskope contribution within the existing risk score breakdown.
+
+**Connect Netskope (Full Access Admin)**
+Admin connects their organization's Netskope tenant from Settings > Integrations. This is a three-step setup.
+
+| Step | Fields | Validation / Behaviour |
+|---|---|---|
+| Step 1 — Enter credentials | Netskope Tenant URL (e.g. `https://<tenant>.goskope.com`), API Token | Both fields required. API Token is masked and never re-displayed after save. Unlike CrowdStrike, there is no region selector or client secret — Netskope authenticates via a single tenant-scoped API token. |
+| Step 2 — Test connection & detect capabilities | Read-only capability summary generated from the credentials | Dune calls the Netskope REST API v2 and probes each alert/data type (DLP, Malware, Malsite, Compromised Credential, UBA, Security Assessment, Watchlist, Quarantine/Remediation, User Confidence Index). Displays which categories are available versus unavailable due to missing license (most commonly, Advanced UEBA not licensed, which affects User Confidence Index and full UBA detail). If the connection fails outright (bad token, invalid tenant URL, network error), the admin cannot proceed past this step. |
+| Step 3 — Set sync cadence & confirm | Sync frequency (Every 6 hours / Every 12 hours / Every 24 hours, default 24 hours) | Confirms and activates the integration. Redirects to the Configure Weights screen with a success toast: "Netskope connected. Set up how it affects risk scores below." |
+
+**Configure Risk Score Weights (Full Access Admin)**
+A settings page under Settings > Integrations > Netskope > Risk Score Weights. Each row is a signal category with a weight slider (0–100%) and a short plain-English description of what it measures. Only categories detected as available in Step 2 of Connect Netskope are shown; unavailable categories are omitted entirely rather than shown disabled, since the admin cannot act on data their license doesn't include.
+
+| Category | Description shown to admin | Source requirement |
+|---|---|---|
+| Behavior Confidence | Netskope's own behavioral risk score for this person, based on their full activity history in Netskope | Advanced UEBA (User Confidence Index) |
+| Data Loss Risk | Sensitive data policy violations by this person, weighted by data type and destination | Base tier (DLP) |
+| Threat Exposure | Malware and malicious site encounters in this person's web and cloud traffic | Base tier (CASB/SWG inline) |
+| Compromised Credentials | This person's credentials found exposed in breach data | Base tier (Compromised Credential alerts) |
+| Shadow IT & App Risk | Use of unsanctioned or low-trust cloud applications by this person | Base tier (CASB) |
+| Enforcement & Watchlist Activity | How often this person's activity required a policy block or quarantine, and whether they're on an admin-defined watchlist | Base tier (Policy/Quarantine/Remediation, Watchlist) |
+| No Netskope Visibility | This person has no managed traffic or activity found in Netskope at all | None (always shown) |
+
+Behavior Confidence and the five granular categories beneath it are drawn from overlapping underlying signals — Netskope's own User Confidence Index is itself computed from the same behavioral, DLP, and threat alerts the granular categories expose individually. To avoid double-counting the same underlying behavior twice in one blended score, an admin enabling Behavior Confidence sees an inline notice recommending they either use Behavior Confidence alone or the five granular categories alone, rather than both at meaningful non-zero weights. Dune does not hard-block setting both, since some organizations may intentionally want partial overlap, but the recommendation and the reasoning behind it are shown directly in the UI rather than left implicit.
+
+Weights are independent per category (not forced to sum to 100%) and combine with the existing training/simulation and CrowdStrike risk inputs already in the Risk Scoring Engine as one blended overall risk score — Netskope categories are not split into a separate score from other inputs. A live preview panel shows how many currently-scored users would see their risk score change, and by roughly how much, before the admin saves. Saving weight changes triggers a recompute of all mapped users' risk scores on the next scheduled sync, not instantly, consistent with the existing risk score recompute cadence and the CrowdStrike integration's behavior.
+
+A seventh, always-present row, **No Netskope Visibility**, controls how much a user's score is affected by having no Netskope activity found at all (no managed traffic ever seen for this identity). As with the equivalent CrowdStrike row, lack of visibility is treated as a risk-relevant signal rather than a neutral non-event. This weight defaults to a moderate, non-zero value rather than 0%, and is shown even for tenants where no other Netskope category is licensed, since it only requires knowing whether a user has any Netskope presence at all. The exact scoring/escalation math for this row is an open question for Eng (see open-questions.md), consistent with how the same question was left open for CrowdStrike's equivalent row.
+
+**Review User Mapping (Full Access Admin)**
+Netskope identifies users directly (its user records are themselves synced from the customer's IdP via SCIM or SAML provisioning), so mapping is more direct than CrowdStrike's device-login heuristic — Netskope's user identity (UPN or email) is matched against the Dune user's IAM identity (the email/UPN from SSO or SCIM provisioning) already used elsewhere in the platform. A table under Settings > Integrations > Netskope > User Mapping shows three states: Matched, Unmatched Netskope identity (data exists in Netskope but no corresponding Dune user was found — typically service accounts or contractors not provisioned in Dune), and Dune users with no Netskope data (no license coverage, or the user's traffic was never routed through Netskope — these are the users the No Netskope Visibility weight applies to). Unmatched Netskope identities do not affect any risk score. Admins can manually link an unmatched Netskope identity to a Dune user from this table.
+
+**Full Access Admin view of Netskope contribution to risk score**
+On a user's existing risk score detail view, a new "Netskope" source section appears alongside the existing Training, Simulation, and CrowdStrike contribution sections, showing the per-category sub-scores and their configured weights. If a category is not licensed for this tenant, it does not appear. If the user has no Netskope mapping at all, the section shows a distinct "No Netskope Visibility" flag and its contribution to the score, rather than omitting the section or implying a clean result.
+
+**End User view**
+End users continue to see only their overall risk score and the existing framing of what drives it in general terms, consistent with the platform's principle of showing risk scores in the context of action rather than as raw underlying data. Netskope-sourced detail (specific DLP violations, app usage, compromised credential hits) is not surfaced to the end user directly, matching the treatment already established for CrowdStrike-sourced detail.
+
+Integration Points
+
+| Integration | Description |
+|---|---|
+| Risk Scoring Engine | Netskope category scores become additional weighted inputs alongside training completion, simulation performance, and CrowdStrike signals in the existing per-user risk score calculation. |
+| RBAC | Connecting the integration, editing weights, and manually resolving user mapping are Full Access admin actions only. Scoped admin roles (AEP Manager, Training & Simulations Manager, Dashboard Viewer) do not see the Integrations settings surface. |
+| Audit Log | Connecting, disconnecting, and changing category weights are timestamped and recorded, consistent with other admin configuration changes. |
+| Smart Groups | Once Netskope contributes to risk score, any Smart Group defined by a risk score threshold is indirectly affected by Netskope data without further configuration. |
+| Adaptive Workflows | Existing risk-score-triggered automation is unaffected in mechanism, but may fire more often or for different users once Netskope weights are active. |
+| Email Notifications | No new notification type introduced by this feature; integration connection failures surface in-product only. |
+| Identity Provider / SSO | The IAM identity (email/UPN) Dune already resolves through SSO or SCIM provisioning is the join key used to match Netskope user records to a Dune user record. |
+| CrowdStrike Integration | Shares the same weighting UI pattern, capability-detection approach, and risk score blending model. If Dune builds a generalized external risk signal framework (see open-questions.md), this integration is the first candidate to share that infrastructure with CrowdStrike rather than duplicating it. |
+
+Edge Cases & System Behaviour
+
+| Scenario | Behaviour |
+|---|---|
+| Netskope API token expires, is revoked, or is rotated mid-use | Next scheduled sync fails; integration status shows "Connection error" with the last successful sync timestamp; risk scores continue using the last successfully synced Netskope data until reconnected. |
+| Client is on Netskope's base SSE tier only, without Advanced UEBA | Behavior Confidence weight row is not shown; the five granular categories and No Netskope Visibility remain configurable. |
+| Client has no Netskope license at all (evaluating the integration only) | Connection step fails at capability detection with a clear message identifying no accessible data categories; integration is not activated. |
+| Netskope identity has no matching Dune user | Data is retained for the User Mapping review table for admin resolution; it never contributes to any risk score while unmatched. |
+| Dune user has no Netskope presence at all (traffic never routed through Netskope, e.g. unmanaged personal device) | Scored under the always-present No Netskope Visibility weight rather than excluded or treated as neutral; the user's risk score detail shows this as a distinct flag, not a blank Netskope section. |
+| Admin enables both Behavior Confidence and the granular categories at meaningful weights | Both are still applied to the blended score (not blocked), but an inline notice explains the overlap risk and recommends choosing one approach. |
+| Admin disconnects the integration | Historical Netskope-sourced score contributions are frozen at their last computed value rather than removed; no further recompute occurs from Netskope inputs until reconnected. |
+| Admin sets a category weight to 0% | The category still displays in the score breakdown for transparency but no longer contributes numerically. |
+| Sync in progress when an admin changes weights | The in-progress sync completes using the previous weights; new weights apply starting with the next scheduled sync. |
+| Netskope API rate limiting or transient error during sync | Sync retries on the next scheduled interval; integration status shows "Sync delayed" rather than "Connection error" if the failure is transient rather than a credential/permission failure. |
