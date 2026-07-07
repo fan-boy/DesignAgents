@@ -1,0 +1,67 @@
+{
+  "feature_name": "CrowdStrike Risk Score Integration",
+  "feature_slug": "crowdstrike-integration",
+  "goal": "Let a Full Access admin connect CrowdStrike Falcon and configure how CrowdStrike-sourced signals weight into each user's Dune risk score.",
+  "user_segments": ["Full Access Admin", "End User"],
+  "success_metrics": [],
+  "constraints": [
+    "CrowdStrike module licensing varies per client tenant (Falcon Insight core, Identity Protection, Spotlight, Discover are separately licensed)",
+    "CrowdStrike's data model is device/identity-keyed, not user-keyed, requiring a mapping layer",
+    "RBAC currently offers no admin persona narrower than Full Access for a security-tooling-owner use case",
+    "Existing risk score recompute follows a scheduled cadence, not real-time"
+  ],
+  "assumptions": [
+    "One CrowdStrike tenant (Client ID/Secret) maps to exactly one Dune organization",
+    "End users should see only a summary of what drives their score, not raw CrowdStrike detail",
+    "Weight changes apply on the next scheduled sync rather than instantly",
+    "All CrowdStrike categories, including device/environment signals, blend into one overall risk score rather than a separate human vs. environment score (confirmed with stakeholder)",
+    "Users with zero CrowdStrike coverage are scored under a distinct 'No Endpoint Visibility' weight rather than excluded or treated as neutral (confirmed with stakeholder)",
+    "RBAC scope for this feature is Full Access admin only for v1 (confirmed with stakeholder)"
+  ],
+  "gaps": [
+    "No definition of how the CrowdStrike contribution mathematically combines with existing training/simulation risk score",
+    "No normalization scheme across ZTA scores, detection severity, vulnerability counts, and account hygiene flags",
+    "No exact scoring/escalation math defined for the new No Endpoint Visibility weight",
+    "No employee-facing disclosure update described for the new data source",
+    "Multi-tenant (multi-CID) support unconfirmed",
+    "No bulk resolution path for user mapping at scale",
+    "Capability re-detection behavior after a license change is unspecified",
+    "No success metric or rollout signal defined anywhere in source material"
+  ],
+  "edge_cases": [
+    "First activation full sync of a large user base with no progress indication",
+    "Partial per-category sync failure (one scope fails while others succeed)",
+    "Previously available category becomes unavailable after a license downgrade",
+    "Zero unmatched identities vs. very large unmatched identity list",
+    "Weight set above 0% for a category with no synced data yet",
+    "Disconnecting the integration with no confirmation step",
+    "All weights set to 0% functioning like an undeclared disconnect",
+    "Re-linking an already-mapped identity to correct a mismatch"
+  ],
+  "critical_questions": [
+    { "owner": "Both", "question": "How does the weighted CrowdStrike contribution mathematically combine with the existing training/simulation risk score, and is there a cap on score movement per sync cycle?" },
+    { "owner": "Eng", "question": "What is the normalization method for turning ZTA scores, detection severity, CVE counts, and account hygiene flags into a common 0-100 sub-score before weights are applied?" },
+    { "owner": "Eng", "question": "What is the exact scoring/escalation math for the No Endpoint Visibility weight?" },
+    { "owner": "PM", "question": "Does this feature require updating employee-facing risk score transparency messaging to disclose the new data source?" },
+    { "owner": "PM", "question": "Can a Dune organization connect more than one CrowdStrike tenant (multi-CID enterprises)?" },
+    { "owner": "Eng", "question": "Is a bulk resolution path needed for user mapping at scale, or is one-at-a-time linking acceptable for v1?" },
+    { "owner": "Eng", "question": "Does capability detection automatically re-run when a client's CrowdStrike license changes, or is it a manual admin action?" },
+    { "owner": "PM", "question": "Is there any defined success signal for this feature that should shape build priority?" }
+  ],
+  "design_risks": [
+    "Score volatility from CrowdStrike-driven changes undermines the platform's calm-authority trust tone if changes are large, frequent, or unexplained",
+    "Folding device/environment posture into a 'human risk' score risks feeling arbitrary or unfair since users don't control patch cadence or sensor health",
+    "Coverage bias: users without full CrowdStrike coverage (BYOD, contractors, exempted execs) score differently for reasons unrelated to actual risk",
+    "Unconstrained independent weight sliders with no recommended defaults make misconfiguration easy and its downstream effects invisible",
+    "Requiring Full Access to configure a security-tooling integration mismatches real-world ownership and may stall enterprise adoption",
+    "No admin-facing warning when saved weights would shift Smart Group membership or fire Adaptive Workflows automation"
+  ],
+  "teaching_notes": [
+    "Reuse the existing risk score badge and Critical/High/Medium/Low scale from knowledge/design-system-rules.md for any CrowdStrike contribution breakdown; never show a raw sub-score without the badge treatment",
+    "The 5-category weight configuration should be a full settings page, not a modal or drawer, per design-system-rules constraints on form length",
+    "knowledge/features/rbac/prd.json already has an open, unresolved question about a Super Admin distinct from Full Access; this feature is a concrete forcing function for that decision",
+    "Reuse the scheduled-polling snapshot-diff sync model already used elsewhere for risk-score-triggered automation rather than designing a bespoke sync UX",
+    "Extend the 'who will this affect' preview pattern used for group-targeted automation to cover Smart Group and Adaptive Workflow cascades when weights are saved"
+  ],
+  "last_updated": "2026-07-07"
+}

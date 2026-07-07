@@ -22,7 +22,7 @@
     "Client ID",
     "Client Secret",
     "Sync frequency",
-    "Category weight sliders (Identity Risk, Device Posture, Detected Threats, Unpatched Vulnerabilities, Account Hygiene)",
+    "Category weight sliders (Identity Risk, Device Posture, Detected Threats, Unpatched Vulnerabilities, Account Hygiene, No Endpoint Visibility)",
     "User mapping status (Matched / Unmatched CrowdStrike identity / No CrowdStrike data)"
   ],
   "integrations": [
@@ -31,18 +31,19 @@
     "Audit Log",
     "Smart Groups",
     "Adaptive Workflows",
-    "Email Notifications"
+    "Email Notifications",
+    "Identity Provider / SSO"
   ],
-  "edge_cases_count": 9,
+  "edge_cases_count": 10,
   "open_questions_flagged": [
     "Does Dune need a generalized external risk signal ingestion framework, or is this a CrowdStrike-specific build?",
     "What is Dune's security posture for storing customer-provided CrowdStrike API credentials?",
-    "Is device-login-history-based user attribution accurate enough to trust for clients without Identity Protection licensed?",
-    "Should device-posture signals (ZTA, vulnerabilities) count toward individual user risk score, or a separate environment-level concept?",
+    "What is the exact scoring/escalation math for the No Endpoint Visibility weight?",
     "Should real-time streaming (vs. scheduled polling) be in scope for v1?"
   ],
   "figma_used": false,
   "source_docs_used": true,
   "confidence": "medium",
-  "confidence_notes": "No Figma exists yet. Feature intent, weighting model, and licensing-gating behavior are well-grounded in CrowdStrike API research. Exact UI layout (settings page structure, breakdown view placement) is inferred from Dune platform conventions and needs design-strategist input and eventual Figma validation. End user visibility of CrowdStrike-derived detail is assumed conservative (summary only) pending explicit product confirmation."
+  "confidence_notes": "No Figma exists yet. Feature intent, weighting model, and licensing-gating behavior are well-grounded in CrowdStrike API research. Product decisions on score blending (single blended score), missing-coverage treatment (No Endpoint Visibility as a distinct non-neutral signal), and mapping (via existing IAM identity) were confirmed directly with the stakeholder during PRD research. Exact UI layout (settings page structure, breakdown view placement) and the precise No Endpoint Visibility scoring formula still need design-strategist input, Eng estimation, and eventual Figma validation.",
+  "last_updated": "2026-07-07"
 }
