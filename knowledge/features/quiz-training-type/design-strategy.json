@@ -1,0 +1,49 @@
+{
+  "feature_name": "Quiz Training Type",
+  "feature_slug": "quiz-training-type",
+  "design_goal": "Let an admin turn an uploaded question set into a trustworthy, assignable knowledge check in minutes using patterns already established by Policies and Modules, and let a learner complete it with an unambiguous pass/fail outcome and a clear path forward on failure.",
+  "user_segments": ["Admin", "End User"],
+  "constraints": [
+    "JSON upload is the only question-authoring mechanism, no in-UI question builder",
+    "Must reuse the existing Training Library tab, Assign Module wizard, and per-user Training Status table rather than inventing new structures",
+    "RBAC is unresolved and must not be guessed",
+    "Attempt limit (3) exists but its terminal behavior is undefined",
+    "Stillsuit DS v2 patterns only: wizard, table, modal/drawer, badge, accordion/disclosure list"
+  ],
+  "selected_strategy": "Quiz as a Policy-shaped standalone content type, assigned through a reused Assign Module wizard",
+  "selected_strategy_rationale": "Quiz needs its own Library tab and create wizard like Policy (a single-document, standalone content type), but unlike Policy it needs a per-assignment Assessment step (passing score, retake) which only exists in the Assign Module wizard today. Reusing that wizard structure avoids inventing a third assignment pattern in this product area.",
+  "alternative_strategies": [
+    { "name": "Auto-reassign / cooldown reset on attempt exhaustion", "summary": "After a learner exhausts 3 attempts, automatically grant a new attempt cycle after a cooldown period without admin action.", "rejected_because": "Introduces new scheduling logic not present anywhere else in this feature or its closest precedent (Policies), and risks learners treating failure as something to wait out rather than re-engage with." }
+  ],
+  "tradeoffs": [
+    "Terminal failed state after 3 attempts gives the learner no self-service path back into compliance; admins must notice and manually reassign",
+    "Reusing the full 4-step Assign Module wizard is heavier than Policy's single Assign action, even though Quiz is a single-item content type like Policy",
+    "JSON-only authoring remains the feature's biggest unresolved trust risk; this strategy treats validation UX as first-class but does not fully specify it pending content design input"
+  ],
+  "assumptions": [
+    "Assign Quiz reuses the full Assign Module wizard structure (Assignment Type, Assessment, Assign To, Review) per stakeholder decision",
+    "Passing score and retake-on-fail are configurable per assignment, pre-filled from quiz publish-time defaults, per stakeholder decision",
+    "Quiz-taking withholds feedback until final scoring with no per-question reveal, per stakeholder decision"
+  ],
+  "open_issues": [
+    "Which roles can create, publish, or assign a Quiz (RBAC undefined)",
+    "Exact validation messaging and error taxonomy for malformed/empty/oversized JSON uploads",
+    "Whether a published quiz can be edited/re-versioned and whether that forces a retake for already-completed users",
+    "Whether Quiz completion feeds the Risk Scoring Engine the same way module assessments do",
+    "Whether a dedicated 'New Quiz Assigned' email exists or the generic assignment template is reused"
+  ],
+  "risks": [
+    "Terminal failure state creates support load if admins don't proactively monitor 'Failed — Attempts exhausted' status",
+    "Assign Quiz's Step 1 (Assignment Type) may feel like a pointless single-option screen since a quiz has no 'individual trainings' split like a Module does",
+    "Weak JSON validation UX turns the feature's clearest differentiator (bulk question authoring) into its biggest support burden"
+  ],
+  "ds_patterns_used": ["wizard", "table", "modal", "drawer", "badge", "accordion"],
+  "new_patterns_required": [],
+  "next_actions": [
+    "Confirm the attempt-exhaustion strategy (terminal failed state) with PM before wireframing end-user fail states",
+    "Design the JSON upload error-state taxonomy with content design before finalizing the Content step",
+    "Build Create Quiz and Assign Quiz wireframes on top of existing Assign Module and Policy Library Figma components rather than from scratch",
+    "Flag RBAC and email-template open issues to PM now rather than at handoff"
+  ],
+  "last_updated": "2026-07-08"
+}

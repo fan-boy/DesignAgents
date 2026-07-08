@@ -1,0 +1,47 @@
+flowchart TD
+    A[Admin opens Quiz tab] --> B[Click Create Quiz]
+    B --> C[Step 1: Basic Info - title, description]
+    C --> D{Title entered?}
+    D -- No --> C
+    D -- Yes --> E[Step 2: Content - download template, upload JSON]
+    E --> F{JSON valid and non-empty?}
+    F -- No --> G[Inline error: malformed/empty/oversized file]
+    G --> E
+    F -- Yes --> H[Show upload success + question count]
+    H --> I[Admin reviews questions in accordion]
+    I --> J[Step 3: Publish - set default passing score + retake toggle]
+    J --> K[Click Publish Quiz]
+    K --> L[Publishing quiz... state]
+    L --> M[Success toast - quiz is now live]
+    M --> N[Quiz appears in Quiz tab, status Published]
+
+    N --> O[Admin clicks Assign on quiz row]
+    O --> P[Assign Step 1: Assignment Type - single unit]
+    P --> Q[Assign Step 2: Assessment - confirm/override passing score + retake]
+    Q --> R[Assign Step 3: Assign To - Users/Departments/Custom Groups/Smart Groups]
+    R --> S[Assign Step 4: Review]
+    S --> T[Click Assign Quiz]
+    T --> U[Live assignment progress X/Y]
+    U --> V{Any per-user failures?}
+    V -- Yes --> W[Results: success count + failure table, e.g. already assigned]
+    V -- No --> X[Results: assigned successfully to N users]
+
+    W --> Y[Learner sees Quiz card on dashboard]
+    X --> Y
+    Y --> Z[Learner clicks Start Quiz]
+    Z --> AA[Question N of M, Attempt X/3, single-select MCQ]
+    AA --> AB[Click Next]
+    AB --> AC{More questions?}
+    AC -- Yes --> AA
+    AC -- No --> AD[Score evaluated against assignment passing score]
+    AD --> AE{Score >= passing score?}
+    AE -- Yes --> AF[Passed - marked Completed]
+    AE -- No --> AG{Retake on fail enabled AND attempts < 3?}
+    AG -- Yes --> AH[Failed - Retake Quiz action]
+    AH --> AA
+    AG -- No --> AI[Terminal: Failed - Attempts exhausted]
+
+    AF --> AJ[Admin opens user's Training Status row]
+    AI --> AJ
+    AJ --> AK[Drill-down: Overall Score, Date Completed, Attempts used, per-question breakdown]
+    AK --> AL[Admin filters Quiz name / Quiz Status in Advanced Reporting]
