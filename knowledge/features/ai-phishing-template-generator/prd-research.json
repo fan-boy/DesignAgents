@@ -1,0 +1,67 @@
+{
+  "feature_name": "AI Phishing Template Generator",
+  "feature_slug": "ai-phishing-template-generator",
+  "goal": "Let a security analyst or admin generate a high-fidelity phishing simulation template in roughly 10 seconds from either a free-text scenario description or an uploaded real email, without depending on a central content team.",
+  "user_segments": ["Security Analyst / Admin (creator)", "Admin (deploy-permitted role)"],
+  "success_metrics": [],
+  "constraints": [
+    "Generation completes within ~10 seconds",
+    "Uploaded .eml and screenshot content must be sandboxed, sanitized, and isolated per workspace",
+    "RBAC gates view, edit, and deploy separately",
+    "All AI generation and edit actions must be logged for auditability"
+  ],
+  "assumptions": [
+    "Text-based redaction is sufficient to remove sensitive/org-specific data from a generated template",
+    "Difficulty can be changed after generation by re-running the agentic pass on the existing draft",
+    "A template library exists as a save destination with no further behavior specified",
+    "Copy an Email and Describe a Scenario carry the same permission requirements"
+  ],
+  "gaps": [
+    "Redaction cannot reach sensitive content embedded in images (logos, signature blocks, addresses baked into graphics)",
+    "No stated behavior when difficulty is changed after manual WYSIWYG edits have been made",
+    "No retention, deletion, or training-pipeline-exclusion policy for uploaded raw .eml/screenshot content",
+    "Template library has no defined list, search, filter, sort, or delete behavior",
+    "No mandatory human review/attestation step before deploying a template sourced from a real uploaded email",
+    "Phishing category list origin (fixed enum vs. admin-configurable) is unspecified",
+    "Audit logging covers actions but not whether prior draft versions are recoverable"
+  ],
+  "edge_cases": [
+    "Generation fails outright distinct from exceeding the ~10s target",
+    "Sanitization strips or rejects part of an upload with no described analyst-facing message",
+    "Template library empty state on first use",
+    "View-only role opens a template in the editor",
+    "Copy an Email permission separate from Describe a Scenario permission",
+    "Cross-workspace access attempt on a template ID",
+    "Sparse or single-word scenario prompt with no minimum length enforced",
+    "Plaintext-only .eml with no layout to preserve",
+    "Duplicate template name within a workspace",
+    "Template library at scale with no search or filter",
+    "Regenerate action distinct from difficulty-triggered re-adjustment, with no overwrite warning",
+    "No delete flow described for templates",
+    "Editing on mobile/tablet not addressed (preview only is described)",
+    "Drag-and-drop block reordering has no keyboard-operable alternative"
+  ],
+  "critical_questions": [
+    { "owner": "Eng", "question": "Where are raw .eml uploads and screenshots stored after generation, for how long, and are they excluded from logging or model-training pipelines given they may contain real PII?" },
+    { "owner": "PM", "question": "If an analyst manually edits a draft and then changes the difficulty setting, does the agentic re-adjustment pass preserve, merge with, or overwrite those edits?" },
+    { "owner": "Both", "question": "Should Copy an Email require a distinct or higher permission tier than Describe a Scenario, given it ingests real third-party content rather than a text prompt?" },
+    { "owner": "PM", "question": "What are the actual success metrics for this feature — adoption, time saved versus the prior content-team workflow, or percentage of AI drafts deployed with no manual edits?" },
+    { "owner": "Eng", "question": "Can sensitive-data redaction reach content embedded in images, and if not, what's the fallback — strip inline images by default, or flag for mandatory manual review?" },
+    { "owner": "PM", "question": "Is there a delete flow for templates, and what happens on the campaign launcher side if a linked template is deleted or edited?" },
+    { "owner": "PM", "question": "Should deploying a template generated from a real uploaded email require an explicit human attestation step beyond generic RBAC deploy permission?" },
+    { "owner": "Eng", "question": "Is the phishing category list a fixed enum or admin-configurable/extensible with custom values?" }
+  ],
+  "design_risks": [
+    "Silent edit loss if difficulty re-adjustment overwrites manual WYSIWYG edits with no warning or undo path",
+    "Redaction blind spot on sensitive content embedded in images, undermining the core 'sensitive data replaced with placeholders' claim",
+    "Unscoped raw-content ingestion via Copy an Email creates a compliance liability with no stated retention limit or review gate",
+    "Underspecified template library risks either late scope growth in eng estimation or an unusable flat list at moderate volume"
+  ],
+  "teaching_notes": [
+    "knowledge/features/aep-library/ is the closest existing precedent: AI-generated artifact created via guided setup, refined in a Test & Refine step, backed by a filterable library table with status flow, search, row actions, and an empty state — model this feature's library on it directly",
+    "Apply the 'errors inform, don't punish' principle to generation failures and sanitization rejections: tell the analyst specifically what was flagged and why",
+    "Trust & Safety principle applies directly: this feature claims to redact sensitive data and produce safe links, so any gap between that claim and actual behavior is a trust failure, not just a bug",
+    "Apply Visibility of System Status (heuristics.md #1) to the ~10s generation window and to sanitization — show progress, never a silent wait"
+  ],
+  "last_updated": "2026-07-08"
+}
