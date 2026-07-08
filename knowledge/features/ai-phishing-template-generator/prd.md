@@ -1,3 +1,8 @@
+## Last updated
+2026-07-08 — Resolved four open questions with the feature owner following prd-research critique: Copy an Email uses the same permission tier as Describe a Scenario (no separate gate), no mandatory attestation step is required before deploying an email-sourced template for v1, image-embedded sensitive data gets no special handling in v1 (redaction is text-based only), and manual edits are always preserved regardless of difficulty setting changes — difficulty only applies at generation or explicit regeneration, never as a live re-adjustment on an edited draft. See below and `open-questions.md`.
+
+---
+
 Dune's agentic generative-AI engine lets a security analyst or admin produce a high-fidelity phishing simulation template in two ways: by describing a scenario in free text, or by uploading a real email as a starting point. The engine analyzes the input and generates a template that preserves the original email type, tone, layout, and link structure, while replacing sensitive or organization-specific content with placeholders and converting every link to a safe simulation URL. Generated templates are editable in a drag-and-drop WYSIWYG editor, previewable on desktop and mobile, and gated by RBAC before they can be deployed into a campaign. This covers the Create Template flow (both creation modes), the Edit Template flow, and the Preview flow. It does not cover campaign scheduling or send targeting, which live in the campaign launcher.
 
 **Create Template — Describe a Scenario**
@@ -34,7 +39,7 @@ The generated template reproduces the structure of the source email while stripp
 | Medium | Balanced realism: plausible sender, moderate urgency, fewer obvious tells |
 | Hard | High-fidelity mimicry: convincing branding and tone, high urgency framing, minimal visual noise, deeper pretext |
 
-Difficulty can be changed after generation, which re-runs the agentic adjustment pass on the existing draft rather than regenerating from scratch.
+Difficulty is applied at generation time. Once a draft exists, changing the difficulty setting does not touch the current draft or discard any manual edits the analyst has made. To get a different difficulty variant of an edited draft, the analyst uses an explicit **Regenerate** action, which is a deliberate, separate step from adjusting the difficulty control.
 
 **Edit Template**
 

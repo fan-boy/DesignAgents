@@ -11,19 +11,18 @@
     "All AI generation and edit actions must be logged for auditability"
   ],
   "assumptions": [
-    "Text-based redaction is sufficient to remove sensitive/org-specific data from a generated template",
-    "Difficulty can be changed after generation by re-running the agentic pass on the existing draft",
-    "A template library exists as a save destination with no further behavior specified",
-    "Copy an Email and Describe a Scenario carry the same permission requirements"
+    "Redaction is text-based only for v1 by decision; sensitive content embedded in images is not detected or flagged",
+    "Copy an Email and Describe a Scenario carry the same permission requirements by decision — no separate gate for raw email upload",
+    "No mandatory human review/attestation step is required before deploying an email-sourced template for v1 by decision",
+    "Manual edits are always preserved; difficulty only applies at generation or explicit Regenerate, never as a live re-adjustment on an edited draft",
+    "A template library exists as a save destination with no further behavior specified"
   ],
   "gaps": [
-    "Redaction cannot reach sensitive content embedded in images (logos, signature blocks, addresses baked into graphics)",
-    "No stated behavior when difficulty is changed after manual WYSIWYG edits have been made",
     "No retention, deletion, or training-pipeline-exclusion policy for uploaded raw .eml/screenshot content",
     "Template library has no defined list, search, filter, sort, or delete behavior",
-    "No mandatory human review/attestation step before deploying a template sourced from a real uploaded email",
     "Phishing category list origin (fixed enum vs. admin-configurable) is unspecified",
-    "Audit logging covers actions but not whether prior draft versions are recoverable"
+    "Audit logging covers actions but not whether prior draft versions are recoverable",
+    "UI copy must not overstate redaction coverage given image-embedded content is out of scope for v1 redaction"
   ],
   "edge_cases": [
     "Generation fails outright distinct from exceeding the ~10s target",
@@ -43,18 +42,13 @@
   ],
   "critical_questions": [
     { "owner": "Eng", "question": "Where are raw .eml uploads and screenshots stored after generation, for how long, and are they excluded from logging or model-training pipelines given they may contain real PII?" },
-    { "owner": "PM", "question": "If an analyst manually edits a draft and then changes the difficulty setting, does the agentic re-adjustment pass preserve, merge with, or overwrite those edits?" },
-    { "owner": "Both", "question": "Should Copy an Email require a distinct or higher permission tier than Describe a Scenario, given it ingests real third-party content rather than a text prompt?" },
     { "owner": "PM", "question": "What are the actual success metrics for this feature — adoption, time saved versus the prior content-team workflow, or percentage of AI drafts deployed with no manual edits?" },
-    { "owner": "Eng", "question": "Can sensitive-data redaction reach content embedded in images, and if not, what's the fallback — strip inline images by default, or flag for mandatory manual review?" },
     { "owner": "PM", "question": "Is there a delete flow for templates, and what happens on the campaign launcher side if a linked template is deleted or edited?" },
-    { "owner": "PM", "question": "Should deploying a template generated from a real uploaded email require an explicit human attestation step beyond generic RBAC deploy permission?" },
     { "owner": "Eng", "question": "Is the phishing category list a fixed enum or admin-configurable/extensible with custom values?" }
   ],
   "design_risks": [
-    "Silent edit loss if difficulty re-adjustment overwrites manual WYSIWYG edits with no warning or undo path",
-    "Redaction blind spot on sensitive content embedded in images, undermining the core 'sensitive data replaced with placeholders' claim",
-    "Unscoped raw-content ingestion via Copy an Email creates a compliance liability with no stated retention limit or review gate",
+    "Redaction is text-based only for v1 (decided) — UI copy claiming templates are 'sanitized' or fully redacted must carry a caveat, or customers will assume image content is covered when it isn't",
+    "Unscoped raw-content ingestion via Copy an Email creates a compliance liability with no stated retention limit — retention/deletion policy for uploaded .eml content remains unresolved",
     "Underspecified template library risks either late scope growth in eng estimation or an unusable flat list at moderate volume"
   ],
   "teaching_notes": [
