@@ -1,0 +1,107 @@
+{
+  "feature_name": "AI Phishing Template Generator",
+  "feature_slug": "ai-phishing-template-generator",
+  "analyzed_at": "2026-07-08",
+  "direct_competitors": ["KnowBe4", "Hoxhunt", "Cofense"],
+  "adjacent_competitors": [],
+  "workflow_stages": ["Choose creation mode", "Provide input (prompt or upload)", "Set difficulty", "Generate", "Edit / review", "Preview", "Save to library"],
+  "competitors": [
+    {
+      "name": "KnowBe4",
+      "url": "https://www.knowbe4.com/products/aida",
+      "tier": "direct",
+      "entry_point": "AIDA suite of autonomous AI agents inside phishing simulation setup",
+      "setup_friction": "Admin specifies parameters — difficulty level and/or NIST Phish Scale Social Engineering Indicators — rather than a free-text prompt",
+      "core_flow": [
+        "Admin sets simulation parameters (difficulty, Social Engineering Indicators)",
+        "Template Generation Agent autonomously constructs a realistic template reflecting current attack vectors",
+        "Recommended Landing Pages Agent auto-suggests a matching landing page",
+        "Callback Template Generation Agent handles callback-phishing templates as a separate specialized path"
+      ],
+      "feedback_states": ["Not documented publicly"],
+      "error_prevention": "Not documented publicly",
+      "trust_model": "Not documented publicly; no explicit review/edit step described between generation and deployment",
+      "rbac_notes": "Not documented publicly",
+      "repeat_use_efficiency": "Framed as reducing admin workflows 'from hours to seconds' via autonomous agents (AIDA Orchestration)",
+      "ai_personalization": "Observed — generative template creation anchored to NIST Phish Scale framework indicators",
+      "risk_score_surface": "Not documented in scope of pages reviewed",
+      "remediation_path": "Not documented in scope of pages reviewed",
+      "confidence": "medium",
+      "source_notes": "Sourced from knowbe4.com/products/aida/agents (fetched directly). support.knowbe4.com AIDA setup article returned HTTP 403 and could not be read. No hands-on trial."
+    },
+    {
+      "name": "Hoxhunt",
+      "url": "https://hoxhunt.com",
+      "tier": "direct",
+      "entry_point": "Adaptive training / phishing simulation configuration",
+      "setup_friction": "Minimal author input — difficulty is largely algorithmic and per-user rather than author-selected per template",
+      "core_flow": [
+        "System continuously evaluates user performance",
+        "Algorithm selects simulation difficulty per user (four-tier scale, easy to expert)",
+        "'Spicy Mode' adds further challenge for advanced users",
+        "AI generates simulation content matching current attack sophistication"
+      ],
+      "feedback_states": ["Not documented in detail"],
+      "error_prevention": "Not documented",
+      "trust_model": "Not documented",
+      "rbac_notes": "Not documented",
+      "repeat_use_efficiency": "Adaptive per-user targeting removes manual re-selection of difficulty over time",
+      "ai_personalization": "Observed — AI-generated content plus per-user adaptive difficulty",
+      "risk_score_surface": "Implied via performance-based adaptive difficulty, not explicitly detailed",
+      "remediation_path": "Not documented in scope of pages reviewed",
+      "confidence": "medium",
+      "source_notes": "Sourced from hoxhunt.com/blog/best-phishing-simulation-tools and general search summaries. Note: a Hoxhunt-authored blog post comparing competitors was found to mischaracterize KnowBe4 as non-generative, contradicting KnowBe4's own product pages — flagged as vendor-biased and down-weighted where it concerns other vendors, not Hoxhunt itself."
+    },
+    {
+      "name": "Cofense",
+      "url": "https://cofense.com",
+      "tier": "direct",
+      "entry_point": "Reporter-button and Triage ecosystem; real reported emails feed into simulation content via analyst review",
+      "setup_friction": "Real-email-to-simulation path is analyst-mediated (report to Cofense Triage, then converted), not a direct self-serve upload by the requesting admin",
+      "core_flow": [
+        "Employee reports a suspicious email via Reporter button",
+        "Email routes to Cofense Triage for analyst review",
+        "Verified/reported emails can be converted into simulation content",
+        "Admins otherwise select from a large pre-built template library (1,500+ templates, 36 languages) with automation for scheduling and smart suggestions"
+      ],
+      "feedback_states": ["Not documented in detail"],
+      "error_prevention": "Not documented",
+      "trust_model": "Analyst-mediated review before real content becomes simulation content — a more conservative posture toward real-email content than a self-serve upload",
+      "rbac_notes": "Not documented",
+      "repeat_use_efficiency": "Smart suggestions based on historical simulation results and active threats; 12-month campaign automation",
+      "ai_personalization": "Not clearly generative — primarily library- and automation-driven rather than AI-authored content synthesis",
+      "risk_score_surface": "Not documented in scope of pages reviewed",
+      "remediation_path": "Reporter/Triage closed loop supports remediation across other inboxes once a real phish is confirmed",
+      "confidence": "medium",
+      "source_notes": "No source explicitly documents a named 'upload an email, get a template' feature; the real-email-to-simulation path is inferred from descriptions of the Reporter/Triage ecosystem and should be treated as a moderate-confidence inference, not a confirmed feature match."
+    }
+  ],
+  "observed_patterns": [
+    "Framework-anchored difficulty controls (KnowBe4's NIST Phish Scale Social Engineering Indicators) make sophistication levels explainable rather than opaque",
+    "Auto-pairing complementary generated assets (KnowBe4's landing-page agent alongside template agent)",
+    "Using historical simulation results and active-threat data to inform what content to generate or suggest next (Cofense)"
+  ],
+  "anti_patterns": [
+    "No publicly documented review/edit gate before a generated template is used (KnowBe4) — a trust risk if true",
+    "Analyst-mediated-only pipeline for real-email-sourced content (Cofense) — safer but reintroduces the central-team dependency Dune's PRD is trying to remove",
+    "Fully opaque, per-user algorithmic difficulty with no per-template author control (Hoxhunt) — not a fit for Dune's analyst-authored difficulty model"
+  ],
+  "differentiation_opportunities": [
+    "Self-serve, ~10-second real-email-to-template flow has no documented competitor equivalent — Cofense's closest analog is analyst-mediated and slower",
+    "Naming what each difficulty tier actually changes (echoing the PRD's Easy/Medium/Hard behavior table) out-differentiates opaque labels used elsewhere",
+    "Explicit WYSIWYG edit + desktop/mobile preview step can be positioned as a deliberate trust/quality checkpoint, since competitors don't publicly describe an equivalent review step"
+  ],
+  "design_implications": [
+    "Surface what each difficulty tier changes directly in the UI rather than presenting unexplained Easy/Medium/Hard labels",
+    "Design the Copy an Email upload flow from Dune's own conventions (e.g., aep-library-adjacent patterns) since no competitor offers a directly comparable self-serve real-email-upload flow to reference",
+    "Frame the WYSIWYG edit/preview step as a named, deliberate checkpoint rather than an incidental post-generation editor",
+    "Treat the still-unresolved retention/handling question for uploaded .eml content as a competitive as well as compliance question, given Cofense's more conservative analyst-mediated posture toward real-email content"
+  ],
+  "confidence_notes": [
+    "Sourced from official vendor marketing/product pages and search-aggregated summaries, not hands-on product trials",
+    "KnowBe4 AIDA setup support article (support.knowbe4.com) returned HTTP 403 and could not be read directly; findings rely on the aida/agents product page only",
+    "A Hoxhunt-authored competitor-comparison blog was identified as vendor-biased regarding its characterization of KnowBe4 and was down-weighted accordingly",
+    "Cofense's real-email-to-template capability is a moderate-confidence inference from Reporter/Triage ecosystem descriptions, not a confirmed named feature",
+    "No competitor source addressed image-embedded redaction, workspace isolation, or RBAC granularity in enough detail for direct comparison on those dimensions"
+  ]
+}
