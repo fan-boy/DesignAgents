@@ -1,0 +1,64 @@
+{
+  "feature_name": "Quiz Training Type",
+  "feature_slug": "quiz-training-type",
+  "goal": "Let admins create a standalone Quiz content type from an uploaded set of questions, assign it to users with a passing score, and track completion and individual results.",
+  "user_segments": ["Admin", "End User"],
+  "success_metrics": [],
+  "constraints": [
+    "Quiz questions are authored via JSON upload only, not an in-UI question builder",
+    "Passing score and retake-on-fail are configured once at publish time, not per assignment",
+    "Quiz is a seventh Training Library content type alongside Security Awareness, User Activity, Functional, Compliance, Custom, and Policies"
+  ],
+  "assumptions": [
+    "Quiz assignment reuses the same generic per-row Assign action used by other content types",
+    "Quiz-taking reuses the existing single-question-at-a-time knowledge-check UI pattern seen in module assessments",
+    "Quiz assignment emails follow the same template pattern as the observed 'New Policy Assigned' email"
+  ],
+  "gaps": [
+    "No dedicated Assign Quiz wizard was found distinct from the generic row-level Assign action",
+    "Passing score/retake are quiz-level, not assignment-level, unlike the Module assessment model",
+    "No validation behavior shown for malformed, empty, or oversized JSON uploads",
+    "Attempt exhaustion (failing all 3 attempts) has no defined end state",
+    "No edit/versioning flow shown for a published quiz",
+    "RBAC is entirely unaddressed in the designs",
+    "Wizard step labels are inconsistent across frames (Basic Info/Content/Publish vs Basic Info/Quiz/Publish vs Basic Info/Review/Publish)",
+    "No Quiz-specific notification template was found"
+  ],
+  "edge_cases": [
+    "Uploaded JSON fails to parse or has zero questions",
+    "Publish succeeds but success toast fails to render",
+    "Network failure mid-publish",
+    "Non-admin or view-only role accessing Quiz creation/assignment",
+    "50+ question quiz in the Review Questions list",
+    "Single-question quiz",
+    "Duplicate quiz titles",
+    "Duplicate assignment to the same user",
+    "Admin abandons wizard mid-flow",
+    "Admin re-uploads via Change file after reviewing questions",
+    "Learner leaves quiz in progress before completing",
+    "Learner exhausts all 3 attempts without passing",
+    "Keyboard-only and screen reader navigation through MCQ options and progress indicators"
+  ],
+  "critical_questions": [
+    { "owner": "Both", "question": "Does Assign Quiz reuse the full Assign Module wizard (audience tabs, due date, review step), or is it a lighter single-step action?" },
+    { "owner": "PM", "question": "Is passing score/retake intentionally fixed per-quiz rather than per-assignment?" },
+    { "owner": "Both", "question": "What validation runs against the uploaded JSON, and what does the admin see on a malformed or empty file?" },
+    { "owner": "PM", "question": "What happens when a learner exhausts all 3 attempts without meeting the passing score?" },
+    { "owner": "PM", "question": "Can a published quiz be edited/re-versioned, and does that trigger a re-take requirement for users who already completed it?" },
+    { "owner": "Both", "question": "Which roles can create, publish, or assign a Quiz?" },
+    { "owner": "PM", "question": "Should quiz assignment reject duplicates the same way module assignment does?" },
+    { "owner": "PM", "question": "Is there a dedicated 'New Quiz Assigned' email, or does Quiz reuse the generic assignment template?" }
+  ],
+  "design_risks": [
+    "Locking passing score at publish time risks rework if per-audience thresholds are later required",
+    "JSON-only authoring is a support burden risk without strong template validation and inline errors",
+    "Undefined attempt-exhaustion end state risks permanently stuck learners and suppressed completion/risk-score signal",
+    "Assign-flow ambiguity risks either over-engineering (full Assign Module wizard) or under-delivering (bare one-step action) audience precision"
+  ],
+  "teaching_notes": [
+    "Model Quiz on the Policy Library pattern (standalone content type, own Library tab, generic per-row Assign), not the Module pattern",
+    "The per-user quiz score drill-down mirrors the Simulated Attack 'Click details' audit modal already used on the End User Risk Insights page",
+    "knowledge/features/custom-training-modules/qa-test-plan.md Section 6 already documents this same Quiz gap discovered during QA — resolve both documents' open questions together"
+  ],
+  "last_updated": "2026-07-08"
+}
