@@ -1,0 +1,52 @@
+{
+  "feature_name": "AI Phishing Template Generator",
+  "feature_slug": "ai-phishing-template-generator",
+  "written_at": "2026-07-08",
+  "flows": [
+    "Create Template — Describe a Scenario",
+    "Create Template — Copy an Email",
+    "Edit Template",
+    "Preview Template"
+  ],
+  "actors": ["Security Analyst / Admin"],
+  "wizard_steps": {
+    "Create Template — Describe a Scenario": [
+      "Step 1 — Choose mode",
+      "Step 2 — Describe the scenario",
+      "Step 3 — Set difficulty",
+      "Step 4 — Generate"
+    ],
+    "Create Template — Copy an Email": [
+      "Step 1 — Choose mode",
+      "Step 2 — Upload source",
+      "Step 3 — Set difficulty",
+      "Step 4 — Generate"
+    ]
+  },
+  "key_fields": [
+    "Free-text scenario prompt",
+    "Phishing category",
+    "Difficulty (Easy / Medium / Hard)",
+    ".eml upload",
+    "Screenshot upload (optional, workspace-gated)",
+    "Template name"
+  ],
+  "integrations": [
+    "Campaign Launcher",
+    "RBAC / Permissions",
+    "Audit Log",
+    "Risk Scoring Engine",
+    "Simulation Sending Infrastructure"
+  ],
+  "edge_cases_count": 10,
+  "open_questions_flagged": [
+    "Should screenshot-based template generation (OCR + layout reconstruction) be P0 or P1?",
+    "Should multilingual template output be supported at launch?",
+    "Which metadata should be captured to enhance adaptive-risk scoring?",
+    "Should templates be shareable across tenants with governance review?"
+  ],
+  "figma_used": false,
+  "source_docs_used": true,
+  "confidence": "medium",
+  "confidence_notes": "No Figma provided, so screen structure, exact copy, and component naming are inferred from acceptance criteria rather than observed UI. Acceptance criteria and implementation notes were detailed enough to cover all major flows, wizard steps, RBAC, and edge cases with reasonable confidence. Deploy/campaign-attach flow is referenced only as an integration point since it lives in the campaign launcher feature, not this one."
+}
