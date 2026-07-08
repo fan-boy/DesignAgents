@@ -1,4 +1,7 @@
-Admins can create **Quiz** as a new, standalone training content type inside the Training Library, alongside Security Awareness, User Activity, Functional, Compliance, Custom, and Policies. A Quiz is a set of multiple-choice questions the admin uploads as a JSON file rather than authoring one at a time in the UI. Once published, a Quiz can be assigned directly to users, independent of any training module, with an admin-configured passing score that determines whether a learner passes or must retake it. End users complete assigned Quizzes from their training dashboard, and admins can track completion, review individual scores, drill into a specific user's exact answers, and filter Quiz performance in Advanced Reporting.
+## Last updated — 2026-07-08
+Resolved with stakeholder input: Assign Quiz reuses the full Assign Module wizard rather than a lightweight action, passing score/retake become configurable per assignment (not fixed at publish), and quiz-taking withholds feedback until final scoring rather than teaching per question. The "Create Quiz" and "Assign Quiz" sections below are updated accordingly.
+
+Admins can create **Quiz** as a new, standalone training content type inside the Training Library, alongside Security Awareness, User Activity, Functional, Compliance, Custom, and Policies. A Quiz is a set of multiple-choice questions the admin uploads as a JSON file rather than authoring one at a time in the UI. Once published, a Quiz can be assigned directly to users, independent of any training module, through the same multi-step assignment wizard used for Modules, with a passing score and retake rule set per assignment that determines whether a learner passes or must retake it. End users complete assigned Quizzes from their training dashboard, and admins can track completion, review individual scores, drill into a specific user's exact answers, and filter Quiz performance in Advanced Reporting.
 
 **Create Quiz (Admin)**
 
@@ -10,7 +13,7 @@ Create Quiz is a 3-step wizard:
 |---|---|---|
 | 1. Basic Info | Quiz title (text, placeholder "e.g. Acceptable Use Policy"), Description (textarea, optional) | Title is required; Next is disabled until filled |
 | 2. Content | "Download JSON Template" action, Quiz Document upload (click-to-upload or drag-and-drop) | Accepts `.json` only, max 10 MB. On successful upload, shows "[filename].json uploaded successfully" and the parsed question count, plus a "Review Questions" list where each question can be expanded to show its answer options with the correct answer marked (e.g. "Correct answer: B"). A "Change file" action lets the admin re-upload before continuing. |
-| 3. Publish | Read-only summary (Quiz name, "[quiz type] · [filename].json"), Questions count, Question type ("Multiple choice"), Created date, **Passing score** (percentage, default 80%, hint: "Learners must score at or above this threshold to pass"), **Retake on fail** (toggle, hint: "Learners who fail will be prompted to retake the quiz") | Cancel / Publish Quiz |
+| 3. Publish | Read-only summary (Quiz name, "[quiz type] · [filename].json"), Questions count, Question type ("Multiple choice"), Created date, **Passing score** (percentage, default 80%, hint: "Learners must score at or above this threshold to pass"), **Retake on fail** (toggle, hint: "Learners who fail will be prompted to retake the quiz") | Cancel / Publish Quiz. These two values are saved as the quiz's default and are pre-filled (and overridable) in the Assess step of the Assign Quiz wizard — they are not locked once published. |
 
 Publishing shows a brief "Publishing quiz..." progress state (quiz name and question count, Cancel disabled) followed by a success toast: "Quiz published successfully — [Quiz Name] is now live." The new quiz then appears in the Quiz tab table with status Published.
 
@@ -18,13 +21,22 @@ Each uploaded question is multiple choice with a fixed set of answer options (ob
 
 **Assign Quiz (Admin)**
 
-A published quiz is assigned from the **Assign** action on its row in the Quiz tab table, the same per-row assignment entry point used by other Training Library content types. The Quiz's passing score and retake behavior are already fixed at publish time, so assignment configuration covers audience and scheduling (recipients, due date) rather than assessment rules.
+A published quiz is assigned through the same multi-step Assign wizard used for Modules, launched from the **Assign** action on its row in the Quiz tab table:
+
+| Step | Content |
+|---|---|
+| 1. Assignment Type | Quiz is a single unit of assignment (no "as individual trainings" split, since a quiz has no separable sub-items) |
+| 2. Assessment | **Passing score** and **Retake on fail**, pre-filled from the quiz's published defaults and editable per assignment, so the same quiz can carry a stricter or lighter bar for different audiences |
+| 3. Assign To | Same four audience tabs used for Module assignment: Users, Departments, Custom Groups, Smart Groups, with the same filters, search, and combined-audience counting |
+| 4. Review | Quiz Details (name, question count), Assessment (passing score, retake setting), Audience (selected count) before confirming |
+
+Assignment otherwise follows the same completion pattern as Module assignment: a live progress indicator while assigning, a results screen confirming success count and any per-user failures (e.g. duplicate assignment), and a success toast on return to the Quiz tab.
 
 **End User — Taking a Quiz**
 
 An assigned Quiz appears as its own item on the end user's training dashboard, tagged with a **Quiz** badge, alongside its Duration and Due Date, with a **Start Quiz** call to action, distinct from module-based "Start Module" / "Resume Module" cards.
 
-Taking the quiz presents one question at a time: a "Question N of M" progress indicator, an "Attempt X/3" counter, the question text, single-select multiple-choice answer options, and a **Next** button to advance. On completion, the learner's score is evaluated against the quiz's passing score. If **Retake on fail** is enabled and the learner does not meet the passing score, they are prompted to retake the quiz.
+Taking the quiz presents one question at a time: a "Question N of M" progress indicator, an "Attempt X/3" counter, the question text, single-select multiple-choice answer options, and a **Next** button to advance. The correct answer is not revealed as the learner progresses; scoring happens once all questions are answered. On completion, the learner's score is evaluated against the passing score set for that assignment. If **Retake on fail** is enabled for that assignment and the learner does not meet the passing score, they are prompted to retake the quiz.
 
 **Admin — Quiz Tracking & Review**
 

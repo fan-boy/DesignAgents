@@ -2,6 +2,7 @@
   "feature_name": "Quiz Training Type",
   "feature_slug": "quiz-training-type",
   "written_at": "2026-07-08",
+  "last_updated": "2026-07-08",
   "flows": [
     "Create Quiz (Admin)",
     "Assign Quiz (Admin)",
@@ -14,6 +15,12 @@
       "Step 1 — Basic Info",
       "Step 2 — Content",
       "Step 3 — Publish"
+    ],
+    "AssignQuiz": [
+      "Step 1 — Assignment Type",
+      "Step 2 — Assessment",
+      "Step 3 — Assign To",
+      "Step 4 — Review"
     ]
   },
   "key_fields": [
@@ -31,7 +38,6 @@
   ],
   "edge_cases_count": 7,
   "open_questions_flagged": [
-    "Is there a dedicated multi-step Assign Quiz wizard (like Assign Module) or is assignment a single-step audience/due-date action?",
     "What happens when a learner exhausts all 3 attempts without passing?",
     "What is the learner's end state when Retake on fail is disabled and they fail?",
     "What validation applies to a malformed or empty quiz JSON upload?",
@@ -43,5 +49,5 @@
   "figma_used": true,
   "source_docs_used": true,
   "confidence": "high",
-  "confidence_notes": "Figma provided a complete, concrete Create Quiz wizard (3 steps with exact field labels, placeholders, and hint copy), the Quiz tab list and empty state, the end-user quiz-taking pattern, the admin per-user score drill-down, and Advanced Reporting filters. Confidence is high on structure and copy. Gaps are concentrated in system behavior not visible in static frames: attempt-exhaustion handling, JSON validation rules, duplicate-assignment handling, RBAC, and whether a dedicated Assign Quiz wizard exists distinct from the generic row-level Assign action. Step-label text was also inconsistent across frames (Basic Info/Content/Publish vs Basic Info/Quiz/Publish vs Basic Info/Review/Publish) — treated as the same 3-step wizard, but the naming should be confirmed with design."
+  "confidence_notes": "Figma provided a complete, concrete Create Quiz wizard (3 steps with exact field labels, placeholders, and hint copy), the Quiz tab list and empty state, the end-user quiz-taking pattern, the admin per-user score drill-down, and Advanced Reporting filters. Confidence is high on structure and copy. Assign Quiz wizard steps, per-assignment passing score, and end-user feedback timing were resolved with stakeholder input on 2026-07-08 (see open-questions.md Resolved section) rather than observed directly in Figma, since no distinct Assign Quiz frames existed in the source file. Remaining gaps are concentrated in system behavior not visible in static frames: attempt-exhaustion handling, JSON validation rules, duplicate-assignment handling, and RBAC. Step-label text was also inconsistent across Create Quiz frames (Basic Info/Content/Publish vs Basic Info/Quiz/Publish vs Basic Info/Review/Publish) — treated as the same 3-step wizard, but the naming should be confirmed with design."
 }
