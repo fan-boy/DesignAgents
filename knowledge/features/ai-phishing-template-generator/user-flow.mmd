@@ -1,0 +1,35 @@
+flowchart TD
+    A[Template Library] -->|New Template| B{Choose Mode}
+    A -->|Empty state CTA| B
+    B -- Describe a Scenario --> C1[Setup: Scenario prompt + category + difficulty]
+    B -- Copy an Email --> C2[Setup: .eml upload + optional screenshot + difficulty]
+    C1 --> D[Generate Template]
+    C2 --> D
+    D --> E{Generation result}
+    E -- Success within ~10s --> F[Edit and Preview: WYSIWYG canvas + desktop/mobile toggle]
+    E -- Failure --> C1err[Inline error, Try again, inputs preserved]
+    C1err --> D
+
+    F --> G{Change difficulty?}
+    G -- No --> H[Manual edits in canvas]
+    G -- Yes, click Regenerate --> I[Confirm: discard edits and regenerate?]
+    I -- Cancel --> F
+    I -- Confirm --> D
+
+    H --> J[Click Save]
+    J --> K{Name and category set?}
+    K -- No --> L[Inline naming and category step]
+    K -- Yes --> M{Duplicate name in workspace?}
+    L --> M
+    M -- Yes --> Lerr[Inline validation error, rename required]
+    Lerr --> L
+    M -- No --> N[Template saved, status Ready]
+
+    N --> O[Template Detail]
+    O -->|Use in Campaign, deploy permission required| P[Hand off to Campaign Launcher]
+    O -->|No deploy permission| Q[Disabled button with tooltip]
+    O -->|Delete| R[Confirm delete - campaign-link behavior open issue]
+    O -->|Edit| F
+
+    A -->|View-only role| S[Read-only Library, no New Template action]
+    F -->|View-only role| T[Read-only canvas, Regenerate and Save hidden]

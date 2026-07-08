@@ -1,0 +1,55 @@
+{
+  "feature_name": "AI Phishing Template Generator",
+  "feature_slug": "ai-phishing-template-generator",
+  "design_goal": "Get an analyst from a scenario idea or a real email to a saved, editable phishing template in under a minute of hands-on time, using a one-shot generation model plus a persistent editor rather than an iterative chat-style refinement loop.",
+  "user_segments": ["Security Analyst / Admin (creator)", "Admin (deploy-permitted role)", "View-only role"],
+  "constraints": [
+    "Generation must visibly progress within the ~10s target — no static spinner",
+    "Manual edits must never be silently discarded; only an explicit, confirmed Regenerate action may replace draft content",
+    "Copy an Email and Describe a Scenario share one RBAC tier — no differentiated access flow",
+    "Redaction UI copy must not overstate coverage given image-embedded content is out of scope for v1",
+    "Privileged actions (deploy, edit) require a disabled state with tooltip when the viewer lacks permission"
+  ],
+  "selected_strategy": "One-shot generation, mode-first branch, single WYSIWYG editor with an explicit Regenerate control",
+  "selected_strategy_rationale": "Matches the PRD's actual scope of one generation pass plus manual editing (no described iteration loop), respects the resolved decision that edits are never silently overwritten by making regeneration opt-in and confirmed, and reuses proven Dune conventions (AEP's labeled generation progress, disabled+tooltip RBAC gating, library table/empty-state pattern) instead of inventing new structure.",
+  "alternative_strategies": [
+    {
+      "name": "AEP-style persistent AI-refine panel (chat-style iterative refinement)",
+      "summary": "Borrow AEP Builder's Step 2 pattern directly: quick-action chips, custom-instruction textarea, change history, and an Apply-and-Regenerate loop paired with a live preview.",
+      "rejected_because": "Heavier than the PRD's stated scope of a single generation pass plus direct WYSIWYG editing; risks scope creep on a feature whose value proposition is speed. Flagged as a strong v1.1 candidate instead."
+    }
+  ],
+  "tradeoffs": [
+    "No middle ground between manual WYSIWYG edits and a full destructive Regenerate — no lightweight tone/urgency nudge without a full regenerate",
+    "Library status model (Draft / Ready / In Use) is a proposal pending resolution of delete/archive behavior against linked campaigns"
+  ],
+  "assumptions": [
+    "Drag-and-drop WYSIWYG editing is desktop-only for v1; mobile/tablet is preview-only",
+    "The right-side difficulty/Regenerate panel is a persistent (non-dismissible) side panel, not an overlay drawer",
+    "A dedicated Template Library surface exists, though its navigation placement is not yet confirmed"
+  ],
+  "open_issues": [
+    "Where are raw .eml uploads and screenshots stored after generation, and for how long?",
+    "Is there a delete flow for templates, and what happens to linked campaigns if a template is deleted or edited?",
+    "Is the phishing category list a fixed enum or admin-configurable/extensible?",
+    "Should screenshot-based generation (OCR + layout reconstruction) be P0 or P1?",
+    "Is drag-and-drop WYSIWYG editing genuinely desktop-only, or does mobile/tablet editing need support?",
+    "What are the feature's actual success metrics?",
+    "Does the persistent right-side panel map to the standard DS drawer component or need a new non-dismissible variant?"
+  ],
+  "risks": [
+    "Redaction-claim honesty: UI copy must precisely scope 'sanitized'/'redacted' language since image-embedded sensitive data isn't handled in v1",
+    "Analysts may not immediately understand why changing difficulty alone does nothing without clear adjacent microcopy",
+    "Library and Setup-screen assumptions may need to change once retention and delete-behavior decisions are made"
+  ],
+  "ds_patterns_used": ["wizard", "modal", "table", "badge", "drawer"],
+  "new_patterns_required": ["Persistent (non-dismissible) right-side panel for difficulty + Regenerate controls — confirm against DS drawer spec or flag as a new variant"],
+  "next_actions": [
+    "Confirm feature placement in navigation IA before wireframing the Library screen",
+    "Resolve the DS drawer-vs-persistent-panel question before building the Edit & Preview screen in Figma",
+    "Draft placeholder content-handling disclosure copy for the Copy an Email setup screen, tied to the retention-policy open issue",
+    "Design the Regenerate confirmation modal and adjacent difficulty microcopy together",
+    "Bring the delete-behavior, category-list, and screenshot-scope open issues back to PM before finalizing the Library screen"
+  ],
+  "last_updated": "2026-07-08"
+}
