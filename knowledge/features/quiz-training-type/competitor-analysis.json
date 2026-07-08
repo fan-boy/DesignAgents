@@ -1,0 +1,113 @@
+{
+  "feature_name": "Quiz Training Type",
+  "feature_slug": "quiz-training-type",
+  "analyzed_at": "2026-07-08",
+  "direct_competitors": ["KnowBe4", "Hoxhunt", "Curricula (Huntress Managed SAT)"],
+  "adjacent_competitors": [],
+  "workflow_stages": [
+    "Where the assessment lives (standalone vs. embedded)",
+    "Question authoring",
+    "Passing score model",
+    "Retake behavior",
+    "Reporting / drill-down"
+  ],
+  "competitors": [
+    {
+      "name": "KnowBe4",
+      "url": "knowbe4.com",
+      "tier": "direct",
+      "entry_point": "Content Manager (admin) for authoring/config; end-of-module Quiz or standalone SAPA (Security Awareness Proficiency Assessment) for learners",
+      "setup_friction": "Content is vendor-authored; admin configures passing score and test-out toggle rather than writing questions",
+      "core_flow": [
+        "Admin selects or configures training content in Content Manager",
+        "Learner completes inline Knowledge Checks during a module (immediate explanation shown)",
+        "Learner takes end-of-module Quiz or standalone SAPA to test retention",
+        "Score evaluated against configurable passing threshold (default 80%)",
+        "Failed learners can review questions and retake; some content allows test-out before starting training"
+      ],
+      "feedback_states": ["inline explanation on Knowledge Check answers", "pass/fail result on Quiz", "retake prompt on fail"],
+      "error_prevention": "Not documented at UI level in available sources",
+      "trust_model": "Not documented; SAT training context, not simulation/agent trust framing",
+      "rbac_notes": "Not documented in available sources",
+      "repeat_use_efficiency": "Test-out toggle lets proficient users skip training entirely by passing the quiz upfront",
+      "ai_personalization": "absent (not found in reviewed sources)",
+      "risk_score_surface": "absent (not found in reviewed sources; KnowBe4's model is not risk-score-adaptive per competitor-list.md)",
+      "remediation_path": "absent (not found in reviewed sources)",
+      "confidence": "medium",
+      "source_notes": "Based on indexed support-article summaries (ModStore/Library Guide, SAPA Overview, end-of-module quiz FAQ, KSAT Quiz Interactions Reports) returned via web search. Direct article fetches returned HTTP 403; exact UI mechanics are inferred from summaries, not observed directly."
+    },
+    {
+      "name": "Hoxhunt",
+      "url": "hoxhunt.com",
+      "tier": "direct",
+      "entry_point": "Micro-lesson quiz surfaced after a simulated phishing interaction, as part of an adaptive training path",
+      "setup_friction": "Not admin-authored; content and triggering are Hoxhunt-curated/algorithmic",
+      "core_flow": [
+        "User interacts with a simulated phishing test",
+        "Short micro-lesson with quiz is triggered",
+        "User completes quiz, earns stars/badges for engagement"
+      ],
+      "feedback_states": ["gamified reward (stars, badges)"],
+      "error_prevention": "Not documented",
+      "trust_model": "Not documented in reviewed sources",
+      "rbac_notes": "Not documented in reviewed sources",
+      "repeat_use_efficiency": "Adaptive training path personalizes future content, but not documented as an admin-facing efficiency tool",
+      "ai_personalization": "observed (adaptive training path is a core positioning claim)",
+      "risk_score_surface": "absent in reviewed quiz-specific sources (Hoxhunt has broader behavioral framing elsewhere per competitor-list.md)",
+      "remediation_path": "observed at a high level (micro-lesson after a failed simulated interaction functions as remediation)",
+      "confidence": "low",
+      "source_notes": "Marketing and general support pages only; no documentation found on exact pass-score or retry mechanics for quizzes. 'No hard gating' is an inference from gamification framing, not a confirmed behavior."
+    },
+    {
+      "name": "Curricula (Huntress Managed SAT)",
+      "url": "huntress.com",
+      "tier": "direct",
+      "entry_point": "Narrative training 'episodes' combining video, quiz, and phishing simulation",
+      "setup_friction": "Content is vendor-authored/curated, not customer-authored",
+      "core_flow": [
+        "Learner watches a story-driven training episode",
+        "Learner completes an interactive quiz tied to the episode",
+        "Quiz score tracked alongside completion rate and phishing report rate"
+      ],
+      "feedback_states": ["not documented at a granular level"],
+      "error_prevention": "Not documented",
+      "trust_model": "Not documented",
+      "rbac_notes": "Not documented",
+      "repeat_use_efficiency": "Not documented",
+      "ai_personalization": "absent (not found in reviewed sources)",
+      "risk_score_surface": "absent (not found in reviewed sources)",
+      "remediation_path": "absent (not found in reviewed sources)",
+      "confidence": "low",
+      "source_notes": "Marketing pages and G2 summary only, post-acquisition rebrand from Curricula to Huntress Managed SAT; no UI walkthrough available."
+    }
+  ],
+  "observed_patterns": [
+    "Inline Knowledge Check (teach) vs. end-of-content Quiz (test) as two distinct constructs (KnowBe4)",
+    "Configurable passing score defaulting to 80% (KnowBe4)",
+    "Retake-on-fail with question review (KnowBe4)",
+    "Test-out toggle letting proficient users skip training by passing the quiz first (KnowBe4)",
+    "Per-question interaction reporting for admins (KnowBe4 KSAT)",
+    "Gamified completion rewards in place of hard pass/fail gating (Hoxhunt)",
+    "Quiz bundled into a broader narrative/episode experience rather than exposed standalone (Curricula/Huntress)"
+  ],
+  "anti_patterns": [
+    "Soft/no pass-fail gating undercuts a compliance-oriented use case (Hoxhunt's gamification model)",
+    "Coupling quiz content to a full training episode removes the option for a lightweight standalone knowledge check (Curricula/Huntress)"
+  ],
+  "differentiation_opportunities": [
+    "Admin-facing bulk JSON question authoring is not offered by any of the three competitors reviewed — all are vendor-authored or algorithmically curated",
+    "Standalone assignability independent of any module is stronger than Curricula's bundled-episode model and cleaner than Hoxhunt's embedded-in-path approach",
+    "Per-user per-question answer drill-down already in Dune's designs matches KnowBe4's most advanced reporting (KSAT) and exceeds what Hoxhunt or Curricula document publicly"
+  ],
+  "design_implications": [
+    "Resolve whether Quiz teaches (show correct answer/explanation per question) or purely tests (no feedback until scored) before finalizing the end-user question flow",
+    "Keep the 80% default passing score — it matches industry expectation (KnowBe4) and needs no special justification",
+    "Treat JSON upload validation and error states as a first-class design surface since bulk authoring is Dune's clearest differentiator here and its clearest risk",
+    "Keep passing-score/retake as a hard gate; do not soften toward Hoxhunt's engagement-only model, which fits a different positioning"
+  ],
+  "confidence_notes": [
+    "KnowBe4: medium confidence, sourced from indexed support-article summaries; direct fetches were blocked (HTTP 403), so exact UI mechanics are inferred from summaries",
+    "Hoxhunt: low confidence, marketing/support pages only, no documented pass-score or retry mechanics",
+    "Curricula/Huntress: low-to-medium confidence, marketing and G2 summary only, no UI walkthrough available, post-acquisition rebrand may have stale legacy documentation"
+  ]
+}
