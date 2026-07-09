@@ -1,0 +1,141 @@
+{
+  "feature_name": "AI Phishing Template Generator",
+  "feature_slug": "ai-phishing-template-generator",
+  "review_scope": "Existing Figma design (~6 months old, predates this feature's PRD/research/strategy) — Figma file 'Dune Security (Master file)', page 'DUNE 628 - Custom Creation of phishing Assets': the Simulated Attacks Library entry point and the full Create New Asset flow across all three creation tabs (Generate with AI, Create Manually, Upload EML File), inspected live via Figma Desktop Bridge across 9 screen frames plus library list states and a flattened flow-diagram image.",
+  "review_focus": ["difficulty/generation coupling", "preview completeness", "WYSIWYG consistency across creation modes", "redaction and safe-link trust signaling", "state completeness", "RBAC/permission boundaries", "library architecture reuse"],
+  "verdict": "needs revision",
+  "quality_bar_assessment": "Structural craft is good (tab model, calm intro banner, single-page progressive disclosure), but the design falls short of Stripe-level craft on trust communication and state completeness: no visible confirmation that redaction or safe-link rewriting occurred, no generation-progress feedback for a ~10s AI call, and a WYSIWYG editor that silently degrades to raw HTML for one of three creation modes.",
+  "strengths": [
+    "Single-page progressive-disclosure creation model (prompt/upload to generate to same-screen edit) is more efficient than a multi-screen wizard and worth preserving",
+    "Existing Simulated Attacks Library (table, search, Sender/Difficulty/Motive/Method/Vector filters, Email/SMS/Voice/Hybrid/Custom Assets tabs) is a mature surface this feature should extend rather than duplicate",
+    "Existing 'Motive' taxonomy (Authority, etc.) already echoes AEP Builder's Adversary Method concept, a cross-feature consistency opportunity already half-built",
+    "In-body 'Add Phishing Link' and 'Add QR code' authoring tools are a thoughtful, already-solved capability not addressed in the current PRD",
+    "Intro banner framing AI vs. manual creation sets expectations clearly and calmly across all three tabs"
+  ],
+  "findings": [
+    {
+      "id": "DR-01",
+      "severity": "S3",
+      "category": "Error prevention",
+      "location": "Generate with AI / Create Manually / Upload EML File tabs — Difficulty dropdown",
+      "issue": "Difficulty is set after generation and never appears wired into the generation call itself; it remains unset in every post-generation frame observed.",
+      "why_it_matters": "The PRD requires difficulty to shape generated content via agentic reasoning, not just classify it afterward — a template labeled 'Hard' may never have been generated with hard-difficulty characteristics.",
+      "recommended_fix": "Move Difficulty above the generate action so it's a generation input, or explicitly document that it's a post-hoc library tag if that's intentional.",
+      "principles": ["Match between system and the real world", "Trust and risk communication"],
+      "teaching_note": "A control positioned like an input but behaving like a label is a quiet trust gap in an AI feature — verify causality, not just placement."
+    },
+    {
+      "id": "DR-02",
+      "severity": "S3",
+      "category": "State completeness",
+      "location": "All three Create New Asset tabs — Preview panel",
+      "issue": "No desktop/mobile preview toggle exists anywhere in the reviewed frames; Preview always renders a single fixed-width view.",
+      "why_it_matters": "This is a named PRD acceptance criterion, and most target employees open simulations on mobile — analysts can't verify mobile rendering before a template goes live.",
+      "recommended_fix": "Add a desktop/mobile toggle to the Preview panel header.",
+      "principles": ["State completeness for enterprise workflows"],
+      "teaching_note": "A preview that only shows one viewport is half a preview for anything destined for an inbox."
+    },
+    {
+      "id": "DR-03",
+      "severity": "S3",
+      "category": "Consistency and standards",
+      "location": "Upload EML File tab, Body editor (frame 13947:20653)",
+      "issue": "After .eml upload, the Body editor shows raw HTML source markup instead of the rendered email that the other two creation modes show in the same component.",
+      "why_it_matters": "Breaks the WYSIWYG promise specifically for the mode the PRD frames as fast and low-skill; editing raw HTML risks breaking the email's rendering entirely.",
+      "recommended_fix": "Parse and render uploaded .eml HTML into the same WYSIWYG canvas used by the other modes, with an explicit fallback state if rendering fails.",
+      "principles": ["Match between system and the real world", "Consistency and standards"],
+      "teaching_note": "When one of three parallel paths through a shared component behaves differently with no visible reason, assume it's an unhandled edge case until proven otherwise."
+    },
+    {
+      "id": "DR-04",
+      "severity": "S3",
+      "category": "Trust and risk communication",
+      "location": "All Create New Asset tabs — Preview panel and Body editor, post-generation/upload",
+      "issue": "No visible confirmation that sensitive data was redacted or links rewritten to safe URLs; placeholder tokens use two inconsistent, unstyled syntaxes ({{firstname}} vs __FIRST_NAME__ __LAST_NAME__).",
+      "why_it_matters": "Redaction and safe-link rewriting are the feature's core safety claims; an analyst has no way to visually verify either happened.",
+      "recommended_fix": "Unify placeholder token syntax and styling across all creation modes; add an explicit post-generation confirmation (e.g., 'Links converted to safe simulation URLs').",
+      "principles": ["Trust and risk communication", "Consistency and standards"],
+      "teaching_note": "A safety claim with no visible evidence is functionally no safety claim, from a trust standpoint."
+    },
+    {
+      "id": "DR-05",
+      "severity": "S2",
+      "category": "Visibility of system status",
+      "location": "Transition from clicking Generate Asset to the Preview/Edit reveal",
+      "issue": "No loading, progress, or labeled-stage state exists anywhere between submitting input and seeing the generated result.",
+      "why_it_matters": "A ~10s wait with no progress feedback reads as broken, especially against Dune's own established AEP Builder labeled-progress pattern for a similar wait.",
+      "recommended_fix": "Reuse AEP Builder's labeled advancing-stage progress pattern, named after what generation actually does.",
+      "principles": ["Visibility of system status"],
+      "teaching_note": "Any async action in the 3-15 second range needs a designed waiting state; silence reads as failure."
+    },
+    {
+      "id": "DR-06",
+      "severity": "S2",
+      "category": "Hierarchy and clarity",
+      "location": "Create New Asset — all three tabs",
+      "issue": "No field labeled Template Name/Asset Title exists on any creation tab, though the Library has a Title column; unclear whether Title is auto-derived from the email Subject.",
+      "why_it_matters": "Conflates the internal library name with the user-facing bait subject line, and leaves the PRD's open duplicate-name question with no field to validate against.",
+      "recommended_fix": "Add an explicit Template Name field, separate from Subject, on all three tabs.",
+      "principles": ["Recognition rather than recall"],
+      "teaching_note": "Any object with a library/list view needs an explicit name field distinct from its user-facing content."
+    },
+    {
+      "id": "DR-07",
+      "severity": "S2",
+      "category": "Consistency and standards",
+      "location": "Create Manually tab (frame 5202:98882)",
+      "issue": "Body field is pre-filled with the same fixture content as the AI-generated example rather than starting blank or with a minimal scaffold.",
+      "why_it_matters": "Likely a mock artifact, but as designed undermines the tab's 'full control' value proposition since it looks identical to the AI output.",
+      "recommended_fix": "Confirm this is fixture reuse; design an explicit blank/scaffold starting state for manual creation if intended.",
+      "principles": ["Match between system and the real world"],
+      "teaching_note": "Reused mock content is easy to mistake for a real default; flag it explicitly in the file."
+    },
+    {
+      "id": "DR-08",
+      "severity": "S1",
+      "category": "Consistency and standards",
+      "location": "Generate with AI tab, Select motive field (frame 5040:166284)",
+      "issue": "Field labeled 'Select motive' displays 'Sender' as its value instead of a motive-type value like 'Authority'.",
+      "why_it_matters": "Reads as a copy-paste wiring bug that would confuse a reviewer or engineer during handoff.",
+      "recommended_fix": "Correct the displayed value to match the Motive taxonomy and QA this control before handoff.",
+      "principles": ["Consistency and standards"],
+      "teaching_note": "Small mismatches are cheap to fix now and expensive to discover during dev handoff."
+    },
+    {
+      "id": "DR-09",
+      "severity": "S2",
+      "category": "RBAC / permissions",
+      "location": "Entire reviewed flow",
+      "issue": "No view-only, restricted-action, or disabled/tooltip states found anywhere; Save Asset is always enabled and the post-save toast shows the asset already Active with no visible deploy gate.",
+      "why_it_matters": "The PRD requires RBAC gating of view/edit/deploy as potentially separable actions; this design shows a simpler, ungated Save-to-Active model.",
+      "recommended_fix": "Confirm with PM whether Active-on-save is intentional or whether a downstream deploy gate exists elsewhere; design explicit RBAC states either way.",
+      "principles": ["RBAC and permission boundary clarity"],
+      "teaching_note": "Absence of RBAC states in a mock isn't proof RBAC is unhandled — confirm before treating it as a gap to design versus a gap to document."
+    },
+    {
+      "id": "DR-10",
+      "severity": "S1",
+      "category": "Craft / polish",
+      "location": "Upload EML File tab, Body editor helper text",
+      "issue": "Helper text reads literally 'This is a hint text to help user.' — unfinished placeholder copy.",
+      "why_it_matters": "Low severity alone, but signals this file needs a copy pass before reuse.",
+      "recommended_fix": "Replace with real guidance copy.",
+      "principles": ["Help and guidance"],
+      "teaching_note": "Placeholder copy left for six months is a good prompt to do a full copy audit before treating any part of a file as handoff-ready."
+    }
+  ],
+  "open_questions": [
+    "[Design] Does this Figma page reflect the current production experience, or is it a superseded/parked exploration?",
+    "[PM] Is Active status on save the intended final state, or is there a downstream deploy/campaign-attach gate not visible in this file?",
+    "[Eng] Is Difficulty wired into generation anywhere outside what's visible in Figma, or confirmed to be purely a post-hoc classification tag?",
+    "[Design] Should this feature's library be the existing multi-channel Simulated Attacks Library rather than the standalone Template Library proposed in design-strategy.md?"
+  ],
+  "revision_priorities": [
+    "Wire Difficulty into generation or document it as a post-hoc tag (DR-01)",
+    "Add a desktop/mobile preview toggle (DR-02)",
+    "Fix Upload EML body rendering to show rendered content, not raw HTML (DR-03)",
+    "Add visible redaction/safe-link confirmation and unify placeholder token styling (DR-04)",
+    "Reconcile the existing Simulated Attacks Library against design-strategy.md's proposed new Template Library before further wireframing"
+  ],
+  "last_updated": "2026-07-09"
+}
