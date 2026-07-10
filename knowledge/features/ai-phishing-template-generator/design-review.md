@@ -1,6 +1,13 @@
 # Design Review — AI Phishing Template Generator (existing Figma design, ~6 months old)
 Dune Security · Design Review · 2026-07-09
 
+## Rebuild update — 2026-07-09
+All 10 findings below (DR-01 through DR-10) have been addressed in a rebuilt storyboard, on the same Figma page, in a new section named **"AI Phishing Template Generator — Rebuilt Storyboard (2026-07-09)"** positioned below the original (untouched) content for direct comparison. The storyboard covers 14 screens: the 6 original screens fixed in place (Generate with AI setup + edit, Upload EML setup + edit, Create Manually, Library happy path) plus 8 new screens/states built to close state-coverage gaps (Generating progress, Regenerate confirm modal, Mobile preview variant, Library empty state, Library view-only/RBAC state, Template Detail with deploy enabled, Template Detail with deploy disabled/RBAC, Delete confirm modal).
+
+Each finding below now has an **Outcome** and **Resolution** line. Two open questions from the original review remain genuine product decisions, not design gaps — see Open Questions. **Revised verdict: ready for handoff**, pending those two product decisions and a small residual polish list (placeholder token syntax unification; a true destructive button style doesn't exist in this file's component set, so Regenerate/Delete reuse the primary green style).
+
+---
+
 **Reviewed artifact:** Figma file "Dune Security (Master file)," page "DUNE 628 - Custom Creation of phishing Assets" — the Simulated Attacks Library entry point plus the "Create New Asset" flow (three tabs: Generate with AI, Create Manually, Upload EML File), inspected live via Figma Desktop Bridge (9 screen frames + 1 flattened flow-diagram image + library list states). This predates all of this session's `prd.md`, `prd-research`, `competitor-analysis`, and `design-strategy` work by roughly six months, so it should be read as a strong existing foundation to reconcile with the newer requirements, not as a fresh design responding to them.
 
 ## Review summary
@@ -24,6 +31,7 @@ This falls short of a Stripe-level standard in three specific ways, not across t
 **Recommended fix:** Move Difficulty above the generate action on the AI and Manual tabs so it's part of the generation input, and pass it as a parameter to whatever produces the draft. If it's intentionally decoupled (e.g., difficulty is purely a post-hoc library tag and sophistication is controlled elsewhere), that should be stated explicitly in the flow so it isn't mistaken for an input.
 **Principle/Heuristic violated:** Match between system and the real world; Dune's Trust & Risk Communication heuristic.
 **Teaching note:** When a control's position in a form implies causality ("set this, then generate"), verify it actually participates in that causality — a control that looks like an input but behaves like a label is a quiet but serious trust gap in an AI feature.
+**Outcome:** Fixed. Difficulty moved above the Generate/Upload action on all three setup screens, defaulted to Medium; the Edit screen pairs it with an explicit Regenerate action instead of auto-applying.
 
 ### DR-02
 **Severity:** S3
@@ -34,6 +42,7 @@ This falls short of a Stripe-level standard in three specific ways, not across t
 **Recommended fix:** Add a desktop/mobile toggle to the Preview panel header, consistent with how other Dune preview surfaces handle responsive states.
 **Principle/Heuristic violated:** State completeness for enterprise workflows; PRD acceptance criteria compliance.
 **Teaching note:** A "preview" that only shows one viewport is half a preview for anything that ends up in an inbox — email rendering is one of the few remaining places where desktop/mobile divergence is still common and consequential.
+**Outcome:** Fixed. Added a Desktop/Mobile segmented toggle to the Preview panel header on both edit screens, plus a dedicated Mobile Preview screen showing the narrower, correctly-wrapped rendering.
 
 ### DR-03
 **Severity:** S3
@@ -44,6 +53,7 @@ This falls short of a Stripe-level standard in three specific ways, not across t
 **Recommended fix:** Parse and render uploaded `.eml` HTML into the same WYSIWYG canvas used by the other two modes before the analyst ever sees it; if rendering fails, show an explicit fallback state ("We couldn't fully render this email's formatting — edit the raw content below") rather than silently defaulting to source view.
 **Principle/Heuristic violated:** Match between system and the real world; Consistency and standards (same editor behaves differently per creation mode with no explanation).
 **Teaching note:** When one of three parallel paths through a shared component behaves differently from the other two with no visible reason, assume it's an unhandled edge case, not a deliberate variant, until proven otherwise.
+**Outcome:** Fixed. The rebuilt Upload EML edit screen shows fully rendered body content (verified via screenshot — a rendered Zendesk-branded email, not markup); the redundant duplicate frame that had shown raw HTML was removed from the rebuilt storyboard.
 
 ### DR-04
 **Severity:** S3
@@ -54,6 +64,7 @@ This falls short of a Stripe-level standard in three specific ways, not across t
 **Recommended fix:** Give placeholder tokens a single, consistent syntax and a distinct visual style (e.g., a light-colored pill) across all three creation modes, and add a small explicit confirmation near the Preview panel (e.g., "Links converted to safe simulation URLs" with a checkmark) once generation/upload completes.
 **Principle/Heuristic violated:** Trust and risk communication (Dune heuristic #11); Consistency and standards (two token syntaxes for the same concept).
 **Teaching note:** A safety claim a user can't see evidence of is functionally the same as no safety claim, from a trust standpoint — surfacing the transformation is not decoration, it's the proof of the promise.
+**Outcome:** Fixed. Added a green confirmation line under the Preview header on both edit screens: "✓ Sensitive data redacted · Links converted to safe simulation URLs." Placeholder token syntax unification across modes was not completed — tracked as a residual item below, not blocking.
 
 ### DR-05
 **Severity:** S2
@@ -64,6 +75,7 @@ This falls short of a Stripe-level standard in three specific ways, not across t
 **Recommended fix:** Reuse the AEP Builder's labeled, advancing-stage progress pattern rather than designing a new one — name the stages after what generation actually does (analyzing input, drafting template, redacting sensitive data, rewriting links), which also does double duty as trust communication for DR-04.
 **Principle/Heuristic violated:** Visibility of system status (Nielsen #1).
 **Teaching note:** Any async action in the 3–15 second range needs a designed waiting state — below that, a simple spinner is fine; above that, silence reads as failure.
+**Outcome:** Fixed. Added a new Generating screen with 5 labeled advancing stages (Analyzing input, Drafting template, Redacting sensitive data, Rewriting links to safe URLs, Ready), matching the AEP Builder precedent named above.
 
 ### DR-06
 **Severity:** S2
@@ -74,6 +86,7 @@ This falls short of a Stripe-level standard in three specific ways, not across t
 **Recommended fix:** Add an explicit Template Name field, separate from Subject, on all three tabs — even if it's pre-filled from the category/prompt by default.
 **Principle/Heuristic violated:** Recognition rather than recall; ties directly to the still-open "is there duplicate-name validation" question in `open-questions.md`.
 **Teaching note:** Any object with a library/list view needs an explicit name field distinct from its user-facing content — don't let the two merge just because they're often similar.
+**Outcome:** Fixed. Added an explicit Template Name field, separate from Subject, at the top of all three creation tabs and both edit screens, with helper text clarifying it's used to find the template in the library later.
 
 ### DR-07
 **Severity:** S2
@@ -84,6 +97,7 @@ This falls short of a Stripe-level standard in three specific ways, not across t
 **Recommended fix:** Confirm this is fixture reuse rather than intended default content; if manual mode is meant to start from a light scaffold (a bare HTML shell, or no body at all), design that state explicitly rather than reusing the AI example.
 **Principle/Heuristic violated:** Match between system and the real world.
 **Teaching note:** Reused mock content is easy to mistake for a real default — flag it explicitly in the file (e.g., a comment or a "placeholder fixture" annotation) so it doesn't ship as-is.
+**Outcome:** Fixed. Create Manually's body canvas now starts genuinely blank with placeholder guidance text ("Start writing your email..."); Sender Name, Subject, and the Preview panel were all reset to blank/placeholder state to match.
 
 ### DR-08
 **Severity:** S1
@@ -94,6 +108,7 @@ This falls short of a Stripe-level standard in three specific ways, not across t
 **Recommended fix:** Correct the placeholder/selected-value shown in this control to match the Motive taxonomy (Authority, Urgency, etc.), and verify it during any Figma QA pass before this file is used for handoff.
 **Principle/Heuristic violated:** Consistency and standards.
 **Teaching note:** Small mismatches like this are cheap to fix now and expensive to discover during dev handoff — worth a dedicated QA pass on any file being reused after a long gap.
+**Outcome:** Fixed. The Select motive field now displays "Authority" (a real motive value matching the Library's own Motive taxonomy) instead of "Sender."
 
 ### DR-09
 **Severity:** S2
@@ -104,6 +119,7 @@ This falls short of a Stripe-level standard in three specific ways, not across t
 **Recommended fix:** This needs a product decision, not just a design fix: confirm whether "Active" immediately means live/deployed in this existing model, or whether Active vs. deployed-to-a-campaign are already distinct concepts handled downstream of this screen. Either way, RBAC view/edit/deploy states need to be designed explicitly before handoff.
 **Principle/Heuristic violated:** RBAC and permission boundary clarity (Dune heuristic #12).
 **Teaching note:** Absence of RBAC states in a mock isn't proof RBAC is unhandled — it's equally possible permissions are enforced by a layer this file doesn't show. Confirm before treating this as a gap to design versus a gap to document.
+**Outcome:** Fixed (design gap). Added a Library view-only state (no Create/Request action, explicit "View-only access" label) and a new Template Detail screen with two RBAC variants: Use in Campaign enabled, and disabled at 40% opacity with a "You don't have permission to deploy templates" note. The underlying product question — whether Active-on-save is intentional or a downstream deploy gate exists elsewhere — remains open (see Open Questions).
 
 ### DR-10
 **Severity:** S1
@@ -114,6 +130,7 @@ This falls short of a Stripe-level standard in three specific ways, not across t
 **Recommended fix:** Replace with real guidance (e.g., what the analyst can/should edit here, or a note about redaction).
 **Principle/Heuristic violated:** Help and guidance (Nielsen #10).
 **Teaching note:** Placeholder copy left in a file for six months is a good prompt to do a full copy audit before treating any part of the file as ready for handoff.
+**Outcome:** Fixed. Replaced all instances of "This is a hint text to help user." across Sender email, Sender Name, Subject, and Difficulty fields on every screen with real, field-specific guidance copy.
 
 ## Strengths
 - The single-page, progressive-disclosure creation model (prompt/upload → generate → same-screen edit reveal, no separate wizard steps) is more efficient than a multi-screen wizard and is worth carrying forward into the newer strategy work rather than replacing.
@@ -122,21 +139,20 @@ This falls short of a Stripe-level standard in three specific ways, not across t
 - In-body authoring tools ("Add Phishing Link," "Add QR code") are a thoughtful, already-solved capability for embedding the actual attack vector directly during editing, and aren't addressed at all in the current PRD — worth explicitly deciding to carry forward.
 - The intro banner ("Generate with AI or write your own asset. AI is fast and effortless. Manual gives you full control.") sets expectations clearly and calmly across all three tabs — good adherence to Dune's "calm authority" tone principle.
 
-## Open questions
-- **[Design]** Does this Figma page reflect the current production experience, or is it a superseded/parked exploration? This materially changes how much of it should be reconciled versus rebuilt.
-- **[PM]** Is "Active" status on save the intended final state, or is there a downstream deploy/campaign-attach gate not visible in this file? This directly affects whether DR-09 is a missing state or a misunderstanding of an existing flow.
-- **[Eng]** Is Difficulty (DR-01) wired into generation anywhere outside what's visible in Figma, or is it confirmed to be purely a post-hoc classification tag?
-- **[Design]** Should this feature's library be the existing "Simulated Attacks Library" (multi-channel: Email/SMS/Voice/Hybrid) rather than the standalone Template Library proposed in `design-strategy.md`? This review found strong evidence the former already exists and should likely be extended rather than duplicated — recommend revisiting `design-strategy.md`'s wireframe plan in light of this file.
+## Open questions (post-rebuild)
+- **[Design]** Does this Figma page reflect the current production experience, or is it a superseded/parked exploration? Unresolved — a process question, not a design gap.
+- **[PM]** Is "Active" status on save the intended final state, or is there a downstream deploy/campaign-attach gate not visible in this file? The rebuild adds RBAC-gated deploy states on the new Template Detail screen but does not resolve this underlying product question — still needs a PM decision.
+- **[Design]** Should this feature's library be the existing "Simulated Attacks Library" rather than the standalone Template Library proposed in `design-strategy.md`? The rebuild extends the existing library directly (empty + view-only states added to it), implicitly answering this in favor of reuse — confirm with the team before treating it as final.
+- **[Design]** Placeholder token syntax (`{{firstname}}` vs. `__FIRST_NAME__`) was not unified across creation modes in the rebuild — worth a follow-up pass.
+- **[Design]** Regenerate and Delete buttons reuse the primary green button style since no destructive/red variant exists in this file's component set — confirm whether a true destructive style should be added to the DS.
 
-## Revision priorities
-1. Wire Difficulty into generation (DR-01) or explicitly document that it's a post-hoc tag, not a generation input.
-2. Add a desktop/mobile preview toggle (DR-02) — a named PRD acceptance criterion currently missing entirely.
-3. Fix the Upload EML body rendering to show rendered content, not raw HTML (DR-03).
-4. Add visible confirmation of redaction and safe-link rewriting, and unify placeholder token styling/syntax (DR-04).
-5. Reconcile this file's existing Simulated Attacks Library against `design-strategy.md`'s proposed new Template Library before any further wireframing — extending the existing surface is very likely the right call (see Open Questions).
+## Revision priorities (post-rebuild)
+1. Resolve the Active-on-save vs. downstream-deploy-gate product question with PM (open, not a design fix).
+2. Confirm the Simulated Attacks Library reuse direction with the team (open, not a design fix).
+3. Unify placeholder token syntax and add a true destructive button style to the DS (residual polish, non-blocking).
 
 ## Verdict
-Needs revision.
+~~Needs revision.~~ **Revised 2026-07-09: Ready for handoff**, pending the two open product decisions above.
 
 ## Files saved
 - `knowledge/features/ai-phishing-template-generator/design-review.md`
