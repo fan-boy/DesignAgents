@@ -1,7 +1,7 @@
 {
   "feature_name": "Candidate Multi-Role Coordination",
   "feature_slug": "candidate-multi-role-coordination",
-  "design_goal": "Give recruiters one place to see everything Para AI knows about a candidate, control what it's allowed to know, and direct its actions across every opportunity that candidate is in, without ever wondering what the AI already did on its own.",
+  "design_goal": "Give recruiters one place to see everything Para AI knows about a candidate, control what it's allowed to know, and direct its actions across every opportunity that candidate is in, without ever wondering what the AI already did on its own. The default landing view matches the recruiter's actual task (check status, take action), not a data-browsing detour through profile or context first.",
   "user_segments": ["Recruiter"],
   "constraints": [
     "Recruiter retains final say on relationship-sensitive actions",
@@ -10,7 +10,9 @@
     "Single-recruiter ownership per candidate profile — reflects real platform architecture (profiles are independently owned per recruiter), not just a v1 simplification",
     "This feature does not reconcile or dedupe candidate identity across recruiters",
     "Assumes reliable company-to-opportunity mapping and existing call-sync/transcription integration",
-    "Para-AI-surfaced opportunity matches (beyond the recruiter's own submissions) require recruiter confirmation before becoming an active track, same as a recruiter-initiated submission"
+    "Para-AI-surfaced opportunity matches (beyond the recruiter's own submissions) require recruiter confirmation before becoming an active track, same as a recruiter-initiated submission",
+    "No standalone Action Queue destination — approval-required items surface inline within their opportunity row on the Opportunities landing view",
+    "Opportunities is the default landing view for a candidate; Profile & Context is a secondary, on-demand view"
   ],
   "success_metrics": [
     "Less recruiter time spent coordinating one candidate across roles",
@@ -19,8 +21,8 @@
     "Recruiters act on Para AI's recommendations more often than not",
     "Zero relationship-sensitive actions sent without recruiter approval"
   ],
-  "selected_strategy": "Command Center: candidate-centric parallel-track dashboard",
-  "selected_strategy_rationale": "The brief's core problem is recruiters reconstructing one candidate's status from scattered per-role views; a single dashboard showing every active opportunity as a parallel track answers that directly, and gives Para AI a natural home for cross-opportunity reasoning like conflict detection.",
+  "selected_strategy": "Opportunities: candidate-centric parallel-track dashboard as the default landing view, with Profile & Context as a secondary view and Para AI embedded inline rather than siloed in a separate destination",
+  "selected_strategy_rationale": "The brief's core problem is recruiters reconstructing one candidate's status from scattered per-role views; a single dashboard showing every active opportunity as a parallel track answers that directly, and gives Para AI a natural home for cross-opportunity reasoning like conflict detection. Refined further so this dashboard (not profile or context data) is what a recruiter lands on, and so approval-required Para AI actions appear inline on the opportunity itself rather than behind a separate Action Queue tab — matching where the recruiter's actual task already is.",
   "alternative_strategies": [
     { "name": "Candidate record with opportunity tabs", "summary": "One candidate page, opportunities as tabs within it", "rejected_because": "Tabs only show one opportunity at a time, preserving the fragmentation the feature is meant to solve" },
     { "name": "Opportunity-first with candidate cross-reference", "summary": "Recruiters keep working from each role's pipeline; a drawer surfaces linked opportunities", "rejected_because": "Keeps the shared-candidate view secondary, undercutting the premise that the candidate is the right unit of coordination" }
@@ -28,32 +30,38 @@
   "tradeoffs": [
     "Compact per-opportunity rows can't show full detail without an expand step (drawer)",
     "Requires cross-opportunity data plumbing (company mapping, unified stage model) that may not exist yet",
-    "Bulk-approve mitigation reduces but does not eliminate rubber-stamp risk"
+    "Bulk-approve mitigation reduces but does not eliminate rubber-stamp risk",
+    "Removing the separate Action Queue means an approval-required item is only as visible as the row it's attached to — a cross-candidate 'everything awaiting me' view now depends on a global surface this design doesn't cover"
   ],
   "assumptions": [
     "Resume/LinkedIn default Visible to Para AI; notes/calls default Private with a one-tap share prompt at capture time",
     "Candidate is never a user of this system, only its subject",
     "Single recruiter owns a given candidate profile at a time, by platform architecture rather than a v1 scoping choice",
     "Company-to-opportunity mapping and call-sync/transcription integration are reliable enough to support conflict detection and auto-transcription",
-    "Para AI can surface opportunity matches beyond the recruiter's own submissions; such matches require recruiter confirmation before becoming an active track"
+    "Para AI can surface opportunity matches beyond the recruiter's own submissions; such matches require recruiter confirmation before becoming an active track",
+    "Durable context (resume, tenure history) does not decay in relevance; volatile context (stated preferences, comp expectations, timing) does, and is shown with a staleness indicator past a set age",
+    "A recruiter's cross-candidate approval backlog is served by a separate, lightweight global surface (e.g. a notification count), not by this candidate-level design"
   ],
   "open_issues": [
     "Whether company-to-opportunity mapping and call-sync integration genuinely exist reliably enough as assumed",
     "Whether a one-tap share prompt at capture is sufficient, or a periodic under-sharing nudge is needed",
     "Whether Paraform performs any identity resolution across independently-owned recruiter profiles for the same real person — without it, cross-recruiter duplicate submission to the same role is undetectable from within this feature",
-    "Whether Para AI's platform-wide matching reach reliably routes through the same recruiter-confirmation gate as a recruiter-initiated submission, or whether that's an unconfirmed assumption"
+    "Whether Para AI's platform-wide matching reach reliably routes through the same recruiter-confirmation gate as a recruiter-initiated submission, or whether that's an unconfirmed assumption",
+    "Whether a flat 60-90 day staleness threshold is right for all volatile context, or whether different fact types decay at different rates",
+    "What the global cross-candidate 'needs your review' surface should actually be (notification bell vs. dedicated inbox) — a real next step outside this candidate-level design"
   ],
   "risks": [
     "Bulk-approve remains a genuine trust risk even with a forced per-item preview",
     "If underlying cross-opportunity data isn't reliable, conflict-blocking behavior would need to degrade to a manual warning instead of a hard block",
-    "Cross-recruiter duplicate submission of the same candidate to the same role is not solvable within one recruiter's Command Center and should be surfaced as a known limitation, not implied as handled"
+    "Cross-recruiter duplicate submission of the same candidate to the same role is not solvable within one recruiter's Opportunities view and should be surfaced as a known limitation, not implied as handled",
+    "A staleness indicator that isn't backed by matching logic actually discounting older signals would mislead recruiters about what Para AI is using, the same trust failure as a false 'undo'"
   ],
-  "ds_patterns_used": ["timeline list", "drawer", "table/row list", "tag/badge", "review inbox/queue", "empty state"],
-  "new_patterns_required": ["persistent Auto vs. Approval-required tag system (no existing precedent to draw from since there is no shared design system for this exercise)"],
+  "ds_patterns_used": ["timeline list", "drawer", "table/row list", "tag/badge", "inline expandable card", "board/kanban (view toggle)", "empty state"],
+  "new_patterns_required": ["persistent Auto vs. Approval-required tag system (no existing precedent to draw from since there is no shared design system for this exercise)", "inline approval card embedded in a list row (replaces a separate review-queue screen)"],
   "next_actions": [
-    "Sketch the Command Center row anatomy first — every other screen takes its cues from it",
-    "Design the Action Queue bulk-approve interaction carefully — highest trust risk in the feature",
-    "Define the exact Auto vs. Approval-required tag taxonomy before laying out any screen"
+    "Sketch the Opportunities row anatomy with its inline-expanded approval state first — every other decision takes its cues from it",
+    "Design the List/Board view toggle and the proposed-match card treatment before finalizing row anatomy",
+    "Define the exact tag taxonomy (Auto / Needs approval / Proposed / Stale) before laying out any screen"
   ],
   "last_updated": "2026-07-11"
 }

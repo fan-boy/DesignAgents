@@ -5,8 +5,8 @@
   "last_updated": "2026-07-11",
   "product_context": "Paraform (Agentic Hiring Platform) — not a Dune Security feature. Written for a design take-home exercise; source material is the exercise prompt, not an internal spec.",
   "flows": [
-    "Candidate Context Intake",
-    "Multi-Opportunity Pipeline View",
+    "Opportunities (landing view)",
+    "Profile & Context (secondary view)",
     "Recruiter view of candidate status"
   ],
   "actors": ["Recruiter", "Para AI"],
@@ -18,11 +18,14 @@
     "call transcript",
     "call summary",
     "note (general or opportunity-tagged)",
-    "visibility toggle (Visible to Para AI / Private to recruiter)",
+    "include-in-matching toggle (on / off, per context item)",
+    "context durability (durable / volatile)",
+    "context staleness flag (volatile items past threshold)",
     "opportunity pipeline stage",
     "Para AI recommended action",
     "action handling mode (Auto-executed / Recruiter-approval required)",
-    "opportunity origin (recruiter-initiated / Para-AI-surfaced)"
+    "opportunity origin (recruiter-initiated / Para-AI-surfaced)",
+    "opportunities view mode (List / Board)"
   ],
   "integrations": [
     "Call recording / transcription tool",
@@ -31,17 +34,19 @@
     "Email / outbound messaging",
     "Para AI matching layer (platform-wide, surfaces matches beyond the recruiter's own submissions)"
   ],
-  "edge_cases_count": 8,
+  "edge_cases_count": 10,
   "open_questions_flagged": [
     "What is the default approval-required timeout window before escalation?",
     "Does the candidate ever see any part of this system, or is it recruiter/Para-AI only?",
     "How are cross-opportunity conflicts (e.g., same-company double submission) detected — real-time rule check or periodic reconciliation?",
-    "What happens to Para AI's confidence in a candidate profile when a majority of sources are marked private?",
+    "What happens to Para AI's confidence in a candidate profile when a majority of sources are excluded from matching?",
     "Does Paraform perform any identity resolution across independently-owned recruiter profiles for the same real person, to catch duplicate submissions to the same role from different recruiters?",
-    "Can Para AI surface a match to an opportunity the recruiter hasn't chosen, and does entering it always require recruiter confirmation the same way a recruiter-initiated submission does?"
+    "Can Para AI surface a match to an opportunity the recruiter hasn't chosen, and does entering it always require recruiter confirmation the same way a recruiter-initiated submission does?",
+    "Is a 60-90 day staleness threshold right for all volatile context, or should different fact types decay at different rates?",
+    "What should the global, cross-candidate 'needs your review' surface be — a notification bell, a dedicated inbox, something else?"
   ],
   "figma_used": false,
   "source_docs_used": true,
   "confidence": "medium",
-  "confidence_notes": "Single source (the take-home prompt itself) with no existing Figma or internal spec to cross-reference. Scope, actors, and edge cases were reasonably inferable from the prompt and the linked Passive Placements concept, but several judgment calls (default visibility rules, approval timeout window, conflict-detection mechanism) are design decisions made to produce a complete PRD rather than facts confirmed by the source. Updated 2026-07-11 with further product research indicating candidate profiles are owned per recruiter (not shared platform-wide) and that Para AI's matching reach can extend beyond opportunities the recruiter has directly pursued — this is a working hypothesis pending confirmation, not a PM-confirmed fact, and is tracked as open questions."
+  "confidence_notes": "Single source (the take-home prompt itself) with no existing Figma or internal spec to cross-reference. Scope, actors, and edge cases were reasonably inferable from the prompt and the linked Passive Placements concept, but several judgment calls (default visibility rules, approval timeout window, conflict-detection mechanism) are design decisions made to produce a complete PRD rather than facts confirmed by the source. Updated 2026-07-11 with further product research indicating candidate profiles are owned per recruiter (not shared platform-wide) and that Para AI's matching reach can extend beyond opportunities the recruiter has directly pursued — this is a working hypothesis pending confirmation, not a PM-confirmed fact, and is tracked as open questions. Updated again 2026-07-11 with an IA refinement from design review: Opportunities as the default landing view, Profile split from Context, Action Queue merged inline, durable-vs-volatile context staleness — these are design decisions, not externally confirmed facts."
 }

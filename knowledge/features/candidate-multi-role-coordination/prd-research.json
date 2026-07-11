@@ -27,19 +27,22 @@
     "No candidate-facing surface defined",
     "Bulk-approve interaction is underspecified and risks becoming a rubber stamp",
     "\"Undo\" on auto-executed actions is not literally possible for already-sent communications",
-    "No notification channel defined for the Action Queue",
     "No cross-recruiter identity resolution or deduplication — same real person could be independently submitted to the same role by two recruiters",
-    "Whether Para AI's platform-wide matching reach always routes through the same recruiter-confirmation gate as a recruiter-initiated submission is unconfirmed"
+    "Whether Para AI's platform-wide matching reach always routes through the same recruiter-confirmation gate as a recruiter-initiated submission is unconfirmed",
+    "No notification mechanism defined for a recruiter's cross-candidate approval backlog now that there is no per-candidate Action Queue to check",
+    "Whether a flat 60-90 day staleness threshold is right for all volatile context or should vary by fact type"
   ],
   "edge_cases": [
     "Candidate declines one opportunity while active in others",
-    "Source marked private after Para AI already used it in a recommendation",
+    "Source excluded from matching after Para AI already used it in a recommendation",
     "Para AI proposes double submission to the same hiring company",
     "Approval-required action left unactioned past the timeout window",
     "Call recording fails to transcribe or produces low-confidence output",
     "Candidate withdraws from the process entirely",
     "Same real-world candidate independently owned by another recruiter — out of scope to detect or reconcile",
-    "Para AI surfaces a new opportunity match the recruiter did not initiate — requires recruiter confirmation before becoming active"
+    "Para AI surfaces a new opportunity match the recruiter did not initiate — requires recruiter confirmation before becoming active, shown in a distinct Proposed section",
+    "Volatile context item ages past staleness threshold — flagged for reconfirmation, matching weight discounted",
+    "Durable context item ages — never flagged as stale"
   ],
   "critical_questions": [
     { "owner": "Both", "question": "Should notes/calls default to Visible-to-Para-AI to maximize context, or Private to maximize trust and control?" },
@@ -54,13 +57,15 @@
     "Over-cautious visibility defaults starve Para AI of context and defeat the feature's stated purpose",
     "Labeling a sent-and-undeliverable-to-retract email as 'undo' sets a false expectation and breaks trust when discovered",
     "If the auto-executed vs. approval-required distinction isn't visible everywhere an action appears, recruiters are surprised by actions they didn't know had already gone out",
-    "Cross-recruiter duplicate submission of the same candidate to the same role is not solvable within one recruiter's Command Center and should be surfaced as a known limitation, not implied as handled",
-    "Para AI's matching reach could outpace recruiter awareness if a surfaced match isn't reliably gated behind recruiter confirmation before anything moves forward"
+    "Cross-recruiter duplicate submission of the same candidate to the same role is not solvable within one recruiter's Opportunities view and should be surfaced as a known limitation, not implied as handled",
+    "Para AI's matching reach could outpace recruiter awareness if a surfaced match isn't reliably gated behind recruiter confirmation before anything moves forward",
+    "A staleness indicator not backed by real recency-weighting in the matching logic would mislead recruiters the same way a false 'undo' does"
   ],
   "teaching_notes": [
     "The brief's 'Passive Placements' reference implies Para AI already has a submission-recommendation capability; frame this feature as extending that muscle across concurrent opportunities, not inventing new AI capability",
-    "The Action Queue is structurally a triage/review inbox (PR review queue, email triage) — design it as a scannable list with fast approve/edit/reject, not a settings form",
-    "Auto-executed vs. Recruiter-approval-required is the single most important piece of information architecture and must be a persistent, legible signal everywhere an action or its status appears"
+    "Approval-required items expand inline on their opportunity row (same fast approve/edit/reject interaction as a triage inbox) rather than living behind a separate Action Queue destination",
+    "Auto-executed vs. Recruiter-approval-required is the single most important piece of information architecture and must be a persistent, legible signal everywhere an action or its status appears",
+    "Opportunities is the default landing view (task-oriented); Profile & Context is secondary and on-demand (data-oriented) — default design decisions toward keeping recruiters on Opportunities"
   ],
   "last_updated": "2026-07-11"
 }

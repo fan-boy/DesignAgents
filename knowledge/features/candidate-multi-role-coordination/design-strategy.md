@@ -3,6 +3,8 @@ Recruiters and Para AI jointly manage a candidate who is active in multiple open
 
 **Update (2026-07-11):** further product research surfaced that candidate profiles on Paraform are owned per recruiter — the same real person can exist as an independent, unlinked profile in another recruiter's own book, and Para AI's matching reach can extend to opportunities the recruiter hasn't directly pursued. This is folded in below as a scoping clarification (the strategy still holds; "one candidate" now explicitly means "one recruiter's own record of a candidate") rather than a change of direction. See Open issues for what's still unconfirmed.
 
+**Update (2026-07-11, IA refinement):** reworked the information architecture based on design review. Three changes: (1) Para AI's presence moves from a separate destination into the surfaces recruiters already use — the standalone Action Queue is gone, approval-required items now expand inline within their opportunity row. (2) The candidate page's default landing view is Opportunities, not Profile or Context — checking status and taking action is the dominant recruiter task, browsing candidate data is secondary and on-demand. (3) Profile (structured, scannable facts) and Context (the chronological, visibility-controlled evidence timeline) are now explicitly separate concerns that had been conflated into one screen. Wireframe plan below reflects all three.
+
 **Success metrics (finalized, tied to the original HMW):**
 1. Less recruiter time spent coordinating one candidate across roles.
 2. Fewer opportunities go stale from missed follow-up.
@@ -11,7 +13,7 @@ Recruiters and Para AI jointly manage a candidate who is active in multiple open
 5. Zero relationship-sensitive actions sent without recruiter approval.
 
 ## Design goal
-Give recruiters one place to see everything Para AI knows about a candidate, control what it's allowed to know, and direct its actions across every opportunity that candidate is in — without ever having to wonder what the AI already did on its own.
+Give recruiters one place to see everything Para AI knows about a candidate, control what it's allowed to know, and direct its actions across every opportunity that candidate is in — without ever having to wonder what the AI already did on its own. The default view a recruiter lands on should match the task they're actually there to do (check status, take action) rather than forcing a detour through profile or context data first.
 
 ## Key constraints
 - The recruiter must retain final say on any relationship-sensitive action (rejections, compensation, anything sourced from a private note) — this is the load-bearing constraint the entire feature is built around, not a nice-to-have.
@@ -39,40 +41,38 @@ Option B, the Command Center. The recruiter's actual pain point, as described in
 
 ## Wireframe plan
 
-### Screen 1 — Candidate Record: Context Timeline
-- **Layout:** Header (candidate identity, source, active-opportunity count as a summary tag) — Body (chronological timeline, main column) — Right rail ("What Para AI currently understands about this candidate," a synthesized card with each point linked to its source item).
-- **Key components:** timeline list, per-item visibility pill (Visible to Para AI / Private), inline one-tap share prompt (appears once per new note/call, dismissible), synthesized-understanding card.
-- **Primary action:** add a context item (upload resume, paste LinkedIn URL, log/sync a call, write a note).
-- **Secondary actions:** toggle visibility on any single item; open full transcript/note; jump to Command Center.
-- **System content:** parsing/sync-in-progress state per item, "needs review" flag on low-confidence transcripts.
-- **Edge cases:** empty timeline (candidate just sourced, no context yet) shows an empty state prompting first upload; a source marked private after Para AI already used it is flagged stale on the synthesized card, not silently dropped.
+### Screen 1 — Opportunities (candidate landing view, default)
+- **Layout:** Header (candidate identity, a two-way nav — Opportunities / Profile & Context — with Opportunities always the default) — quick-insight strip (condensed synthesis of what Para AI currently understands, plus a "View full context →" link) — quick-capture row (+ Add note / + Log call, opens an inline panel rather than navigating away) — conflict banner when applicable — a distinct "Proposed by Para AI" section for surfaced-but-unconfirmed matches — the active-opportunity list, List view by default with a Board (grouped-by-stage) view available as a toggle.
+- **Key components:** quick-insight strip, quick-capture entry points, proposed-match card (visually distinct from an active track — Confirm / Dismiss, not Approve/Edit/Reject), per-opportunity row (company/role, stage tag, days-in-stage, last activity, next recommended action with a persistent Auto / Needs your approval tag), inline-expandable approval card (drafted content, citation, Approve / Edit / Reject — appears within the row itself, not on a separate screen), List/Board view toggle, conflict banner, sync-freshness indicator.
+- **Primary action:** act on an opportunity — approve/edit/reject an inline drafted action, or confirm/dismiss a proposed match.
+- **Secondary actions:** quick-add a note or call without leaving the page; switch to Profile & Context; toggle List/Board view; manually add the candidate to a new opportunity; close/archive a track.
+- **System content:** default sort by most-urgent-first (stage age, upcoming deadlines); escalation flag on approval-required items past the review window, shown directly on the row.
+- **Edge cases:** zero active opportunities but a proposed match exists — the landing view still has something worth showing, not a hard empty state; true zero-everything shows an empty state prompting a first submission; 8-10+ opportunities is the point at which Board view (grouped by stage) becomes the more legible choice — this is the answer to what was previously an open scaling question, not a separate unresolved problem.
 
-### Screen 2 — Command Center: Multi-Opportunity View
-- **Layout:** Header (candidate identity strip, link back to Context Timeline, conflict banner when applicable) — Body (parallel horizontal tracks, one row per active opportunity).
-- **Key components:** per-opportunity row (company/role, stage tag, days-in-stage, last activity, next recommended action with a persistent Auto / Needs your approval tag), conflict banner, sync-freshness indicator, a distinct "Para AI proposed this" row style for a surfaced-but-unconfirmed match (visually separate from an active track, since it isn't one yet).
-- **Primary action:** click a row to open its detail drawer (fuller history, actions specific to that opportunity).
-- **Secondary actions:** add candidate to a new opportunity; close/archive a track; confirm or dismiss a Para-AI-proposed match before it becomes an active track.
-- **System content:** default sort by most-urgent-first (stage age, upcoming deadlines).
-- **Edge cases:** zero opportunities shows an empty state ("not yet submitted anywhere"); a single opportunity still renders as a one-row track rather than switching to a different layout, so the mental model never changes shape; 8-10+ opportunities collapse into a scrollable, sortable list rather than growing the page indefinitely.
+### Screen 2 — Profile & Context (secondary view, on-demand)
+- **Layout:** Header (same nav, Profile & Context active) — Profile summary block (name, title, location/remote preference, comp range, resume and LinkedIn links — structured, scannable facts, not chronological) — Context timeline below (chronological, newest-first) — full "What Para AI sees" panel with per-signal citations (the detailed counterpart to the landing page's condensed strip).
+- **Key components:** profile summary card, timeline list, per-item "Include in matching" toggle (renamed from "Visible to Para AI" so the toggle's actual consequence — whether Para AI can use this signal when proposing new opportunities — is explicit rather than implied), a staleness indicator on aging **volatile** context (stated preferences, comp expectations, timing — things that can genuinely go out of date), synthesized-understanding card.
+- **Primary action:** add or edit a context item.
+- **Secondary actions:** toggle a context item's matching inclusion; reconfirm a stale item; open a full transcript or note.
+- **System content:** parsing/sync-in-progress state per item; "needs review" flag on low-confidence transcripts; staleness threshold for volatile items (proposed default: 60-90 days, to be confirmed against real usage rather than treated as final).
+- **Edge cases:** empty timeline (candidate just sourced, no context yet) shows an empty state prompting first upload; a source marked private after Para AI already used it is flagged stale on the synthesized card, not silently dropped; **durable** facts (resume history, tenure) are never shown as stale regardless of age — only preference-like signals decay.
 
-### Screen 3 — Para AI Action Queue
-- **Layout:** Header (queue count, filter by opportunity/urgency) — Body (list of pending items).
-- **Key components:** per-item card (candidate + opportunity context, the actual drafted content, a citation back to the source that generated it, Approve / Edit / Reject), bulk-select mode with an expandable per-item preview strip (never a collapsed "5 items selected" with no visible content).
-- **Primary action:** Approve, Edit, or Reject an item; Approve Selected in bulk mode only after each selected item's draft has been shown, not just counted.
-- **Secondary actions:** snooze/defer an item.
-- **System content:** escalation flag on items past the review-timeout window (e.g., "waiting 2 days").
-- **Edge cases:** empty queue state ("nothing needs your review right now"); an item whose source was made private after generation is flagged and requires explicit confirm-or-discard rather than a silent approve.
+### Cross-cutting requirements
+- The Auto-executed vs. Recruiter-approval-required distinction must use one consistent tag/label treatment everywhere an action or its status appears — the Opportunities row, its inline-expanded state, and any activity log — so a recruiter is never in a position to be surprised by something that already happened. This includes new-opportunity actions: whether the recruiter or Para AI initiated it, entering an active track is always Recruiter-approval-required, never a special case.
+- If a context item is shown as "stale" in the UI, Para AI's actual matching logic must already be discounting it by a comparable amount — a staleness indicator that doesn't correspond to real signal-weighting underneath would mislead the recruiter about what the model is actually using, the same trust failure as a false "undo."
 
-### Cross-cutting requirement
-The Auto-executed vs. Recruiter-approval-required distinction must use one consistent tag/label treatment everywhere an action or its status appears — Command Center rows, Action Queue cards, and any activity log — so a recruiter is never in a position to be surprised by something that already happened. This now explicitly includes new-opportunity actions: whether the recruiter or Para AI initiated a new opportunity, it is always Recruiter-approval-required before it becomes an active track — never a special case.
+## Global surface (related, out of per-candidate scope)
+A recruiter's cross-candidate backlog — every approval-required item across every candidate they own, not just this one — still needs a single entry point; removing the per-candidate Action Queue doesn't remove that need. Proposed direction: a lightweight "Needs your review (N)" notification affordance in the main app navigation, not a heavy dedicated destination like the current product's separate ParaAI page. Not wireframed here — this candidate-level design only covers the per-candidate inline surfacing.
 
 ## Open issues
 - Whether company-to-opportunity mapping and call-sync integration genuinely exist reliably enough to support the conflict-detection and auto-transcription assumed here.
 - Whether the one-tap share prompt at capture-time is enough to counter under-sharing, or whether Para AI needs a periodic nudge ("you have 3 unshared notes on an active candidate") — deferred as a v2 consideration.
-- Whether Paraform performs any identity resolution across independently-owned recruiter profiles for the same real person — without it, the same candidate could be submitted to the same role twice by two different recruiters, and this feature has no way to detect or prevent that from within one recruiter's Command Center.
+- Whether Paraform performs any identity resolution across independently-owned recruiter profiles for the same real person — without it, the same candidate could be submitted to the same role twice by two different recruiters, and this feature has no way to detect or prevent that from within one recruiter's Opportunities view.
 - Whether Para AI's platform-wide matching reach (surfacing opportunities the recruiter didn't choose) reliably routes through the same recruiter-confirmation gate as a recruiter-initiated submission, or whether that's an assumption this design is making without confirmation.
+- Whether a flat 60-90 day staleness threshold is right for all volatile context, or whether different fact types (comp floor vs. location preference vs. reason for leaving) should decay at different rates.
+- What the global cross-candidate "needs your review" surface should actually be — notification bell, dedicated inbox, something else — a real next step but outside this candidate-level design.
 
 ## Next design actions
-1. Sketch the Command Center row anatomy first — it's the screen every other decision (queue design, timeline design) takes its cues from.
-2. Design the Action Queue's bulk-approve interaction carefully; it's the single highest-risk interaction in the feature from a trust standpoint.
-3. Write the exact tag taxonomy (label + color logic) for Auto vs. Approval-required before laying out any screen, so it's applied consistently rather than retrofitted.
+1. Sketch the Opportunities row anatomy with its inline-expanded approval state first — one row now carries what used to be split across two screens (Command Center + Action Queue).
+2. Design the List/Board view toggle and the proposed-match card treatment before finalizing row anatomy, since both change what a row needs to support.
+3. Write the exact tag taxonomy (Auto / Needs approval / Proposed / Stale) before laying out any screen, so it's applied consistently rather than retrofitted.
