@@ -1,0 +1,59 @@
+{
+  "feature_name": "Candidate Multi-Role Coordination",
+  "feature_slug": "candidate-multi-role-coordination",
+  "design_goal": "Give recruiters one place to see everything Para AI knows about a candidate, control what it's allowed to know, and direct its actions across every opportunity that candidate is in, without ever wondering what the AI already did on its own.",
+  "user_segments": ["Recruiter"],
+  "constraints": [
+    "Recruiter retains final say on relationship-sensitive actions",
+    "No existing design system to build against — generic interaction patterns used instead of Stillsuit DS v2",
+    "No candidate-facing surface in scope",
+    "Single-recruiter ownership per candidate profile — reflects real platform architecture (profiles are independently owned per recruiter), not just a v1 simplification",
+    "This feature does not reconcile or dedupe candidate identity across recruiters",
+    "Assumes reliable company-to-opportunity mapping and existing call-sync/transcription integration",
+    "Para-AI-surfaced opportunity matches (beyond the recruiter's own submissions) require recruiter confirmation before becoming an active track, same as a recruiter-initiated submission"
+  ],
+  "success_metrics": [
+    "Less recruiter time spent coordinating one candidate across roles",
+    "Fewer opportunities go stale from missed follow-up",
+    "Recruiters keep auto-execution on, not off",
+    "Recruiters act on Para AI's recommendations more often than not",
+    "Zero relationship-sensitive actions sent without recruiter approval"
+  ],
+  "selected_strategy": "Command Center: candidate-centric parallel-track dashboard",
+  "selected_strategy_rationale": "The brief's core problem is recruiters reconstructing one candidate's status from scattered per-role views; a single dashboard showing every active opportunity as a parallel track answers that directly, and gives Para AI a natural home for cross-opportunity reasoning like conflict detection.",
+  "alternative_strategies": [
+    { "name": "Candidate record with opportunity tabs", "summary": "One candidate page, opportunities as tabs within it", "rejected_because": "Tabs only show one opportunity at a time, preserving the fragmentation the feature is meant to solve" },
+    { "name": "Opportunity-first with candidate cross-reference", "summary": "Recruiters keep working from each role's pipeline; a drawer surfaces linked opportunities", "rejected_because": "Keeps the shared-candidate view secondary, undercutting the premise that the candidate is the right unit of coordination" }
+  ],
+  "tradeoffs": [
+    "Compact per-opportunity rows can't show full detail without an expand step (drawer)",
+    "Requires cross-opportunity data plumbing (company mapping, unified stage model) that may not exist yet",
+    "Bulk-approve mitigation reduces but does not eliminate rubber-stamp risk"
+  ],
+  "assumptions": [
+    "Resume/LinkedIn default Visible to Para AI; notes/calls default Private with a one-tap share prompt at capture time",
+    "Candidate is never a user of this system, only its subject",
+    "Single recruiter owns a given candidate profile at a time, by platform architecture rather than a v1 scoping choice",
+    "Company-to-opportunity mapping and call-sync/transcription integration are reliable enough to support conflict detection and auto-transcription",
+    "Para AI can surface opportunity matches beyond the recruiter's own submissions; such matches require recruiter confirmation before becoming an active track"
+  ],
+  "open_issues": [
+    "Whether company-to-opportunity mapping and call-sync integration genuinely exist reliably enough as assumed",
+    "Whether a one-tap share prompt at capture is sufficient, or a periodic under-sharing nudge is needed",
+    "Whether Paraform performs any identity resolution across independently-owned recruiter profiles for the same real person — without it, cross-recruiter duplicate submission to the same role is undetectable from within this feature",
+    "Whether Para AI's platform-wide matching reach reliably routes through the same recruiter-confirmation gate as a recruiter-initiated submission, or whether that's an unconfirmed assumption"
+  ],
+  "risks": [
+    "Bulk-approve remains a genuine trust risk even with a forced per-item preview",
+    "If underlying cross-opportunity data isn't reliable, conflict-blocking behavior would need to degrade to a manual warning instead of a hard block",
+    "Cross-recruiter duplicate submission of the same candidate to the same role is not solvable within one recruiter's Command Center and should be surfaced as a known limitation, not implied as handled"
+  ],
+  "ds_patterns_used": ["timeline list", "drawer", "table/row list", "tag/badge", "review inbox/queue", "empty state"],
+  "new_patterns_required": ["persistent Auto vs. Approval-required tag system (no existing precedent to draw from since there is no shared design system for this exercise)"],
+  "next_actions": [
+    "Sketch the Command Center row anatomy first — every other screen takes its cues from it",
+    "Design the Action Queue bulk-approve interaction carefully — highest trust risk in the feature",
+    "Define the exact Auto vs. Approval-required tag taxonomy before laying out any screen"
+  ],
+  "last_updated": "2026-07-11"
+}

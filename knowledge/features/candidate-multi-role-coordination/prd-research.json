@@ -1,0 +1,66 @@
+{
+  "feature_name": "Candidate Multi-Role Coordination",
+  "feature_slug": "candidate-multi-role-coordination",
+  "goal": "Let a recruiter and Para AI jointly manage one candidate across every opportunity they're active in, with Para AI organizing context and handling bounded coordination while the recruiter retains control of relationship-sensitive decisions.",
+  "user_segments": ["Recruiter", "Para AI (system actor with bounded autonomy)"],
+  "success_metrics": [
+    "Less recruiter time spent coordinating one candidate across roles",
+    "Fewer opportunities go stale from missed follow-up",
+    "Recruiters keep auto-execution on, not off",
+    "Recruiters act on Para AI's recommendations more often than not",
+    "Zero relationship-sensitive actions sent without recruiter approval"
+  ],
+  "constraints": [
+    "Recruiter must remain the decision-maker on relationship-sensitive actions",
+    "Para AI actions must be traceable to a specific context source",
+    "Take-home exercise scope, no existing internal Paraform spec to reconcile against",
+    "Candidate profiles are owned per recruiter, not shared platform-wide — this feature does not reconcile or dedupe across recruiters"
+  ],
+  "assumptions": [
+    "Resume and LinkedIn data default to Visible to Para AI; notes and call recordings default to Private",
+    "Exactly one recruiter owns a given candidate profile at a time, by platform architecture rather than a v1 scoping choice",
+    "Company-to-opportunity mapping is reliable enough to auto-detect same-company double submission",
+    "Auto-executed actions are limited to reversible, logistical communications",
+    "Para AI can surface opportunity matches beyond the recruiter's own submissions; such matches require recruiter confirmation before becoming an active track"
+  ],
+  "gaps": [
+    "No candidate-facing surface defined",
+    "Bulk-approve interaction is underspecified and risks becoming a rubber stamp",
+    "\"Undo\" on auto-executed actions is not literally possible for already-sent communications",
+    "No notification channel defined for the Action Queue",
+    "No cross-recruiter identity resolution or deduplication — same real person could be independently submitted to the same role by two recruiters",
+    "Whether Para AI's platform-wide matching reach always routes through the same recruiter-confirmation gate as a recruiter-initiated submission is unconfirmed"
+  ],
+  "edge_cases": [
+    "Candidate declines one opportunity while active in others",
+    "Source marked private after Para AI already used it in a recommendation",
+    "Para AI proposes double submission to the same hiring company",
+    "Approval-required action left unactioned past the timeout window",
+    "Call recording fails to transcribe or produces low-confidence output",
+    "Candidate withdraws from the process entirely",
+    "Same real-world candidate independently owned by another recruiter — out of scope to detect or reconcile",
+    "Para AI surfaces a new opportunity match the recruiter did not initiate — requires recruiter confirmation before becoming active"
+  ],
+  "critical_questions": [
+    { "owner": "Both", "question": "Should notes/calls default to Visible-to-Para-AI to maximize context, or Private to maximize trust and control?" },
+    { "owner": "PM", "question": "Is there any candidate-facing view, or is the candidate purely the subject and never a user of this system?" },
+    { "owner": "Eng", "question": "Is company-to-opportunity mapping reliable enough today to auto-block same-company double submission?" },
+    { "owner": "Eng", "question": "Is automatic call-recording sync from a connected tool assumed to exist, or is manual upload the only real v1 path?" },
+    { "owner": "PM", "question": "Can Para AI surface a match to an opportunity the recruiter hasn't chosen, and does entering it always require recruiter confirmation the same way a recruiter-initiated submission does?" },
+    { "owner": "Eng", "question": "Does Paraform perform any identity resolution across independently-owned recruiter profiles for the same real person, to catch duplicate submissions to the same role?" }
+  ],
+  "design_risks": [
+    "Bulk approval without forced per-item review turns the approval gate into a formality",
+    "Over-cautious visibility defaults starve Para AI of context and defeat the feature's stated purpose",
+    "Labeling a sent-and-undeliverable-to-retract email as 'undo' sets a false expectation and breaks trust when discovered",
+    "If the auto-executed vs. approval-required distinction isn't visible everywhere an action appears, recruiters are surprised by actions they didn't know had already gone out",
+    "Cross-recruiter duplicate submission of the same candidate to the same role is not solvable within one recruiter's Command Center and should be surfaced as a known limitation, not implied as handled",
+    "Para AI's matching reach could outpace recruiter awareness if a surfaced match isn't reliably gated behind recruiter confirmation before anything moves forward"
+  ],
+  "teaching_notes": [
+    "The brief's 'Passive Placements' reference implies Para AI already has a submission-recommendation capability; frame this feature as extending that muscle across concurrent opportunities, not inventing new AI capability",
+    "The Action Queue is structurally a triage/review inbox (PR review queue, email triage) — design it as a scannable list with fast approve/edit/reject, not a settings form",
+    "Auto-executed vs. Recruiter-approval-required is the single most important piece of information architecture and must be a persistent, legible signal everywhere an action or its status appears"
+  ],
+  "last_updated": "2026-07-11"
+}

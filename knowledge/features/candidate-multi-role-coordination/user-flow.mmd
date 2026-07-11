@@ -1,0 +1,37 @@
+flowchart TD
+    A[Recruiter sources candidate] --> B[Upload resume / paste LinkedIn URL]
+    B --> C[Auto-parsed, default Visible to Para AI]
+    C --> D[Recruiter logs or syncs a call]
+    D --> E[Transcribed + summarized, default Private]
+    E --> F{Recruiter shares call with Para AI?}
+    F -- Yes --> G[Item marked Visible to Para AI]
+    F -- No --> H[Item stays Private]
+    G --> I[Recruiter adds freeform note]
+    H --> I
+    I --> J[Recruiter submits candidate to 2+ opportunities]
+    J --> K[Command Center shows parallel tracks per opportunity]
+    K --> L[Para AI synthesizes shared context]
+    K --> J1[Para AI surfaces a match the recruiter didn't choose]
+    J1 --> J2{Recruiter confirms the match?}
+    J2 -- Yes --> K
+    J2 -- No / dismiss --> J3[Discarded, never becomes a track]
+    L --> M{Action relationship-sensitive or high-stakes?}
+    M -- No, logistics --> N[Auto-executed: e.g. scheduling email]
+    M -- Yes --> O[Drafted action lands in Action Queue]
+    N --> P[Logged to candidate activity timeline]
+    O --> Q{Recruiter reviews queue item}
+    Q -- Approve --> R[Action sent, opportunity stage advances]
+    Q -- Edit --> R
+    Q -- Reject --> S[Action dropped, not sent]
+    R --> T[Command Center reflects updated stage]
+    P --> T
+    T --> U{Same-company double submission attempted?}
+    U -- Yes --> V[Blocked, conflict banner shown, manual resolution required]
+    U -- No --> W[Track proceeds normally]
+    T --> X{Queue item unactioned past timeout?}
+    X -- Yes --> Y[Escalation reminder shown, never auto-sent]
+    X -- No --> W
+    W --> Z{Opportunity outcome}
+    Z -- Offer / Hired --> AA[Track closed: Hired]
+    Z -- No longer pursued --> AB[Track closed: manually]
+    Z -- Candidate withdraws entirely --> AC[All tracks close, all queued actions cancelled]

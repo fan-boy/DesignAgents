@@ -1,0 +1,57 @@
+### Feature summary
+Candidate Multi-Role Coordination lets a Recruiter and Para AI jointly manage one candidate across every opportunity they're active in, covering context intake (resume, LinkedIn, calls, notes with per-item visibility control) and a unified pipeline view where Para AI recommends and, within bounds, executes actions. The primary user is the Recruiter; the trigger is a candidate becoming active in 2+ opportunities at once. **Update (2026-07-11):** further product research indicates candidate profiles are owned per recruiter, not shared platform-wide — "one recruiter per candidate" is very likely real platform architecture, not just a v1 scoping choice. Success metrics are now finalized (see design-strategy.md). **Still missing:** no candidate-facing surface (is the candidate ever aware of any of this?), and no confirmation of whether Para AI can propose matches to opportunities the recruiter didn't choose.
+
+### Gaps and ambiguities
+1. ~~No success metric is defined.~~ **Resolved 2026-07-11** — five metrics finalized, tied to the original HMW: less recruiter time coordinating a candidate across roles, fewer stale opportunities, recruiters keep auto-execution on, recruiters act on Para AI's recommendations more often than not, zero relationship-sensitive actions sent without approval.
+2. **Default visibility assumptions are a designed guess, not a stated fact.** The PRD defaults notes/calls to Private and resume/LinkedIn to Visible. If defaults lean too private, Para AI may rarely get real context and the feature fails at its stated goal ("bring context inside the model"); if too open, it undermines the trust premise. This is the central design tension of the whole assignment and should be argued explicitly, not asserted. `[Both]`
+3. **Bulk-approve is underspecified and carries a rubber-stamp risk.** The PRD allows batch-approving "repetitive" approval-required items but doesn't say what the recruiter actually sees before approving in bulk. If bulk approval doesn't force a real skim of each drafted action, the approval gate becomes theater — the exact failure mode the assignment is trying to avoid. `[PM]`
+4. **"Undo" on auto-executed actions is not literally possible for sent communications.** An email or scheduling message that's already been delivered can't be unsent. The PRD should distinguish "undo before send" (a short grace window) from "correct after send" (a follow-up message), and only claim the one that's real. `[Eng]`
+5. **Same-company conflict detection assumes a clean company↔opportunity mapping.** The PRD blocks double-submission to the same company, but this requires knowing which opportunities share a hiring company — not stated whether that data exists reliably at the opportunity level. `[Eng]`
+6. **No notification channel for the Action Queue is defined.** Recruiters won't proactively check a queue that doesn't ping them. Missing: in-app badge vs. email vs. push, and whether cadence differs for time-sensitive items (e.g., an offer deadline) vs. routine ones. `[PM]`
+7. ~~Single-recruiter assumption may not hold.~~ **Reframed 2026-07-11** — further product research suggests candidate profiles are independently owned per recruiter by platform design (no single shared candidate record to build multi-recruiter ownership on top of), so this is now understood as an architecture fact rather than a v1 scoping gap. It surfaces two sharper questions instead: whether Paraform does any identity resolution across recruiters' independent profiles of the same real person (to catch duplicate submissions to the same role), and whether Para AI's matching reach extends to opportunities the recruiter hasn't chosen. `[Both]`
+8. **Para AI's matching reach beyond recruiter-initiated submissions is unconfirmed.** If Para AI can surface a candidate-to-role match the recruiter never picked (a broader, platform-wide matching layer), the PRD's model of "recruiter submits, then Para AI coordinates" is incomplete — there may be a prior step where Para AI itself proposes a new opportunity. Whether that proposal still requires recruiter confirmation before becoming an active track is assumed but not confirmed. `[PM]`
+9. **No cross-recruiter deduplication is addressed.** If the same real person is independently sourced by two recruiters, nothing in this design (or, per available evidence, the platform) prevents both from submitting them to the same role. Worth confirming whether this is an accepted risk elsewhere in the product or something this feature is implicitly expected to guard against. `[Eng]`
+
+### Missing states
+**System states**
+- Resume upload parsing in progress / parsing failed (unreadable file, unsupported format)
+- Call recording sync in progress from the connected call tool; sync failure (auth expired, tool disconnected)
+- ATS/pipeline sync lag or failure between an opportunity's own pipeline and the unified Command Center view
+
+**Permission states**
+- Not addressed at all: is there a role above Recruiter (team lead, admin) with visibility into other recruiters' candidates? Currently the PRD has exactly one actor role.
+- View-only or read-only access to a candidate record if a recruiter is covering for a colleague
+
+**Content states**
+- Candidate sourced but not yet submitted to any opportunity — Command Center's zero-opportunity empty state
+- Candidate with only one active opportunity — does the multi-track UI still render, or collapse to a simpler single-pipeline view?
+- Candidate active in a high number of opportunities (8-10+) — how the parallel-track layout scales before it becomes unscannable
+
+**Action states**
+- Recruiter edits an AI-drafted message before approving — is the edit logged/versioned, and does it change how future drafts are generated for this candidate?
+- Recruiter rejects (not just edits) a recommended action — does Para AI drop it silently, or attempt a revised recommendation?
+- Bulk-approve flow specifically — what the recruiter sees per-item before a batch send
+
+**Responsive / Accessibility**
+- Not addressed in the PRD at all. Recruiter workflows are frequently mobile/on-the-go (reacting to a candidate reply between meetings) — worth an explicit scope call on whether mobile is in v1.
+
+### Questions for PM / Eng
+1. `[Both]` Should Visible-to-Para-AI default to on for notes and calls (maximizing model context, per the brief's stated goal) or off (maximizing recruiter trust and control)? The brief frames this as a deliberate tradeoff the candidate should reason about, not default away.
+2. `[PM]` Is there any candidate-facing view of any of this, or is the candidate entirely opaque to this system (only ever the subject, never a user)?
+3. `[Eng]` Is company-to-opportunity mapping reliable enough today to auto-block same-company double submission, or does that require a manual recruiter check?
+4. `[Eng]` For call recordings synced automatically from a connected tool — is that integration assumed to already exist, or is manual upload the only real v1 path?
+5. `[PM]` Given candidate profiles are owned per recruiter rather than shared platform-wide, can Para AI surface a match to an opportunity the recruiter hasn't chosen — and does entering it as an active tracked opportunity always require recruiter confirmation, the same as a recruiter-initiated submission?
+6. `[Eng]` Does Paraform perform any identity resolution across independently-owned recruiter profiles for the same real person, to catch duplicate submissions to the same role from different recruiters? If not, is that an accepted platform-level risk?
+
+### Design risks
+- **Rubber-stamp risk on bulk approval.** If batch-approving multiple recruiter-approval-required actions doesn't force a genuine per-item skim, the approval gate becomes a formality and Para AI effectively acts unsupervised on sensitive actions — directly contradicting the assignment's core constraint.
+- **Context starvation from over-cautious defaults.** If recruiters rarely flip notes/calls to Visible-to-Para-AI (because it's effortful or feels risky), Para AI's recommendations stay shallow and the feature fails to deliver on "bring context inside the model," even though the visibility control itself works as designed.
+- **False "undo" erodes trust.** If the UI implies an auto-executed email can be undone when it actually can't, the first time a recruiter discovers this (after a candidate replies to something they thought was retracted) will break trust in the whole auto-execute tier, likely causing recruiters to disable auto-execution altogether.
+- **Invisible mode boundary.** If Auto-executed vs. Recruiter-approval-required isn't visually obvious everywhere an action appears (not just in the queue), recruiters will be surprised by actions they didn't know had already gone out — the same trust failure as the current real-world problem this feature is meant to fix.
+- **Cross-recruiter duplicate submission.** Because candidate profiles are independently owned per recruiter, nothing in this feature (or, per available evidence, the platform) stops two recruiters from separately submitting the same real person to the same role. This isn't fixable from within one recruiter's Command Center — it needs a platform-level answer, and should be surfaced as a known limitation rather than implied as solved.
+- **Para AI's matching reach could outpace recruiter awareness.** If Para AI can surface a new opportunity match the recruiter never chose, the recruiter's confidence in "I can see everything happening with my candidate" depends entirely on that surfaced match being visible and confirmable before anything moves forward — the design treats this as approval-required, but it's unconfirmed whether that's actually how it would work.
+
+### Teaching notes
+- The brief's linked "Passive Placements" concept implies Para AI already has a submission-recommendation capability today. This feature should read as extending that existing muscle across simultaneously-active opportunities, not inventing a new AI capability from scratch — frame the design strategy that way.
+- The Action Queue is structurally a **triage/review inbox** (closer to a PR review queue or an email triage surface than a settings panel). Wireframe it with that mental model: scannable list, per-item context, fast approve/edit/reject, not a form.
+- The single most important piece of information architecture in this feature is the Auto-executed vs. Recruiter-approval-required distinction. It should be a persistent, legible visual signal wherever an action or its status appears — pipeline track, activity log, and queue alike — not something the recruiter has to open a detail view to learn.
