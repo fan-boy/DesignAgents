@@ -8,7 +8,7 @@ The candidate page has two views: **Opportunities** (default landing — status 
 - From a candidate search or list, the recruiter opens a candidate directly into Opportunities — never Profile or Context first.
 - From any single opportunity's own pipeline board, clicking a candidate who is active in more than one opportunity routes into the same shared Opportunities view (never a duplicate, opportunity-scoped view).
 - From a Para-AI-surfaced match notification, the recruiter opens Opportunities directly to the pending "Proposed by Para AI" row.
-- A recruiter's cross-candidate backlog (approval-required items across every candidate they own) is a separate, global entry point outside this flow's scope — see design-strategy.md.
+- In practice, a recruiter's actual starting point is the Home dashboard (a supporting screen, not part of the core flow below): its "Needs your review" feed and "Candidates needing attention" list are what a recruiter clicks through to land on a specific candidate's Opportunities view in the first place. See design-strategy.md for how Home resolves the cross-candidate review backlog question.
 
 ## Happy path
 1. Recruiter sources a candidate and creates their record; uploads a resume and pastes a LinkedIn URL from Profile & Context. Both are parsed and default to Included in matching.

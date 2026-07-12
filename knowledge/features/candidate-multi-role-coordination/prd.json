@@ -7,7 +7,10 @@
   "flows": [
     "Opportunities (landing view)",
     "Profile & Context (secondary view)",
-    "Recruiter view of candidate status"
+    "Recruiter view of candidate status",
+    "Home dashboard (supporting — not core to the brief)",
+    "Candidates list (supporting — not core to the brief)",
+    "Opportunities list (supporting — not core to the brief)"
   ],
   "actors": ["Recruiter", "Para AI"],
   "wizard_steps": {},
@@ -43,10 +46,10 @@
     "Does Paraform perform any identity resolution across independently-owned recruiter profiles for the same real person, to catch duplicate submissions to the same role from different recruiters?",
     "Can Para AI surface a match to an opportunity the recruiter hasn't chosen, and does entering it always require recruiter confirmation the same way a recruiter-initiated submission does?",
     "Is a 60-90 day staleness threshold right for all volatile context, or should different fact types decay at different rates?",
-    "What should the global, cross-candidate 'needs your review' surface be — a notification bell, a dedicated inbox, something else?"
+    "What's the actual prioritization logic behind the Home dashboard's 'most active right now' ranking? Currently illustrative, not defined."
   ],
   "figma_used": false,
   "source_docs_used": true,
   "confidence": "medium",
-  "confidence_notes": "Single source (the take-home prompt itself) with no existing Figma or internal spec to cross-reference. Scope, actors, and edge cases were reasonably inferable from the prompt and the linked Passive Placements concept, but several judgment calls (default visibility rules, approval timeout window, conflict-detection mechanism) are design decisions made to produce a complete PRD rather than facts confirmed by the source. Updated 2026-07-11 with further product research indicating candidate profiles are owned per recruiter (not shared platform-wide) and that Para AI's matching reach can extend beyond opportunities the recruiter has directly pursued — this is a working hypothesis pending confirmation, not a PM-confirmed fact, and is tracked as open questions. Updated again 2026-07-11 with an IA refinement from design review: Opportunities as the default landing view, Profile split from Context, Action Queue merged inline, durable-vs-volatile context staleness — these are design decisions, not externally confirmed facts."
+  "confidence_notes": "Single source (the take-home prompt itself) with no existing Figma or internal spec to cross-reference. Scope, actors, and edge cases were reasonably inferable from the prompt and the linked Passive Placements concept, but several judgment calls (default visibility rules, approval timeout window, conflict-detection mechanism) are design decisions made to produce a complete PRD rather than facts confirmed by the source. Updated 2026-07-11 with further product research indicating candidate profiles are owned per recruiter (not shared platform-wide) and that Para AI's matching reach can extend beyond opportunities the recruiter has directly pursued — this is a working hypothesis pending confirmation, not a PM-confirmed fact, and is tracked as open questions. Updated again 2026-07-11 with an IA refinement from design review: Opportunities as the default landing view, Profile split from Context, Action Queue merged inline, durable-vs-volatile context staleness — these are design decisions, not externally confirmed facts. Updated again 2026-07-11 with three supporting screens (Home, Candidates list, Opportunities list) built around the core candidate experience and explicitly scoped as context rather than part of what the brief asks to be evaluated on, plus Para AI attribution (sidebar status indicator, labeled tags) so its presence stays legible without a dedicated destination."
 }
