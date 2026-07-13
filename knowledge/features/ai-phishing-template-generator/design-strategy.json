@@ -10,8 +10,9 @@
     "Redaction UI copy must not overstate coverage given image-embedded content is out of scope for v1",
     "Privileged actions (deploy, edit) require a disabled state with tooltip when the viewer lacks permission"
   ],
-  "selected_strategy": "One-shot generation, mode-first branch, single WYSIWYG editor with an explicit Regenerate control",
-  "selected_strategy_rationale": "Matches the PRD's actual scope of one generation pass plus manual editing (no described iteration loop), respects the resolved decision that edits are never silently overwritten by making regeneration opt-in and confirmed, and reuses proven Dune conventions (AEP's labeled generation progress, disabled+tooltip RBAC gating, library table/empty-state pattern) instead of inventing new structure.",
+  "selected_strategy": "One-shot generation, three-tab creation surface, single WYSIWYG editor with an explicit Regenerate control (as built)",
+  "selected_strategy_rationale": "Matches the PRD's scope of one generation pass plus manual editing (no iteration loop), respects the resolved decision that edits are never silently overwritten via opt-in confirmed regeneration, and reuses proven Dune conventions. As built, the creation surface is three tabs (Generate with AI / Create Manually / Upload EML File) on one page rather than a mode-chooser modal, and assets save into the existing Simulated Attacks Library (Custom Assets tab) rather than a new standalone library.",
+  "as_built_note": "Synced 2026-07-13 to the Figma rebuild (17 frames). Departures from the pre-build strategy: three-tab creation surface (no chooser modal); a third non-AI 'Create Manually' mode; reuse of the existing Simulated Attacks Library instead of a new Template Library; product noun 'asset'; Motive selector + prompt chips instead of a single category enum; inline difficulty + Regenerate (no persistent side panel); and an added Add Phishing Link 3-state sub-flow.",
   "alternative_strategies": [
     {
       "name": "AEP-style persistent AI-refine panel (chat-style iterative refinement)",
@@ -25,31 +26,37 @@
   ],
   "assumptions": [
     "Drag-and-drop WYSIWYG editing is desktop-only for v1; mobile/tablet is preview-only",
-    "The right-side difficulty/Regenerate panel is a persistent (non-dismissible) side panel, not an overlay drawer",
-    "A dedicated Template Library surface exists, though its navigation placement is not yet confirmed"
+    "Difficulty + Regenerate sit inline below the body editor (no persistent side panel needed, as built)",
+    "Custom assets live in the existing Simulated Attacks Library under a Custom Assets tab (as built)"
+  ],
+  "resolved_by_build": [
+    "Delete flow now designed (confirmation modal on Asset Detail)",
+    "Library reuse settled — extends the existing Simulated Attacks Library rather than a new standalone library",
+    "Persistent side-panel vs drawer question moot — inline difficulty + Regenerate used instead",
+    "Difficulty confirmed as a pre-generation input; Regenerate is explicit and confirmed"
   ],
   "open_issues": [
     "Where are raw .eml uploads and screenshots stored after generation, and for how long?",
-    "Is there a delete flow for templates, and what happens to linked campaigns if a template is deleted or edited?",
-    "Is the phishing category list a fixed enum or admin-configurable/extensible?",
+    "Does Save produce an immediately deployable (Active) asset, or is deploy a separate gated step downstream?",
+    "Downstream behavior when deleting/editing a campaign-linked asset",
+    "Is the motive/category taxonomy final (Motive selector + prompt chips), and is it admin-configurable?",
     "Should screenshot-based generation (OCR + layout reconstruction) be P0 or P1?",
     "Is drag-and-drop WYSIWYG editing genuinely desktop-only, or does mobile/tablet editing need support?",
     "What are the feature's actual success metrics?",
-    "Does the persistent right-side panel map to the standard DS drawer component or need a new non-dismissible variant?"
+    "Placeholder-token syntax not yet unified across creation modes"
   ],
   "risks": [
     "Redaction-claim honesty: UI copy must precisely scope 'sanitized'/'redacted' language since image-embedded sensitive data isn't handled in v1",
     "Analysts may not immediately understand why changing difficulty alone does nothing without clear adjacent microcopy",
     "Library and Setup-screen assumptions may need to change once retention and delete-behavior decisions are made"
   ],
-  "ds_patterns_used": ["wizard", "modal", "table", "badge", "drawer"],
-  "new_patterns_required": ["Persistent (non-dismissible) right-side panel for difficulty + Regenerate controls — confirm against DS drawer spec or flag as a new variant"],
+  "ds_patterns_used": ["tabs", "modal", "table", "badge", "popover", "toast"],
+  "new_patterns_required": ["Tracked-link token style + 'Tracked link' badge for inserted phishing links (reuses redaction-token treatment)", "A true destructive button style is absent in the file — Regenerate/Delete reuse the primary style; flag for DS"],
   "next_actions": [
-    "Confirm feature placement in navigation IA before wireframing the Library screen",
-    "Resolve the DS drawer-vs-persistent-panel question before building the Edit & Preview screen in Figma",
-    "Draft placeholder content-handling disclosure copy for the Copy an Email setup screen, tied to the retention-policy open issue",
-    "Design the Regenerate confirmation modal and adjacent difficulty microcopy together",
-    "Bring the delete-behavior, category-list, and screenshot-scope open issues back to PM before finalizing the Library screen"
+    "Resolve the Active-on-save vs. downstream-deploy-gate product question with PM",
+    "Confirm the motive/category taxonomy (Motive selector + prompt chips) and whether it is admin-configurable",
+    "Finalize raw-upload retention/deletion policy and swap in the real content-handling disclosure copy",
+    "Unify placeholder-token syntax across modes and add a destructive button style to the DS"
   ],
-  "last_updated": "2026-07-08"
+  "last_updated": "2026-07-13"
 }

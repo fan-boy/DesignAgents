@@ -2,51 +2,68 @@
   "feature_name": "AI Phishing Template Generator",
   "feature_slug": "ai-phishing-template-generator",
   "written_at": "2026-07-08",
+  "last_updated": "2026-07-13",
+  "product_naming": "The product UI labels the deliverable an 'asset' and the destination the 'Simulated Attacks Library' (Custom Assets tab). 'Template' and 'asset' refer to the same object.",
   "flows": [
-    "Create Template — Describe a Scenario",
-    "Create Template — Copy an Email",
-    "Edit Template",
-    "Preview Template"
+    "Create New Asset — Generate with AI",
+    "Create New Asset — Create Manually",
+    "Create New Asset — Upload EML File",
+    "Generating (progress)",
+    "Edit & Preview",
+    "Add Phishing Link sub-flow",
+    "Preview (desktop / mobile)",
+    "Asset Library (Custom Assets tab, empty, view-only)",
+    "Asset Detail (deploy enabled / RBAC-disabled)",
+    "Regenerate confirmation",
+    "Delete confirmation"
   ],
-  "actors": ["Security Analyst / Admin"],
-  "wizard_steps": {
-    "Create Template — Describe a Scenario": [
-      "Step 1 — Choose mode",
-      "Step 2 — Describe the scenario",
-      "Step 3 — Set difficulty",
-      "Step 4 — Generate"
-    ],
-    "Create Template — Copy an Email": [
-      "Step 1 — Choose mode",
-      "Step 2 — Upload source",
-      "Step 3 — Set difficulty",
-      "Step 4 — Generate"
+  "actors": ["Security Analyst / Admin (creator)", "Admin / deploy-permitted role", "View-only role"],
+  "creation_modes": {
+    "surface": "Single Create New Asset page with three tabs (not a modal chooser)",
+    "tabs": [
+      "Generate with AI — prompt + prompt chips + motive, AI generates",
+      "Create Manually — blank WYSIWYG, no AI, full control",
+      "Upload EML File — start from a real .eml, optional screenshot"
     ]
   },
   "key_fields": [
-    "Free-text scenario prompt",
-    "Phishing category",
-    "Difficulty (Easy / Medium / Hard)",
+    "Template Name (library-facing, distinct from Subject)",
+    "Prompt to generate email + prompt chips (IT helpdesk / Finance / Custom)",
+    "Select motive (Authority, Urgency, etc. — matches Library Motive column)",
+    "Sender email / Sender Name",
+    "Subject",
+    "Body (WYSIWYG with Add Phishing Link + Add QR code)",
+    "Difficulty (Easy / Medium / Hard) — pre-generation input, default Medium",
     ".eml upload",
-    "Screenshot upload (optional, workspace-gated)",
-    "Template name"
+    "Screenshot upload (optional, workspace-gated)"
   ],
+  "add_phishing_link_subflow": [
+    "1 — Select display text in body; Add Phishing Link is the next action",
+    "2 — Anchored popover: Link text, Landing destination, read-only Tracked simulation URL + trust note; Cancel / Insert link",
+    "3 — Inserted as a tracked-link token with a badge + confirmation 'routed through a safe simulation URL'"
+  ],
+  "generating_stages": ["Analyzing input", "Drafting template", "Redacting sensitive data", "Rewriting links to safe URLs", "Ready"],
   "integrations": [
     "Campaign Launcher",
+    "Simulated Attacks Library (Custom Assets tab)",
     "RBAC / Permissions",
     "Audit Log",
     "Risk Scoring Engine",
     "Simulation Sending Infrastructure"
   ],
-  "edge_cases_count": 10,
+  "edge_cases_count": 13,
   "open_questions_flagged": [
-    "Should screenshot-based template generation (OCR + layout reconstruction) be P0 or P1?",
-    "Should multilingual template output be supported at launch?",
+    "Should screenshot-based generation (OCR + layout reconstruction) be P0 or P1?",
+    "Should multilingual output be supported at launch?",
     "Which metadata should be captured to enhance adaptive-risk scoring?",
-    "Should templates be shareable across tenants with governance review?"
+    "Should assets be shareable across tenants with governance review?",
+    "Raw .eml/screenshot retention, deletion, and training-pipeline-exclusion policy",
+    "Does Save produce an immediately deployable (Active) asset, or is deploy a separate gated step downstream?",
+    "Downstream behavior when deleting/editing a campaign-linked asset"
   ],
-  "figma_used": false,
+  "figma_used": true,
+  "figma_source": "Page 'DUNE 628 - Custom Creation of phishing Assets', section 'AI Phishing Template Generator — Rebuilt Storyboard (2026-07-09)'",
   "source_docs_used": true,
-  "confidence": "medium",
-  "confidence_notes": "No Figma provided, so screen structure, exact copy, and component naming are inferred from acceptance criteria rather than observed UI. Acceptance criteria and implementation notes were detailed enough to cover all major flows, wizard steps, RBAC, and edge cases with reasonable confidence. Deploy/campaign-attach flow is referenced only as an integration point since it lives in the campaign launcher feature, not this one."
+  "confidence": "high",
+  "confidence_notes": "Synced to the as-built rebuilt storyboard (17 frames: 3 creation tabs with setup + edit variants, generating progress, mobile preview, regenerate/delete modals, library empty + view-only states, asset detail deploy-enabled + RBAC-disabled, and the 3-state Add Phishing Link sub-flow). Screen structure, field names, and copy are now observed rather than inferred. Remaining low confidence is on unresolved product questions (retention policy, Active-on-save vs deploy gate, motive/category taxonomy finalization), not on the design."
 }

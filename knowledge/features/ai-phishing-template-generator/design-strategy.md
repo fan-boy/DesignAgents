@@ -1,5 +1,19 @@
 # Design Strategy — AI Phishing Template Generator
-Dune Security · Design Strategy · Last updated: 2026-07-08
+Dune Security · Design Strategy · Last updated: 2026-07-13
+
+---
+
+## As-built reconciliation (2026-07-13)
+
+The strategy below was written before the Figma rebuild and remains the record of the reasoning. Where the built storyboard departs from it, the build wins. Key reconciliations:
+
+- **Creation surface is three tabs on one page, not a mode-chooser modal.** The build uses a single **Create New Asset** page with **Generate with AI**, **Create Manually**, and **Upload EML File** tabs (Screen 2's proposed modal was dropped). "Create Manually" is a third, non-AI mode not in the original strategy — a blank WYSIWYG "full control" path.
+- **The library is the existing Simulated Attacks Library, not a new standalone Template Library.** Custom assets land under its **Custom Assets** tab, reusing its channel tabs (Email/SMS/Voice/Hybrid), Sender/Difficulty/Motive/Method filters, and search. This resolves the strategy's Open Issue about library reuse in favor of extending the existing surface. Empty and view-only states were added to it.
+- **Product noun is "asset"** (Create New Asset, Custom Assets), and the setup uses a **Motive** selector (Authority, Urgency, …) plus quick **prompt chips**, rather than a single "phishing category" enum.
+- **The persistent right-side refine panel (Screen 5) was not needed.** Difficulty + an explicit **Regenerate** button sit inline below the body editor; no drawer-vs-panel DS reconciliation was required (Open Issue 7 moot for v1).
+- **Resolved and built:** difficulty as a pre-generation input, labeled Generating progress, desktop/mobile preview toggle, redaction/safe-link confirmation banner, Regenerate confirmation modal, Asset Detail with RBAC-gated deploy, Delete confirmation modal, and an **Add Phishing Link** three-state sub-flow (select text → configure popover with auto safe tracking URL → tracked-link token + confirmation). Add QR code exists in the toolbar as a sibling capability.
+- **As-built screen inventory (17 frames):** three creation tabs (each with setup + post-generation edit variants), Generating progress, Mobile preview, Regenerate confirm modal, Library empty state, Library view-only state, Asset Detail (deploy-enabled), Asset Detail (RBAC-disabled), Delete confirm modal, plus the 3-state Add Phishing Link sub-flow.
+- **Still open after the build:** raw-upload retention policy, whether Save yields an immediately deployable (Active) asset vs. a separate downstream deploy gate, motive/category taxonomy finalization, screenshot-mode P0/P1, multilingual, risk-scoring metadata, cross-tenant sharing, and placeholder-token syntax unification.
 
 ---
 

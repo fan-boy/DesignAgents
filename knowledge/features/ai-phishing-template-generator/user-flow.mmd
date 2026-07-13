@@ -1,35 +1,42 @@
 flowchart TD
-    A[Template Library] -->|New Template| B{Choose Mode}
+    A[Simulated Attacks Library] -->|Create New Asset| B[Create New Asset page: 3 tabs]
     A -->|Empty state CTA| B
-    B -- Describe a Scenario --> C1[Setup: Scenario prompt + category + difficulty]
-    B -- Copy an Email --> C2[Setup: .eml upload + optional screenshot + difficulty]
-    C1 --> D[Generate Template]
-    C2 --> D
-    D --> E{Generation result}
-    E -- Success within ~10s --> F[Edit and Preview: WYSIWYG canvas + desktop/mobile toggle]
-    E -- Failure --> C1err[Inline error, Try again, inputs preserved]
-    C1err --> D
+    A -->|View-only role| VO[View-only library, no Create action]
 
-    F --> G{Change difficulty?}
+    B -- Generate with AI --> C1[Setup: name + prompt/chips + motive + sender + difficulty]
+    B -- Create Manually --> C2[Blank WYSIWYG: name + sender + subject + body + difficulty]
+    B -- Upload EML File --> C3[Setup: name + .eml upload + optional screenshot + difficulty]
+
+    C1 -->|Generate Asset| D[Generating: Analyzing to Ready]
+    C3 -->|Upload| D
+    D --> E{Result}
+    E -- Success ~10s --> F[Edit and Preview: WYSIWYG + redaction banner + desktop/mobile toggle]
+    E -- Failure --> Derr[Inline error, Try again, inputs preserved]
+    Derr --> D
+    C2 --> F
+
+    F --> AL{Add attack vector?}
+    AL -- Add Phishing Link --> L1[Select display text]
+    L1 --> L2[Popover: link text + landing destination + tracked safe URL]
+    L2 -- Insert link --> L3[Tracked-link token + confirmation]
+    L2 -- Cancel --> F
+    L3 --> F
+    AL -- Add QR code --> F
+    AL -- No --> G{Change difficulty?}
+
     G -- No --> H[Manual edits in canvas]
     G -- Yes, click Regenerate --> I[Confirm: discard edits and regenerate?]
     I -- Cancel --> F
     I -- Confirm --> D
 
-    H --> J[Click Save]
-    J --> K{Name and category set?}
-    K -- No --> L[Inline naming and category step]
-    K -- Yes --> M{Duplicate name in workspace?}
-    L --> M
-    M -- Yes --> Lerr[Inline validation error, rename required]
-    Lerr --> L
-    M -- No --> N[Template saved, status Ready]
+    H --> J[Click Save Asset]
+    J --> M{Duplicate name in workspace?}
+    M -- Yes --> Merr[Inline validation error, rename required]
+    Merr --> J
+    M -- No --> N[Saved to Simulated Attacks Library, Custom Assets tab]
 
-    N --> O[Template Detail]
-    O -->|Use in Campaign, deploy permission required| P[Hand off to Campaign Launcher]
+    N --> O[Asset Detail]
+    O -->|Use in Campaign, deploy permission| P[Hand off to Campaign Launcher]
     O -->|No deploy permission| Q[Disabled button with tooltip]
-    O -->|Delete| R[Confirm delete - campaign-link behavior open issue]
+    O -->|Delete| R[Confirm delete - campaign-link warning]
     O -->|Edit| F
-
-    A -->|View-only role| S[Read-only Library, no New Template action]
-    F -->|View-only role| T[Read-only canvas, Regenerate and Save hidden]
