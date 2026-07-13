@@ -37,6 +37,7 @@ _As-built, synced 2026-07-13 to the rebuilt Figma storyboard. The product labels
 - **Insert phishing link:** blocked until a landing destination is chosen; the tracked URL is generated once a destination exists.
 - **Save with duplicate name:** blocked with an inline validation message; rename required.
 - **RBAC:** roles without create permission see a view-only library (no Create New Asset); roles without deploy permission see a disabled "Use in Campaign" with tooltip on Asset Detail.
+- **Delete an asset:** available from two places — the library row **Actions** menu (View details / Duplicate / Delete) and the **Delete** button on Asset Detail. Both open the same Delete confirmation modal, which warns if the asset is linked to a campaign. View-only roles do not see Delete.
 
 ## System responses
 

@@ -27,7 +27,7 @@ _Updated 2026-07-13 to match the as-built storyboard. Items marked ✅ are now d
 ## Action states
 - ✅ Difficulty changed after manual edits — no effect on the draft; a different difficulty requires the explicit, confirmed Regenerate
 - ✅ Regenerate is an explicit action with a confirmation modal (discards current edits)
-- ✅ Delete flow designed — confirmation modal on Asset Detail; downstream behavior for a campaign-linked asset still open
+- ✅ Delete flow designed — reachable from both the library row **Actions** menu (View details / Duplicate / Delete) and the Asset Detail Delete button; both open the same confirmation modal. Downstream behavior for a campaign-linked asset still open. View-only roles do not see Delete
 - **Add Phishing Link — no landing destination chosen:** Insert should be blocked until a destination is selected; the tracked URL only generates once a destination exists
 - **Add Phishing Link — cursor placed with no text selected:** define whether it inserts a new link or requires a selection (build shows selection-first)
 - **Add QR code:** insertion path exists in the toolbar as a sibling to Add Phishing Link — its own configure/confirm behavior still to spec

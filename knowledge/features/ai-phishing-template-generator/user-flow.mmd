@@ -2,6 +2,7 @@ flowchart TD
     A[Simulated Attacks Library] -->|Create New Asset| B[Create New Asset page: 3 tabs]
     A -->|Empty state CTA| B
     A -->|View-only role| VO[View-only library, no Create action]
+    A -->|Row Actions menu: Delete| R
 
     B -- Generate with AI --> C1[Setup: name + prompt/chips + motive + sender + difficulty]
     B -- Create Manually --> C2[Blank WYSIWYG: name + sender + subject + body + difficulty]
