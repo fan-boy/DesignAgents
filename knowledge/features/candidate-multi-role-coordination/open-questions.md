@@ -4,6 +4,8 @@ Most of the original scope/architecture questions were answered directly by Para
 
 ## Unresolved
 - [ ] [Both] Should the Include-in-matching toggle default on for notes/calls (more context) or off (more trust and control)? This is a proposed new control, so the default is a genuine design decision.
+- [ ] [Both] Para AI permissions: is the proposed action taxonomy right (scheduling/logistics, matching, sensitive-locked, cross-opportunity judgment), and does "Off" earn its place as a third level, or is Auto/Ask-first enough?
+- [ ] [PM] When a recruiter changes their defaults after per-candidate overrides exist, do overridden candidates keep their overrides silently, or get flagged for re-review?
 - [ ] [Both] How does Para AI compute the match score shown on recommended opportunities (e.g. "Strong · 8/10"), and how do we keep that number legible and trustworthy rather than a black box?
 - [ ] [PM] Which state changes should trigger a cross-opportunity hold — offer confirmed, verbal offer, final round scheduled? And how long does Para hold a paused action before re-escalating?
 - [ ] [Both] Is a flat 60-90 day staleness threshold right for volatile context (comp floor, location, reason for leaving), or should different fact types decay at different rates?
@@ -12,6 +14,7 @@ Most of the original scope/architecture questions were answered directly by Para
 - [ ] [PM] How should the candidate page hand off to Paraform's existing cross-candidate Para review/approve surface — a badge count, a deep link, shared state? (The surface exists; the handoff is undefined.)
 
 ## Resolved
+- [x] [Design] Should Para AI autonomy config be a recruiter-level or candidate-level setting? — **Answer (design decision):** Both, layered — recruiter-level defaults (autonomy preferences are mostly about the recruiter's trust in Para; per-candidate-only config would never get touched) with per-candidate overrides (sensitivity genuinely varies per relationship, e.g. an exec mid-offer). Relationship-sensitive actions are permanently locked to Ask-first at both levels — configurable to Off, never to Auto. The candidate-page drawer shows the override view; recruiter defaults live in (out-of-scope) recruiter settings.
 - [x] [PM] Is there one shared candidate record, or does each recruiter have their own view of the same person? — **Answer (Paraform):** There is one shared candidate record. An earlier draft of this design wrongly assumed per-recruiter silos; that assumption has been removed throughout.
 - [x] [PM] What does "managing one candidate across multiple opportunities" mean — my own submissions, or platform-wide? — **Answer (Paraform):** Coordinating the roles you've personally submitted the candidate to. The design is scoped accordingly.
 - [x] [Eng] How does Paraform handle duplicate submissions / ownership conflicts for a single role across recruiters? — **Answer (Paraform):** Not something to worry about for the take-home — the second recruiter can't submit the same candidate to the same role. Platform-prevented, out of scope to design.

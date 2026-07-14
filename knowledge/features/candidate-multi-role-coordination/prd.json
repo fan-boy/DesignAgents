@@ -11,7 +11,8 @@
     "Call lifecycle: schedule (propose times / booking link) → review (per-call Para toggle + tags)",
     "Ask Para assistant (cited Q&A + in-chat approval-gated actions)",
     "Cross-opportunity hold (Para pauses its actions when an offer lands elsewhere)",
-    "Scored recommended opportunities (Proposed by Para AI)"
+    "Scored recommended opportunities (Proposed by Para AI)",
+    "Para AI permissions (recruiter-level defaults + per-candidate overrides; Auto / Ask first / Off per action; sensitive actions locked to Ask first)"
   ],
   "actors": ["Recruiter", "Para AI"],
   "wizard_steps": {},
@@ -37,7 +38,9 @@
     "outreach channel (LinkedIn / email)",
     "call state (scheduled / completed / review-pending / saved)",
     "per-call 'use for Para AI' toggle + call tags",
-    "cross-opportunity hold state (Para-paused action, waiting on recruiter)"
+    "cross-opportunity hold state (Para-paused action, waiting on recruiter)",
+    "per-action access level (Auto / Ask first / Off)",
+    "permissions scope (recruiter defaults / customized for this candidate)"
   ],
   "integrations": [
     "On-platform calls with automatic recording / transcription",

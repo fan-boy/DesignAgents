@@ -72,6 +72,13 @@ The candidate page is three tabs (Opportunities, Activity, Profile) plus a persi
 - **Panel:** right slide-in, scoped to the current candidate; answers only from included-in-matching context; cited answers.
 - **In-chat actions:** when asked to *do* something, Para renders an inline action card (e.g. a drafted call schedule with Confirm & send / Edit) — the same approval gate as everywhere else, so the assistant can take action, not just answer.
 
+### Para AI permissions (drawer, reached from the candidate header / Para summary strip)
+- **Model:** recruiter-level defaults + per-candidate overrides. Defaults express the recruiter's general trust in Para; an override tunes one relationship (tighter for an exec mid-offer, looser for a high-volume pipeline). A "Customize for this candidate" toggle switches from inherited defaults to overrides, with a visible "Customized" state and one-tap reset.
+- **Access levels per action:** Auto (Para acts + logs) / Ask first (Para drafts, recruiter approves) / Off (Para doesn't do it).
+- **Locked tier:** relationship-sensitive actions (submissions, rejection/withdrawal messages, comp & offer messaging) are permanently Ask-first — Off is allowed, Auto is not selectable at either level. The trust boundary is enforced by the system, not by recruiter vigilance.
+- **Grouping:** Scheduling & logistics; Matching & recommendations; Relationship-sensitive (locked); Cross-opportunity judgment (e.g. auto-pause on offer). Every action Para can take appears here — this screen is the authoritative answer to "what can Para do by itself for this candidate."
+- **Edge cases:** defaults changed after overrides exist → overridden candidates keep their overrides, with a "defaults have changed" notice; everything Off → Para degrades to a read-only summarizer for this candidate, stated plainly rather than implied.
+
 ### Cross-cutting requirements
 - The Auto vs. Recruiter-approval distinction uses one consistent tag treatment everywhere an action or its status appears — opportunity row, inline-expanded state, Ask Para action cards, activity log. A recruiter is never surprised by something that already happened.
 - Para AI is always attributed (persistent "Para AI active" indicator + labeled tags on its output) since it has no page of its own.
