@@ -1,40 +1,49 @@
 flowchart TD
-    A[Recruiter sources candidate] --> B[Upload resume / paste LinkedIn URL in Profile and Context]
-    B --> C[Auto-parsed, default Included in matching]
-    C --> D[Recruiter logs or syncs a call]
-    D --> E[Transcribed + summarized, default excluded from matching]
-    E --> F{Recruiter includes call in matching?}
-    F -- Yes --> G[Item marked Included in matching]
-    F -- No --> H[Item stays excluded]
-    G --> I[Recruiter adds freeform note]
-    H --> I
-    I --> J[Recruiter submits candidate to 2+ opportunities from Opportunities view]
-    J --> K[Opportunities shows active tracks per opportunity]
-    K --> L[Para AI synthesizes included-in-matching context]
-    K --> J1[Para AI surfaces a match the recruiter didn't choose]
-    J1 --> J2{Recruiter confirms the proposed match?}
-    J2 -- Yes --> K
-    J2 -- No / dismiss --> J3[Discarded, never becomes a track]
-    L --> M{Action relationship-sensitive or high-stakes?}
-    M -- No, logistics --> N[Auto-executed: e.g. scheduling email]
-    M -- Yes --> O[Drafted action expands inline within its opportunity row]
-    N --> P[Logged to candidate activity timeline]
+    A[Recruiter adds candidate] --> B[Profile: upload resume / paste LinkedIn — default Included in matching]
+    B --> C[Activity: schedule a call]
+    C --> C1{Schedule option}
+    C1 -- Propose times --> C2[Pick slots · Para pre-fills message]
+    C1 -- Send booking link --> C3[Share calendar link · Para pre-fills message]
+    C2 --> C4[Send via LinkedIn or Email]
+    C3 --> C4
+    C4 --> C5[Candidate books · call lands on Activity timeline]
+    C5 --> C6[Call happens on-platform · recorded + transcribed]
+    C6 --> C7[Activity card: Review pending]
+    C7 --> C8{Review drawer: use this call for Para AI?}
+    C8 -- Yes + tags --> C9[Saved to timeline · Included in matching]
+    C8 -- No --> C10[Saved to timeline · excluded]
+    C9 --> J[Submit candidate to 2+ opportunities]
+    C10 --> J
+    J --> K[Opportunities: parallel active tracks]
+    K --> P1[Para AI surfaces a scored match the recruiter didn't choose]
+    P1 --> P2{Confirm proposed match?}
+    P2 -- Yes --> K
+    P2 -- No / dismiss --> P3[Discarded, never a track]
+    K --> L[Para AI synthesizes included-in-matching context → next action per opportunity]
+    L --> M{Relationship-sensitive or high-stakes?}
+    M -- No, logistics --> N[Auto-executed · logged]
+    M -- Yes --> O[Draft expands inline on its opportunity row]
     O --> Q{Recruiter reviews inline draft}
-    Q -- Approve --> R[Action sent, opportunity stage advances]
-    Q -- Edit --> R
-    Q -- Reject --> S[Action dropped, not sent]
-    R --> T[Opportunities reflects updated stage]
-    P --> T
-    T --> U{Same-company double submission attempted?}
-    U -- Yes --> V[Blocked, conflict banner shown, manual resolution required]
-    U -- No --> W[Track proceeds normally]
-    T --> X{Inline item unactioned past timeout?}
-    X -- Yes --> Y[Escalation reminder shown on the row, never auto-sent]
-    X -- No --> W
-    W --> AD{Volatile context item ages past staleness threshold?}
-    AD -- Yes --> AE[Flagged for reconfirmation, matching weight discounted]
-    AD -- No / durable item --> Z{Opportunity outcome}
+    Q -- Approve / Edit --> R[Sent · stage advances]
+    Q -- Reject --> S[Dropped, not sent]
+    N --> T[Opportunities reflects new state]
+    R --> T
+    K -.-> AP[Ask Para assistant · any tab]
+    AP --> AP1{Ask or act?}
+    AP1 -- Ask --> AP2[Cited answer from included-in-matching context]
+    AP1 -- Act e.g. schedule --> AP3[Inline action card · Confirm & send / Edit]
+    AP3 --> Q
+    T --> HOLD{Offer arrives at one opportunity?}
+    HOLD -- Yes --> H1[Para pauses its queued auto-actions on the OTHER opportunities]
+    H1 --> H2{Recruiter: keep paused / resume all / review each}
+    H2 --> Z
+    HOLD -- No --> U{Same-company double submission?}
+    U -- Yes --> V[Blocked · conflict banner · manual resolution]
+    U -- No --> W[Track proceeds]
+    W --> AD{Volatile context aged past threshold?}
+    AD -- Yes --> AE[Flagged for reconfirmation · matching weight discounted]
+    AD -- No / durable --> Z{Opportunity outcome}
     AE --> Z
     Z -- Offer / Hired --> AA[Track closed: Hired]
-    Z -- No longer pursued --> AB[Track closed: manually]
-    Z -- Candidate withdraws entirely --> AC[All tracks close, all pending actions cancelled]
+    Z -- No longer pursued --> AB[Track closed manually]
+    Z -- Candidate withdraws --> AC[All tracks close · all pending actions cancelled]

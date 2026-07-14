@@ -2,15 +2,16 @@
   "feature_name": "Candidate Multi-Role Coordination",
   "feature_slug": "candidate-multi-role-coordination",
   "written_at": "2026-07-09",
-  "last_updated": "2026-07-11",
-  "product_context": "Paraform (Agentic Hiring Platform) — not a Dune Security feature. Written for a design take-home exercise; source material is the exercise prompt, not an internal spec.",
+  "last_updated": "2026-07-14",
+  "product_context": "Paraform (Agentic Hiring Platform) — not a Dune Security feature. Written for a design take-home exercise; source material is the exercise prompt, not an internal spec. Scoped entirely to the candidate page; broader recruiter dashboards are out of scope.",
   "flows": [
-    "Opportunities (landing view)",
-    "Profile & Context (secondary view)",
-    "Recruiter view of candidate status",
-    "Home dashboard (supporting — not core to the brief)",
-    "Candidates list (supporting — not core to the brief)",
-    "Opportunities list (supporting — not core to the brief)"
+    "Opportunities (default landing view)",
+    "Activity + context intake (log, filters, call lifecycle)",
+    "Profile (facts, LinkedIn, resume history)",
+    "Call lifecycle: schedule (propose times / booking link) → review (per-call Para toggle + tags)",
+    "Ask Para assistant (cited Q&A + in-chat approval-gated actions)",
+    "Cross-opportunity hold (Para pauses its actions when an offer lands elsewhere)",
+    "Scored recommended opportunities (Proposed by Para AI)"
   ],
   "actors": ["Recruiter", "Para AI"],
   "wizard_steps": {},
@@ -28,16 +29,24 @@
     "Para AI recommended action",
     "action handling mode (Auto-executed / Recruiter-approval required)",
     "opportunity origin (recruiter-initiated / Para-AI-surfaced)",
-    "opportunities view mode (List / Board)"
+    "opportunities view mode (List / Board)",
+    "match score (on Para-AI-surfaced recommendations, e.g. 8/10)",
+    "resume upload history (current + prior versions)",
+    "activity filters (date range / company / type)",
+    "schedule-call mode (propose times / send booking link)",
+    "outreach channel (LinkedIn / email)",
+    "call state (scheduled / completed / review-pending / saved)",
+    "per-call 'use for Para AI' toggle + call tags",
+    "cross-opportunity hold state (Para-paused action, waiting on recruiter)"
   ],
   "integrations": [
-    "Call recording / transcription tool",
+    "On-platform calls with automatic recording / transcription",
     "ATS / role pipeline system",
-    "LinkedIn public profile fetch",
+    "LinkedIn (public profile fetch + outreach channel)",
     "Email / outbound messaging",
-    "Para AI matching layer (platform-wide, surfaces matches beyond the recruiter's own submissions)"
+    "Para AI matching layer (platform-wide, surfaces scored matches beyond the recruiter's own submissions)"
   ],
-  "edge_cases_count": 10,
+  "edge_cases_count": 11,
   "open_questions_flagged": [
     "What is the default approval-required timeout window before escalation?",
     "Does the candidate ever see any part of this system, or is it recruiter/Para-AI only?",
@@ -46,10 +55,12 @@
     "Does Paraform perform any identity resolution across independently-owned recruiter profiles for the same real person, to catch duplicate submissions to the same role from different recruiters?",
     "Can Para AI surface a match to an opportunity the recruiter hasn't chosen, and does entering it always require recruiter confirmation the same way a recruiter-initiated submission does?",
     "Is a 60-90 day staleness threshold right for all volatile context, or should different fact types decay at different rates?",
-    "What's the actual prioritization logic behind the Home dashboard's 'most active right now' ranking? Currently illustrative, not defined."
+    "How does Para AI compute the match score shown on recommended opportunities (e.g. 8/10) — and how is it kept legible/trustworthy to recruiters?",
+    "Which state changes trigger a cross-opportunity hold (offer confirmed, offer verbal, final round scheduled?) and how long does Para hold before re-escalating?",
+    "The cross-candidate 'needs your review' backlog belongs on the home dashboard (out of scope here) — how should this feature hand off to it?"
   ],
   "figma_used": false,
   "source_docs_used": true,
   "confidence": "medium",
-  "confidence_notes": "Single source (the take-home prompt itself) with no existing Figma or internal spec to cross-reference. Scope, actors, and edge cases were reasonably inferable from the prompt and the linked Passive Placements concept, but several judgment calls (default visibility rules, approval timeout window, conflict-detection mechanism) are design decisions made to produce a complete PRD rather than facts confirmed by the source. Updated 2026-07-11 with further product research indicating candidate profiles are owned per recruiter (not shared platform-wide) and that Para AI's matching reach can extend beyond opportunities the recruiter has directly pursued — this is a working hypothesis pending confirmation, not a PM-confirmed fact, and is tracked as open questions. Updated again 2026-07-11 with an IA refinement from design review: Opportunities as the default landing view, Profile split from Context, Action Queue merged inline, durable-vs-volatile context staleness — these are design decisions, not externally confirmed facts. Updated again 2026-07-11 with three supporting screens (Home, Candidates list, Opportunities list) built around the core candidate experience and explicitly scoped as context rather than part of what the brief asks to be evaluated on, plus Para AI attribution (sidebar status indicator, labeled tags) so its presence stays legible without a dedicated destination."
+  "confidence_notes": "Single source (the take-home prompt itself) with no existing Figma or internal spec to cross-reference. Scope, actors, and edge cases were reasonably inferable from the prompt and the linked Passive Placements concept, but several judgment calls (default visibility rules, approval timeout window, conflict-detection mechanism) are design decisions made to produce a complete PRD rather than facts confirmed by the source. Updated 2026-07-11 with further product research indicating candidate profiles are owned per recruiter (not shared platform-wide) and that Para AI's matching reach can extend beyond opportunities the recruiter has directly pursued — this is a working hypothesis pending confirmation, not a PM-confirmed fact, and is tracked as open questions. Updated again 2026-07-11 with an IA refinement from design review: Opportunities as the default landing view, Profile split from Context, Action Queue merged inline, durable-vs-volatile context staleness — these are design decisions, not externally confirmed facts. Refocused 2026-07-14 onto the candidate page only — the home/candidates-list/all-opportunities dashboards were dropped from scope — and expanded with the Activity tab (log + date/company/type filters), the on-platform call lifecycle (schedule via propose-times or booking-link sent over LinkedIn/email → post-call review with a per-call Para toggle and tags), scored recommended opportunities, the cross-opportunity hold where Para pauses its own queued actions when an offer lands elsewhere, and the Ask Para assistant (cited Q&A plus in-chat approval-gated actions). These are design decisions, not externally confirmed facts."
 }

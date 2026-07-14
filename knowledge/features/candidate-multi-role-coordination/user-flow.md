@@ -1,55 +1,60 @@
 ## Scope note
-Every step below operates within one recruiter's own profile of a candidate. Candidate profiles are owned per recruiter, not shared platform-wide — this flow does not span or reconcile across recruiters who may separately know the same real person.
+Every step below operates within one recruiter's own profile of a candidate, entirely on the candidate page. Candidate profiles are owned per recruiter, not shared platform-wide — this flow does not span or reconcile across recruiters who may separately know the same real person. Broader recruiter surfaces (home dashboard, candidates list, all-roles view) are out of scope.
 
-## IA note (2026-07-11 refinement)
-The candidate page has two views: **Opportunities** (default landing — status and next actions, including any Para-AI-surfaced proposed matches) and **Profile & Context** (secondary, on-demand — structured facts plus the chronological, visibility-controlled evidence timeline). There is no separate Action Queue destination; approval-required items expand inline within their opportunity row on Opportunities.
+## IA note
+The candidate page has three tabs — **Opportunities** (default landing: status, next actions, proposed matches, cross-opportunity holds), **Activity** (chronological log + context intake + the call lifecycle), and **Profile** (structured facts, LinkedIn, resume history) — plus a persistent **Ask Para** assistant reachable from a floating launcher on every tab. There is no separate Action Queue; approval-required items expand inline on their opportunity row.
 
 ## Entry points
-- From a candidate search or list, the recruiter opens a candidate directly into Opportunities — never Profile or Context first.
-- From any single opportunity's own pipeline board, clicking a candidate who is active in more than one opportunity routes into the same shared Opportunities view (never a duplicate, opportunity-scoped view).
-- From a Para-AI-surfaced match notification, the recruiter opens Opportunities directly to the pending "Proposed by Para AI" row.
-- In practice, a recruiter's actual starting point is the Home dashboard (a supporting screen, not part of the core flow below): its "Needs your review" feed and "Candidates needing attention" list are what a recruiter clicks through to land on a specific candidate's Opportunities view in the first place. See design-strategy.md for how Home resolves the cross-candidate review backlog question.
+- From a candidate search or list, the recruiter opens a candidate directly into Opportunities.
+- From any single role's own pipeline board, clicking a candidate active in more than one opportunity routes into this same shared Opportunities view (never a duplicate, opportunity-scoped view).
+- From a Para-AI-surfaced match notification, the recruiter opens Opportunities to the pending "Proposed by Para AI" row.
 
 ## Happy path
-1. Recruiter sources a candidate and creates their record; uploads a resume and pastes a LinkedIn URL from Profile & Context. Both are parsed and default to Included in matching.
-2. Recruiter logs or syncs a call; it's transcribed and summarized. The item defaults to excluded from matching, and a one-tap "Include this in matching?" prompt appears once, inline, right after the summary appears. This same quick-capture entry point (+ Log call, + Add note) is also reachable directly from Opportunities, so the recruiter doesn't have to leave the landing view just to log something.
-3. Recruiter includes the call in matching (or leaves it excluded) and adds a freeform note about the candidate's motivations.
-4. Recruiter submits the candidate to two open opportunities (Role A, Role B) from Opportunities. The view now shows two active tracks. Separately, Para AI surfaces a third match (Role D) from its broader matching layer that the recruiter never chose — it appears in a distinct "Proposed by Para AI" section, not mixed into the active list, until the recruiter reviews and confirms or dismisses it.
-5. Para AI synthesizes included-in-matching context into recommended next actions per opportunity: an auto-executable scheduling email for Role A, and a recruiter-approval-required "submit to Role B" draft citing the shared call note.
-6. The scheduling email auto-sends and logs to the activity timeline. The submission draft expands inline within Role B's own row on Opportunities — no separate destination to visit.
-7. Recruiter reviews the drafted submission note right there in the row (with its source citation visible), edits one line, and approves it.
-8. Both opportunity tracks advance stage (Role A to Interviewing, Role B to Submitted) and Opportunities reflects both without the recruiter navigating away from the candidate or the row.
-9. Months later, the call note from step 2 ages past the staleness threshold; it's flagged for reconfirmation in Context, and Para AI's matching weight for that signal is discounted until the recruiter reconfirms or updates it.
-10. Role A results in an offer; recruiter manually updates that track to Offer and eventually Closed (hired). Role B is manually closed as no longer pursued once the candidate accepts elsewhere.
+1. Recruiter adds a candidate; uploads a resume and pastes a LinkedIn URL from Profile. Both parse and default to Included in matching. The resume upload history keeps prior versions as newer ones are added.
+2. Recruiter schedules a call from Activity: a slide-in drawer offers two options — propose specific time slots, or send a booking link. Para pre-fills an editable message; the recruiter sends it via LinkedIn or email. When the candidate picks a time, the call lands on the Activity timeline automatically.
+3. The call happens on-platform and is recorded + transcribed. Afterward its Activity card enters a "Review pending" state.
+4. Recruiter opens the review drawer: reads Para's transcript summary, decides the **Use this call for Para AI** toggle, edits Para's suggested tags, adds an optional context note, and saves it to the timeline. (Notes work the same way — captured with a one-tap "Include in matching?" prompt.)
+5. Recruiter submits the candidate to two open opportunities (Role A, Role B) from Opportunities; the view now shows two active tracks. Separately, Para AI surfaces a scored match (Role D, e.g. "Strong match · 8/10") the recruiter never chose, in a distinct "Proposed by Para AI" section.
+6. Recruiter confirms or dismisses the proposed match. Only on confirm does it become an active track — the same gate as a recruiter-initiated submission.
+7. Para AI synthesizes included-in-matching context into a recommended next action per opportunity: an auto-executable scheduling nudge for Role A, and an approval-required "submit to Role B" draft citing the shared call.
+8. The auto action executes and logs; the approval-required draft expands inline within Role B's row. The recruiter reviews it there (source citation visible), edits a line, and approves — no separate destination.
+9. Both tracks advance stage and Opportunities reflects both without the recruiter leaving the candidate.
+10. At any point the recruiter opens **Ask Para** to ask about the candidate ("what's she looking for," "when did we last follow up," "who's a good fit") — answered from included-in-matching context, with citations — or to *act*: asking Para to "set up the Fieldnote intro" renders an inline action card (drafted schedule, Confirm & send / Edit), gated like every other action.
+11. Role A extends an offer with an expiry. Para AI **pauses its queued auto-actions on the other opportunities** and surfaces a "paused · waiting on you" card explaining why; the recruiter resumes or keeps them paused.
+12. Months later, the call from step 4 ages past the staleness threshold; it's flagged for reconfirmation in Activity/Context and Para's matching weight for it is discounted until reconfirmed.
+13. Role A closes as Hired; other tracks close as no longer pursued.
 
 ## Decision points
-- **Is this action relationship-sensitive or high-stakes?** → Auto-executed (logistics, scheduling, status confirmations) vs. Recruiter-approval-required (submissions, rejections, compensation, anything sourced from content excluded from matching).
-- **Is a context item included in matching?** → Included in Para AI's synthesized understanding and citable in recommendations and new-match proposals, or excluded entirely.
-- **Is a context item durable or volatile?** → Durable (resume, tenure) never goes stale. Volatile (stated preferences, comp, timing) gets a staleness flag past a set age, and a discounted matching weight to match.
-- **Would an action create a same-company double submission?** → Blocked and surfaced to the recruiter as a manual conflict, never auto-executed.
-- **Has an approval-required item sat past the review window?** → Escalated with a reminder shown directly on the opportunity row; never auto-sent after timeout.
-- **Did the recruiter or Para AI initiate this opportunity?** → Doesn't change the gate: either way, it only becomes an active track once the recruiter confirms it.
+- **Is this action relationship-sensitive or high-stakes?** → Auto-executed (logistics, scheduling, status) vs. Recruiter-approval-required (submissions, rejections, compensation, anything sourced from excluded content).
+- **Is a context item included in matching?** → Usable by Para AI in synthesis, recommendations, and proposed matches, or excluded entirely.
+- **Is a context item durable or volatile?** → Durable never goes stale; volatile gets a staleness flag past a set age and a discounted matching weight.
+- **Does a state change in one opportunity affect the others?** → e.g. an offer at Role A → Para pauses its own queued actions on Role B/C and waits for the recruiter, rather than firing them.
+- **Would an action create a same-company double submission?** → Blocked, surfaced as a manual conflict, never auto-executed.
+- **Has an approval-required item sat past the review window?** → Escalated with a reminder on its row; never auto-sent.
+- **Did the recruiter or Para AI initiate this opportunity?** → Doesn't change the gate: active only once the recruiter confirms.
 
 ## System responses
-- Resume parsing and call transcription run asynchronously; the relevant timeline item shows a pending state until complete, and a "needs review" flag if transcription confidence is low.
-- Para AI's synthesized "what it currently understands" panel — full version on Profile & Context, condensed strip on Opportunities — updates whenever a source's matching-inclusion changes, and marks any recommendation whose source was later excluded as stale.
-- Opportunities reflects stage changes as they sync from each opportunity's own pipeline, with a visible sync-freshness indicator.
-- An approval-required item past its timeout window shows a visible waiting-duration indicator directly on its row.
-- A volatile context item past the staleness threshold shows a reconfirm prompt in Context; durable items never do.
+- Resume parsing and call transcription run asynchronously; the relevant item shows a pending state, and a "needs review" flag if transcription confidence is low.
+- Para AI's "what it currently understands" — full panel on Profile, condensed strip on Opportunities — updates whenever a source's matching-inclusion changes, and marks any recommendation whose source was later excluded as stale.
+- Opportunities reflects stage changes as they sync from each role's pipeline, with a visible sync-freshness indicator.
+- An approval-required item past its timeout shows a waiting-duration indicator on its row.
+- A volatile context item past the staleness threshold shows a reconfirm prompt; durable items never do.
+- Ask Para answers only from included-in-matching context and cites its sources; requested actions come back as approval-gated action cards, not silent sends.
 
 ## Edge cases
-- **Candidate declines/is rejected from one opportunity while active in others:** that track closes; other tracks and their pending actions are unaffected — Para AI does not infer or propagate the outcome elsewhere.
-- **A note or call is excluded from matching after Para AI already used it:** the recommendation that cited it is flagged stale rather than silently kept or retracted.
-- **Same-company double submission proposed:** blocked outright, surfaced in the Opportunities conflict banner for manual resolution.
-- **Approval-required item unactioned past the timeout:** escalated as a reminder on its row; never silently auto-sent.
-- **Low-confidence or failed transcript:** flagged "needs review" in Context; excluded from Para AI's synthesized understanding until the recruiter confirms it.
-- **Candidate withdraws entirely:** every active track closes, and any pending actions for that candidate are cancelled, not executed.
-- **Para AI surfaces a match the recruiter didn't choose:** shown in the distinct Proposed section, never mixed into active tracks; the recruiter confirms or dismisses it before it ever behaves like a real opportunity.
-- **The same real person is independently owned by another recruiter:** out of this flow's scope entirely — no cross-recruiter visibility, reconciliation, or duplicate-submission check happens here.
-- **A volatile item ages past the staleness threshold:** flagged for reconfirmation; a durable item never is, regardless of age.
+- **Candidate declines/is rejected from one opportunity while active in others:** that track closes; other tracks and their pending actions are unaffected — no cross-opportunity inference.
+- **An offer arrives at one opportunity while others are mid-process:** Para pauses its queued auto-actions on the others and waits; the recruiter resumes or keeps paused — nothing auto-sends.
+- **A note or call is excluded from matching after Para used it:** the recommendation that cited it is flagged stale rather than silently kept or retracted.
+- **Same-company double submission proposed:** blocked, surfaced in the conflict banner for manual resolution.
+- **Approval-required item unactioned past the timeout:** escalated on its row; never silently auto-sent.
+- **Low-confidence or failed transcript:** flagged "needs review"; excluded from Para's understanding until the recruiter confirms.
+- **Candidate withdraws entirely:** every active track closes; all pending actions across tracks are cancelled.
+- **Para AI surfaces a match the recruiter didn't choose:** shown in the distinct Proposed section with a match score; confirmed or dismissed before it behaves like a real opportunity.
+- **The same real person is independently owned by another recruiter:** out of this flow's scope — no cross-recruiter visibility, reconciliation, or duplicate-submission check.
+- **A volatile item ages past the staleness threshold:** flagged for reconfirmation; a durable item never is.
 
 ## Exit states
-- **Success:** at least one opportunity reaches Closed (hired); other tracks close naturally as no longer pursued.
-- **No hire:** all tracks eventually close without a placement; candidate record remains searchable/reusable for future opportunities.
+- **Success:** at least one opportunity reaches Closed (hired); other tracks close naturally.
+- **No hire:** all tracks close without a placement; the candidate record stays searchable/reusable.
 - **Cancellation:** candidate withdraws mid-process; all tracks and pending actions close/cancel together.
-- **Error/timeout:** an async step (transcription, sync) fails or an approval sits unresolved; both cases surface a visible flag on the relevant row rather than failing silently.
+- **Error/timeout:** an async step (transcription, sync) fails or an approval sits unresolved; both surface a visible flag on the relevant row rather than failing silently.

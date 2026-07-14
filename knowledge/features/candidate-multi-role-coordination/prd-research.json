@@ -30,7 +30,9 @@
     "No cross-recruiter identity resolution or deduplication — same real person could be independently submitted to the same role by two recruiters",
     "Whether Para AI's platform-wide matching reach always routes through the same recruiter-confirmation gate as a recruiter-initiated submission is unconfirmed",
     "Whether a flat 60-90 day staleness threshold is right for all volatile context or should vary by fact type",
-    "The Home dashboard's 'most active right now' ranking and stage-distribution chart are illustrative — actual prioritization logic isn't defined"
+    "How Para AI computes the match score on recommended opportunities (e.g. 8/10) and how to keep it trustworthy rather than a black box",
+    "Which state changes trigger a cross-opportunity hold, and how long Para holds a paused action before re-escalating",
+    "The cross-candidate approval backlog belongs on an out-of-scope home dashboard — an unresolved product-level handoff, not owned by this feature"
   ],
   "edge_cases": [
     "Candidate declines one opportunity while active in others",
@@ -65,9 +67,10 @@
     "The brief's 'Passive Placements' reference implies Para AI already has a submission-recommendation capability; frame this feature as extending that muscle across concurrent opportunities, not inventing new AI capability",
     "Approval-required items expand inline on their opportunity row (same fast approve/edit/reject interaction as a triage inbox) rather than living behind a separate Action Queue destination",
     "Auto-executed vs. Recruiter-approval-required is the single most important piece of information architecture and must be a persistent, legible signal everywhere an action or its status appears",
-    "Opportunities is the default landing view (task-oriented); Profile & Context is secondary and on-demand (data-oriented) — default design decisions toward keeping recruiters on Opportunities",
-    "Home, Candidates list, and Opportunities list are supporting screens built for context — the brief's actual ask is answered by the two candidate-level views, and that distinction should stay visible to whoever reviews this",
-    "Para AI has no dedicated page, so its presence is signaled another way: a persistent sidebar status indicator plus explicit attribution tags on its actual output (Home's review feed, the opportunities-at-a-glance ranking)"
+    "Opportunities is the default landing view (task-oriented); Activity and Profile are secondary, on-demand tabs — default design decisions toward keeping recruiters on Opportunities",
+    "The whole feature is the candidate page; broader recruiter dashboards are the product around it and out of scope for this take-home",
+    "The sharpest expression of 'where Para waits' is the cross-opportunity hold (Para pauses its own actions when an offer lands elsewhere) and the per-call review toggle — dramatize the act-vs-wait boundary, don't just assert it",
+    "Para AI has no dedicated page — its presence is signaled inline (persistent indicator + attribution tags) and it can take actions from the Ask Para chat behind the standard approval gate"
   ],
-  "last_updated": "2026-07-11"
+  "last_updated": "2026-07-14"
 }

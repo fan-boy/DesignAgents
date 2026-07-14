@@ -1,10 +1,11 @@
 # Edge Cases — Candidate Multi-Role Coordination
 
 ## System states
-- Resume upload parsing in progress / parsing failed (unreadable file, unsupported format)
-- Call recording sync in progress from a connected call tool; sync failure (auth expired, tool disconnected)
+- Resume upload parsing in progress / parsing failed (unreadable file, unsupported format); prior resume versions retained in upload history
+- Call scheduled but candidate hasn't booked yet; booking link expires unused → prompt to resend
+- Call completed → "Review pending" state on its Activity card until the recruiter reviews it
+- On-platform call recording fails to transcribe or produces a low-confidence transcript
 - ATS/pipeline sync lag or failure between an opportunity's own pipeline and the unified Opportunities view
-- Call recording fails to transcribe or produces a low-confidence transcript
 
 ## Permission states
 - No role above Recruiter currently defined (no team lead/admin visibility into other recruiters' candidates)
@@ -27,8 +28,10 @@
 - Approval-required action left unactioned past the timeout window — escalation reminder, no auto-send after timeout
 - Bulk-approve flow — what the recruiter sees per item before a batch send; items still show full drafted content inline, never just a count
 - Candidate withdraws from the process entirely — all tracks close, all queued actions across tracks cancelled
-- Para AI surfaces a new opportunity match the recruiter did not initiate (from Paraform's broader matching layer) — treated identically to a recruiter-initiated submission: it only becomes an active tracked opportunity after explicit recruiter confirmation, shown in a distinct "Proposed by Para AI" section rather than mixed into active tracks
-- Approval-required item now expands inline on its opportunity row instead of routing to a separate Action Queue — a recruiter's cross-candidate backlog of these across their whole book is a related but separate, unresolved concern (see open-questions.md)
+- Para AI surfaces a new opportunity match the recruiter did not initiate (from Paraform's broader matching layer) — treated identically to a recruiter-initiated submission: it only becomes an active tracked opportunity after explicit recruiter confirmation, shown in a distinct "Proposed by Para AI" section with a match score, never mixed into active tracks
+- One opportunity extends an offer while others are mid-process — Para AI pauses its own queued auto-actions on the other opportunities (follow-up nudges, scheduling reminders) and surfaces a "paused · waiting on you" card; the recruiter keeps paused / resumes all / reviews each — nothing auto-sends while a hold is active
+- Recruiter asks Para to take an action from the Ask Para chat (e.g. schedule a call) — Para returns an inline action card behind the same approval gate (Confirm & send / Edit), never a silent send
+- Approval-required item now expands inline on its opportunity row instead of routing to a separate Action Queue — a recruiter's cross-candidate backlog across their whole book belongs on an out-of-scope home dashboard (see open-questions.md)
 
 ## Responsive / Accessibility
 - Not addressed in the PRD. Recruiter workflows are frequently mobile/on-the-go — needs an explicit scope call on whether mobile is in v1.

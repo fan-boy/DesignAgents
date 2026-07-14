@@ -11,10 +11,10 @@
     "This feature does not reconcile or dedupe candidate identity across recruiters",
     "Assumes reliable company-to-opportunity mapping and existing call-sync/transcription integration",
     "Para-AI-surfaced opportunity matches (beyond the recruiter's own submissions) require recruiter confirmation before becoming an active track, same as a recruiter-initiated submission",
-    "No standalone Action Queue destination — approval-required items surface inline within their opportunity row on the Opportunities landing view",
-    "Opportunities is the default landing view for a candidate; Profile & Context is a secondary, on-demand view",
-    "Home, Candidates (list), and Opportunities (list) are supporting screens built around the core candidate experience, not part of what the brief asks to be evaluated on",
-    "Para AI has no page of its own, so its presence is made legible another way: a persistent sidebar status indicator plus explicit attribution tags on its actual output, everywhere that output appears"
+    "No standalone Action Queue destination — approval-required items surface inline within their opportunity row",
+    "Entire feature lives on one candidate's page (tabs: Opportunities default, Activity, Profile) plus a persistent Ask Para assistant; broader recruiter dashboards (home, candidates list, all-roles view) are out of scope",
+    "Calls happen on-platform and are recorded/transcribed automatically; the per-call 'use for Para AI' toggle is the inclusion decision for a call",
+    "Para AI has no page of its own — it lives inline on the candidate page, attributed wherever it appears (persistent indicator + labeled tags), and can take actions from the Ask Para chat behind the same approval gate"
   ],
   "success_metrics": [
     "Less recruiter time spent coordinating one candidate across roles",
@@ -33,7 +33,7 @@
     "Compact per-opportunity rows can't show full detail without an expand step (drawer)",
     "Requires cross-opportunity data plumbing (company mapping, unified stage model) that may not exist yet",
     "Bulk-approve mitigation reduces but does not eliminate rubber-stamp risk",
-    "Removing the separate Action Queue means an approval-required item is only as visible as the row it's attached to — resolved by the Home dashboard's cross-candidate 'Needs your review' feed rather than left uncovered"
+    "Removing the separate Action Queue means an approval-required item is only as visible as the row it's attached to — a recruiter's book-wide backlog belongs on the (out-of-scope) home dashboard, flagged as a dependency rather than solved here"
   ],
   "assumptions": [
     "Resume/LinkedIn default Included in matching; notes/calls default excluded, with a one-tap prompt at capture time",
@@ -42,7 +42,8 @@
     "Company-to-opportunity mapping and call-sync/transcription integration are reliable enough to support conflict detection and auto-transcription",
     "Para AI can surface opportunity matches beyond the recruiter's own submissions; such matches require recruiter confirmation before becoming an active track",
     "Durable context (resume, tenure history) does not decay in relevance; volatile context (stated preferences, comp expectations, timing) does, and is shown with a staleness indicator past a set age",
-    "A recruiter's cross-candidate approval backlog is served by the Home dashboard's 'Needs your review' feed and stat tile, not a separate dedicated destination"
+    "Calls are on-platform, so a transcript always exists; the post-call review (Para toggle + tags) is where a completed call becomes usable context",
+    "A recruiter's cross-candidate approval backlog is served by the home dashboard, which is out of this feature's scope"
   ],
   "open_issues": [
     "Whether company-to-opportunity mapping and call-sync integration genuinely exist reliably enough as assumed",
@@ -50,7 +51,9 @@
     "Whether Paraform performs any identity resolution across independently-owned recruiter profiles for the same real person — without it, cross-recruiter duplicate submission to the same role is undetectable from within this feature",
     "Whether Para AI's platform-wide matching reach reliably routes through the same recruiter-confirmation gate as a recruiter-initiated submission, or whether that's an unconfirmed assumption",
     "Whether a flat 60-90 day staleness threshold is right for all volatile context, or whether different fact types decay at different rates",
-    "The Home dashboard's 'most active' ranking and stage-distribution chart are illustrative — the actual prioritization logic (recency vs. deadline proximity vs. recruiter-assigned priority) isn't defined"
+    "How Para AI computes the match score on recommended opportunities, and how to keep it legible/trustworthy",
+    "Which state changes trigger a cross-opportunity hold (offer confirmed vs. verbal vs. final round) and how long Para holds before re-escalating",
+    "The cross-candidate 'needs your review' backlog belongs on the out-of-scope home dashboard — a product-level dependency, not solved within this feature"
   ],
   "risks": [
     "Bulk-approve remains a genuine trust risk even with a forced per-item preview",
@@ -58,12 +61,12 @@
     "Cross-recruiter duplicate submission of the same candidate to the same role is not solvable within one recruiter's Opportunities view and should be surfaced as a known limitation, not implied as handled",
     "A staleness indicator that isn't backed by matching logic actually discounting older signals would mislead recruiters about what Para AI is using, the same trust failure as a false 'undo'"
   ],
-  "ds_patterns_used": ["timeline list", "drawer", "table/row list", "tag/badge", "inline expandable card", "board/kanban (view toggle)", "empty state", "12-column dashboard grid (8/4 split)", "stat tile", "stacked bar chart (stage distribution)", "sidebar navigation with persistent status indicator"],
-  "new_patterns_required": ["persistent Auto vs. Approval-required tag system (no existing precedent to draw from since there is no shared design system for this exercise)", "inline approval card embedded in a list row (replaces a separate review-queue screen)", "Para AI attribution tag (labels AI-originated content without a dedicated destination to point to)"],
+  "ds_patterns_used": ["timeline list", "right slide-in drawer", "table/row list", "tag/badge", "inline expandable card", "board/kanban (view toggle)", "empty state", "tabbed candidate page", "floating action button (assistant launcher)", "chat panel with inline action cards", "sidebar with persistent status indicator", "toggle switch", "segmented option cards (schedule modes)"],
+  "new_patterns_required": ["persistent Auto vs. Approval-required tag system (no existing precedent since there is no shared design system for this exercise)", "inline approval card embedded in a list row (replaces a separate review-queue screen)", "cross-opportunity hold card (Para pauses its own actions on other opportunities based on cross-opportunity state)", "in-chat action card (Para takes an action from the assistant behind the standard approval gate)", "Para AI attribution tag (labels AI-originated content without a dedicated destination)"],
   "next_actions": [
-    "Define the actual prioritization logic behind the Home dashboard's 'most active' ranking, currently illustrative",
-    "Decide whether Board (kanban) view needs its own full wireframe or stays a stated capability for now",
+    "Pressure-test the Opportunities row + inline approval + cross-opportunity hold as one system sharing the act-vs-wait tag language",
+    "Decide whether Board (kanban) view needs its own full wireframe or stays a stated capability",
     "Confirm the 60-90 day staleness threshold against real usage rather than treating it as final"
   ],
-  "last_updated": "2026-07-11"
+  "last_updated": "2026-07-14"
 }
