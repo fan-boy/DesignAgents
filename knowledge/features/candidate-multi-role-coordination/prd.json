@@ -44,23 +44,29 @@
     "ATS / role pipeline system",
     "LinkedIn (public profile fetch + outreach channel)",
     "Email / outbound messaging",
-    "Para AI matching layer (platform-wide, surfaces scored matches beyond the recruiter's own submissions)"
+    "Para AI matching layer (recommends scored matches; the recruiter's action and consent originates every submission)"
   ],
   "edge_cases_count": 11,
   "open_questions_flagged": [
-    "What is the default approval-required timeout window before escalation?",
-    "Does the candidate ever see any part of this system, or is it recruiter/Para-AI only?",
-    "How are cross-opportunity conflicts (e.g., same-company double submission) detected — real-time rule check or periodic reconciliation?",
-    "What happens to Para AI's confidence in a candidate profile when a majority of sources are excluded from matching?",
-    "Does Paraform perform any identity resolution across independently-owned recruiter profiles for the same real person, to catch duplicate submissions to the same role from different recruiters?",
-    "Can Para AI surface a match to an opportunity the recruiter hasn't chosen, and does entering it always require recruiter confirmation the same way a recruiter-initiated submission does?",
+    "Should the Include-in-matching toggle default on or off for notes/calls? (proposed new control)",
+    "How does Para AI compute the match score shown on recommendations (e.g. 8/10), and how is it kept legible/trustworthy?",
+    "Which state changes trigger a cross-opportunity hold (offer confirmed vs. verbal vs. final round), and how long does Para hold before re-escalating?",
     "Is a 60-90 day staleness threshold right for all volatile context, or should different fact types decay at different rates?",
-    "How does Para AI compute the match score shown on recommended opportunities (e.g. 8/10) — and how is it kept legible/trustworthy to recruiters?",
-    "Which state changes trigger a cross-opportunity hold (offer confirmed, offer verbal, final round scheduled?) and how long does Para hold before re-escalating?",
-    "The cross-candidate 'needs your review' backlog belongs on the home dashboard (out of scope here) — how should this feature hand off to it?"
+    "Is company-to-opportunity mapping reliable enough to hard-block same-company double submission, or should it be a soft warning?",
+    "Any candidate-facing view, or is the candidate strictly the subject? (assumed subject-only)",
+    "How should the candidate page hand off to Paraform's existing cross-candidate Para review/approve surface?"
+  ],
+  "resolved_by_paraform": [
+    "One shared candidate record per person (an earlier per-recruiter-silo assumption was wrong and was removed)",
+    "'Managing across multiple opportunities' = coordinating the roles the recruiter personally submitted the candidate to",
+    "Cross-recruiter duplicate submission to the same role is platform-prevented and out of scope for the take-home",
+    "Every submission originates from a recruiter's action and consent — Para AI never auto-submits",
+    "A consistent place to review/approve Para AI activity across candidates already exists; inline approvals roll up to it",
+    "Context today: structured insights from resume + LinkedIn, recruiter-added preferences, transcript-derived insights when calls are recorded",
+    "A private / exclude-from-Para control is a new distinction this design proposes, not existing behavior"
   ],
   "figma_used": false,
   "source_docs_used": true,
   "confidence": "medium",
-  "confidence_notes": "Single source (the take-home prompt itself) with no existing Figma or internal spec to cross-reference. Scope, actors, and edge cases were reasonably inferable from the prompt and the linked Passive Placements concept, but several judgment calls (default visibility rules, approval timeout window, conflict-detection mechanism) are design decisions made to produce a complete PRD rather than facts confirmed by the source. Updated 2026-07-11 with further product research indicating candidate profiles are owned per recruiter (not shared platform-wide) and that Para AI's matching reach can extend beyond opportunities the recruiter has directly pursued — this is a working hypothesis pending confirmation, not a PM-confirmed fact, and is tracked as open questions. Updated again 2026-07-11 with an IA refinement from design review: Opportunities as the default landing view, Profile split from Context, Action Queue merged inline, durable-vs-volatile context staleness — these are design decisions, not externally confirmed facts. Refocused 2026-07-14 onto the candidate page only — the home/candidates-list/all-opportunities dashboards were dropped from scope — and expanded with the Activity tab (log + date/company/type filters), the on-platform call lifecycle (schedule via propose-times or booking-link sent over LinkedIn/email → post-call review with a per-call Para toggle and tags), scored recommended opportunities, the cross-opportunity hold where Para pauses its own queued actions when an offer lands elsewhere, and the Ask Para assistant (cited Q&A plus in-chat approval-gated actions). These are design decisions, not externally confirmed facts."
+  "confidence_notes": "Single source (the take-home prompt itself) with no existing Figma or internal spec to cross-reference. Scope, actors, and edge cases were reasonably inferable from the prompt and the linked Passive Placements concept, but several judgment calls (default visibility rules, approval timeout window, conflict-detection mechanism) are design decisions made to produce a complete PRD rather than facts confirmed by the source. Updated 2026-07-11 with further product research indicating candidate profiles are owned per recruiter (not shared platform-wide) and that Para AI's matching reach can extend beyond opportunities the recruiter has directly pursued — this is a working hypothesis pending confirmation, not a PM-confirmed fact, and is tracked as open questions. Updated again 2026-07-11 with an IA refinement from design review: Opportunities as the default landing view, Profile split from Context, Action Queue merged inline, durable-vs-volatile context staleness — these are design decisions, not externally confirmed facts. Refocused 2026-07-14 onto the candidate page and expanded with the Activity tab, the on-platform call lifecycle (schedule → review with a per-call Para toggle and tags), scored recommended opportunities, the cross-opportunity hold, and the Ask Para assistant (cited Q&A plus in-chat approval-gated actions). Reconciled 2026-07-14 with Paraform's answers to clarifying questions (see resolved_by_paraform): there is one shared candidate record (an earlier per-recruiter-silo assumption was removed); coordination is scoped to the recruiter's own submissions; every submission originates from recruiter action/consent (Para never auto-submits); cross-recruiter dedup is platform-handled; a consistent Para review/approve surface already exists; and the private/include-in-matching control is a new distinction this design proposes. Remaining open items are design-detail on those proposed distinctions, not scope/architecture."
 }

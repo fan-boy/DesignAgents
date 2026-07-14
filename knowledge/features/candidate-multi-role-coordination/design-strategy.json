@@ -7,10 +7,11 @@
     "Recruiter retains final say on relationship-sensitive actions",
     "No existing design system to build against — generic interaction patterns used instead of Stillsuit DS v2",
     "No candidate-facing surface in scope",
-    "Single-recruiter ownership per candidate profile — reflects real platform architecture (profiles are independently owned per recruiter), not just a v1 simplification",
-    "This feature does not reconcile or dedupe candidate identity across recruiters",
-    "Assumes reliable company-to-opportunity mapping and existing call-sync/transcription integration",
-    "Para-AI-surfaced opportunity matches (beyond the recruiter's own submissions) require recruiter confirmation before becoming an active track, same as a recruiter-initiated submission",
+    "One shared candidate record per person (confirmed); this feature coordinates the roles the recruiter personally submitted the candidate to",
+    "Cross-recruiter duplicate submission to the same role is platform-prevented and out of scope (confirmed)",
+    "Every submission originates from a recruiter's action and consent — Para AI recommends but never auto-submits",
+    "A consistent place to review/approve Para AI activity across candidates already exists (confirmed); inline approvals roll up to it and redesigning it is out of scope",
+    "Assumes reliable company-to-opportunity mapping; calls are on-platform and transcribed when recorded",
     "No standalone Action Queue destination — approval-required items surface inline within their opportunity row",
     "Entire feature lives on one candidate's page (tabs: Opportunities default, Activity, Profile) plus a persistent Ask Para assistant; broader recruiter dashboards (home, candidates list, all-roles view) are out of scope",
     "Calls happen on-platform and are recorded/transcribed automatically; the per-call 'use for Para AI' toggle is the inclusion decision for a call",
@@ -33,33 +34,42 @@
     "Compact per-opportunity rows can't show full detail without an expand step (drawer)",
     "Requires cross-opportunity data plumbing (company mapping, unified stage model) that may not exist yet",
     "Bulk-approve mitigation reduces but does not eliminate rubber-stamp risk",
-    "Removing the separate Action Queue means an approval-required item is only as visible as the row it's attached to — a recruiter's book-wide backlog belongs on the (out-of-scope) home dashboard, flagged as a dependency rather than solved here"
+    "Removing the separate Action Queue means an approval-required item is only as visible as the row it's attached to — but Paraform already has a consistent cross-candidate Para review surface these roll up to (confirmed), so this is not a coverage gap"
   ],
   "assumptions": [
     "Resume/LinkedIn default Included in matching; notes/calls default excluded, with a one-tap prompt at capture time",
     "Candidate is never a user of this system, only its subject",
-    "Single recruiter owns a given candidate profile at a time, by platform architecture rather than a v1 scoping choice",
-    "Company-to-opportunity mapping and call-sync/transcription integration are reliable enough to support conflict detection and auto-transcription",
-    "Para AI can surface opportunity matches beyond the recruiter's own submissions; such matches require recruiter confirmation before becoming an active track",
-    "Durable context (resume, tenure history) does not decay in relevance; volatile context (stated preferences, comp expectations, timing) does, and is shown with a staleness indicator past a set age",
-    "Calls are on-platform, so a transcript always exists; the post-call review (Para toggle + tags) is where a completed call becomes usable context",
-    "A recruiter's cross-candidate approval backlog is served by the home dashboard, which is out of this feature's scope"
+    "One shared candidate record; coordination is scoped to the roles the recruiter personally submitted the candidate to (confirmed)",
+    "Every submission originates from a recruiter's action and consent; Para AI recommends but never auto-submits (confirmed)",
+    "Context comes from resume/LinkedIn structured insights, recruiter-added preferences, and transcript-derived insights when calls are recorded (confirmed)",
+    "The private / include-in-matching control is a NEW distinction this design proposes — Paraform has no such control today (confirmed as a new distinction)",
+    "Durable context (resume, tenure history) does not decay; volatile context (preferences, comp, timing) does, and is shown with a staleness indicator past a set age",
+    "The cross-opportunity hold and match scores are design proposals, flagged as assumptions"
   ],
   "open_issues": [
-    "Whether company-to-opportunity mapping and call-sync integration genuinely exist reliably enough as assumed",
+    "Whether the Include-in-matching toggle should default on or off for notes/calls (proposed new control)",
     "Whether a one-tap share prompt at capture is sufficient, or a periodic under-sharing nudge is needed",
-    "Whether Paraform performs any identity resolution across independently-owned recruiter profiles for the same real person — without it, cross-recruiter duplicate submission to the same role is undetectable from within this feature",
-    "Whether Para AI's platform-wide matching reach reliably routes through the same recruiter-confirmation gate as a recruiter-initiated submission, or whether that's an unconfirmed assumption",
-    "Whether a flat 60-90 day staleness threshold is right for all volatile context, or whether different fact types decay at different rates",
     "How Para AI computes the match score on recommended opportunities, and how to keep it legible/trustworthy",
     "Which state changes trigger a cross-opportunity hold (offer confirmed vs. verbal vs. final round) and how long Para holds before re-escalating",
-    "The cross-candidate 'needs your review' backlog belongs on the out-of-scope home dashboard — a product-level dependency, not solved within this feature"
+    "Whether a flat 60-90 day staleness threshold is right for all volatile context, or whether different fact types decay at different rates",
+    "Whether company-to-opportunity mapping is reliable enough to hard-block same-company double submission, or whether it degrades to a soft warning",
+    "How the candidate page hands off to Paraform's existing cross-candidate Para review/approve surface"
+  ],
+  "resolved_by_paraform": [
+    "One shared candidate record (dropped the earlier per-recruiter-silo assumption)",
+    "Coordination is scoped to the recruiter's own submissions",
+    "Cross-recruiter duplicate submission is platform-prevented and out of scope",
+    "Para never auto-submits — every submission originates from recruiter action/consent",
+    "A consistent cross-candidate Para review/approve surface already exists",
+    "Context = resume/LinkedIn structured insights + recruiter-added preferences + transcript insights when recorded",
+    "Private/exclude-from-Para is a new distinction, not existing behavior"
   ],
   "risks": [
     "Bulk-approve remains a genuine trust risk even with a forced per-item preview",
     "If underlying cross-opportunity data isn't reliable, conflict-blocking behavior would need to degrade to a manual warning instead of a hard block",
-    "Cross-recruiter duplicate submission of the same candidate to the same role is not solvable within one recruiter's Opportunities view and should be surfaced as a known limitation, not implied as handled",
-    "A staleness indicator that isn't backed by matching logic actually discounting older signals would mislead recruiters about what Para AI is using, the same trust failure as a false 'undo'"
+    "A cross-opportunity hold that pauses too aggressively could feel obstructive — the trigger set and hold duration need real-world tuning",
+    "A staleness indicator that isn't backed by matching logic actually discounting older signals would mislead recruiters about what Para AI is using, the same trust failure as a false 'undo'",
+    "A match score shown without an explanation reads as a black box and can erode trust — it needs a legible 'why'"
   ],
   "ds_patterns_used": ["timeline list", "right slide-in drawer", "table/row list", "tag/badge", "inline expandable card", "board/kanban (view toggle)", "empty state", "tabbed candidate page", "floating action button (assistant launcher)", "chat panel with inline action cards", "sidebar with persistent status indicator", "toggle switch", "segmented option cards (schedule modes)"],
   "new_patterns_required": ["persistent Auto vs. Approval-required tag system (no existing precedent since there is no shared design system for this exercise)", "inline approval card embedded in a list row (replaces a separate review-queue screen)", "cross-opportunity hold card (Para pauses its own actions on other opportunities based on cross-opportunity state)", "in-chat action card (Para takes an action from the assistant behind the standard approval gate)", "Para AI attribution tag (labels AI-originated content without a dedicated destination)"],

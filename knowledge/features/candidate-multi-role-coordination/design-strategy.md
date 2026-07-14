@@ -2,7 +2,7 @@
 
 Recruiters and Para AI jointly manage a candidate who is active in multiple open roles at once. Today the context that makes a match good (why they're really leaving, what they'd thrive in, call color) lives outside the model, and status per role is tracked separately, forcing recruiters to re-derive the full picture from memory or scattered tabs. The design has to give Para AI enough reach to remove repetitive coordination work while keeping the recruiter in control of every relationship-sensitive decision — the whole feature is a series of answers to "where does Para act on its own, and where does it wait for the recruiter."
 
-This is a design take-home for Paraform (not a Dune Security deliverable — no Stillsuit DS or Dune patterns apply; no competitor research was run, out of scope for this exercise). Everything lives on **one candidate's page**. Broader recruiter surfaces (home dashboard, candidates list, all-roles view) are the product *around* this feature and are explicitly out of scope.
+This is a design take-home for Paraform (not a Dune Security deliverable — no Stillsuit DS or Dune patterns apply; no competitor research was run, out of scope for this exercise). Confirmed with Paraform: there is **one shared candidate record** per person, and "managing across multiple opportunities" means coordinating the roles **this recruiter personally submitted** the candidate to. Every submission originates from a recruiter's action and consent — Para AI recommends, it never auto-submits — and cross-recruiter duplicate submission is prevented by the platform (out of scope here). Everything lives on **one candidate's page**; broader recruiter surfaces (home dashboard, candidates list, all-roles view) are the product *around* this feature and out of scope. Where this design introduces net-new distinctions (the include-in-matching / private control, cross-opportunity holds, match scores, per-call review), they're flagged as called-out assumptions, not existing Paraform behavior.
 
 **Success metrics (tied to the original HMW):**
 1. Less recruiter time spent coordinating one candidate across roles.
@@ -20,8 +20,9 @@ Give recruiters one place to see everything Para AI knows about a candidate, con
 ## Key constraints
 
 - The recruiter retains final say on any relationship-sensitive action (rejections, compensation, anything sourced from an excluded item). This is the load-bearing constraint, not a nice-to-have.
-- Candidate profiles are owned per recruiter — real platform architecture, not a v1 simplification. This feature coordinates opportunities within one recruiter's own profile of a candidate; it does not reconcile or dedupe across recruiters, and there is no candidate-facing surface.
-- Para AI's matching extends beyond opportunities the recruiter directly submitted to (a platform-wide layer). Any surfaced match is a scored recommendation only, active solely on recruiter confirmation.
+- One shared candidate record per person; this feature coordinates the opportunities the recruiter personally submitted the candidate to. No candidate-facing surface. Cross-recruiter duplicate submission is platform-prevented and out of scope.
+- Every submission originates from a recruiter's action and consent — Para AI recommends matches and drafts actions, but never submits or sends on its own.
+- Paraform already has a consistent place to review and approve Para AI activity across candidates (confirmed); the candidate page's inline approvals are the in-context view of the same decisions and roll up to it. Redesigning that cross-candidate surface is out of scope.
 - Para AI has no page of its own — it lives inline on the candidate page, attributed wherever it appears.
 - Assumed available: on-platform calls with automatic recording/transcription, and reliable company-to-opportunity mapping (for same-company conflict detection). If either is weaker in reality, the auto-transcription and conflict-blocking pieces degrade to manual equivalents.
 - Matching-inclusion defaults: resume/LinkedIn on; notes/calls off, with a one-tap "Include this in matching?" prompt at capture so inclusion isn't buried in settings.
@@ -77,13 +78,19 @@ The candidate page is three tabs (Opportunities, Activity, Profile) plus a persi
 - If a context item reads as "stale" in the UI, Para's matching logic must already be discounting it comparably — a staleness indicator not backed by real weighting misleads the recruiter, the same trust failure as a false "undo."
 - The cross-opportunity hold and the per-call review toggle are the two places the act-vs-wait boundary is dramatized rather than asserted — keep both legible.
 
+## Resolved by Paraform's answers (2026-07-14)
+- **Shared candidate record, not per-recruiter silos.** An earlier version of this strategy assumed profiles were owned per recruiter; that was wrong. There's one shared record, and this feature coordinates the roles the recruiter personally submitted the candidate to.
+- **Cross-recruiter duplicate submission is platform-prevented** (a second recruiter can't submit the same candidate to a taken role) and explicitly out of scope for the take-home — so the "unsolved dedup risk" earlier drafts flagged is dropped.
+- **Para never auto-submits.** Every submission originates from a recruiter's action and consent, which confirms the design's core gate: Para recommends, the recruiter's confirmation is the submission.
+- **A consistent review/approve surface for Para activity already exists** across candidates — so inline approvals on the candidate page are the in-context view of the same decisions, not a replacement for a place that was missing.
+- **Private / exclude-from-Para is a new distinction** — Paraform has no such control today, so the Include-in-matching toggle is a proposal, called out as an assumption.
+
 ## Open issues
-- Whether on-platform call transcription and company-to-opportunity mapping genuinely exist reliably enough to support the auto-transcription and conflict-detection assumed here.
 - Whether the one-tap include prompt at capture is enough to counter under-sharing, or whether Para needs a periodic nudge ("3 unshared notes on an active candidate").
-- Whether Paraform does any identity resolution across independently-owned recruiter profiles — without it, the same candidate could be submitted to the same role by two recruiters, undetectable from within one recruiter's page.
-- Whether Para AI's platform-wide matching reliably routes every surfaced match through the recruiter-confirmation gate, or whether that's an unconfirmed assumption.
+- How Para AI computes the match score shown on recommendations, and how to keep it legible/trustworthy.
+- Which state changes should trigger a cross-opportunity hold (offer confirmed vs. verbal vs. final round), and how long Para holds before re-escalating.
 - Whether a flat 60-90 day staleness threshold fits all volatile context or should vary by fact type.
-- The cross-candidate "needs your review" backlog: real need, but it belongs on the (out-of-scope) home dashboard — a dependency to resolve at the product level, not within this feature.
+- Whether company-to-opportunity mapping is reliable enough to hard-block same-company double submission, or whether that degrades to a soft warning.
 
 ## Next design actions
 1. Pressure-test the Opportunities row + inline approval + cross-opportunity hold as one system — they share the act-vs-wait tag language and must stay consistent.
@@ -91,4 +98,4 @@ The candidate page is three tabs (Opportunities, Activity, Profile) plus a persi
 3. Confirm the 60-90 day staleness threshold against real usage rather than treating it as final.
 
 ---
-*Revision history: written 2026-07-11 (per-recruiter scoping; Opportunities-as-landing IA; inline approval; durable-vs-volatile context). Refocused 2026-07-14 onto the candidate page only — home/candidates-list/all-opportunities dashboards dropped from scope — and expanded with the Activity tab + call lifecycle (schedule → review with the per-call Para toggle), scored recommended opportunities, the cross-opportunity hold, and the Ask Para assistant with in-chat actions.*
+*Revision history: written 2026-07-11 (Opportunities-as-landing IA; inline approval; durable-vs-volatile context). Refocused 2026-07-14 onto the candidate page and expanded with the Activity tab + call lifecycle, scored recommendations, the cross-opportunity hold, and the Ask Para assistant with in-chat actions. Reconciled 2026-07-14 with Paraform's answers: shared candidate record (dropped the earlier per-recruiter-silo assumption); coordination scoped to the recruiter's own submissions; submissions always originate from recruiter action/consent; cross-recruiter dedup is platform-handled; a consistent Para review/approve surface already exists; the private/include control is a proposed new distinction.*

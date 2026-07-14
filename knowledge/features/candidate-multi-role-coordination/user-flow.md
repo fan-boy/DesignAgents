@@ -1,5 +1,5 @@
 ## Scope note
-Every step below operates within one recruiter's own profile of a candidate, entirely on the candidate page. Candidate profiles are owned per recruiter, not shared platform-wide — this flow does not span or reconcile across recruiters who may separately know the same real person. Broader recruiter surfaces (home dashboard, candidates list, all-roles view) are out of scope.
+There is one shared candidate record per person (confirmed with Paraform). This flow is about how a recruiter coordinates the opportunities **they personally submitted** the candidate to, entirely on the candidate page. Every submission originates from a recruiter's action and consent — Para AI recommends but never auto-submits. Cross-recruiter duplicate submission is platform-prevented and out of scope. Broader recruiter surfaces (home dashboard, candidates list, all-roles view) are out of scope. The private / include-in-matching control used below is a new distinction this design proposes (Paraform has no such control today).
 
 ## IA note
 The candidate page has three tabs — **Opportunities** (default landing: status, next actions, proposed matches, cross-opportunity holds), **Activity** (chronological log + context intake + the call lifecycle), and **Profile** (structured facts, LinkedIn, resume history) — plus a persistent **Ask Para** assistant reachable from a floating launcher on every tab. There is no separate Action Queue; approval-required items expand inline on their opportunity row.
@@ -50,7 +50,7 @@ The candidate page has three tabs — **Opportunities** (default landing: status
 - **Low-confidence or failed transcript:** flagged "needs review"; excluded from Para's understanding until the recruiter confirms.
 - **Candidate withdraws entirely:** every active track closes; all pending actions across tracks are cancelled.
 - **Para AI surfaces a match the recruiter didn't choose:** shown in the distinct Proposed section with a match score; confirmed or dismissed before it behaves like a real opportunity.
-- **The same real person is independently owned by another recruiter:** out of this flow's scope — no cross-recruiter visibility, reconciliation, or duplicate-submission check.
+- **Two recruiters, same candidate, same role:** platform-prevented (the second recruiter can't submit to a taken role) and out of scope to design here — not something this flow has to handle.
 - **A volatile item ages past the staleness threshold:** flagged for reconfirmation; a durable item never is.
 
 ## Exit states

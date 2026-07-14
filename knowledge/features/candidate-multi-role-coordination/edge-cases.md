@@ -16,7 +16,7 @@
 - Candidate with only one active opportunity — does the multi-track UI still render, or collapse to a single-pipeline view?
 - Candidate active in a high number of opportunities (8-10+) — this is the threshold where the List view's default toggles to Board (grouped by stage) rather than an unresolved scaling question
 - A note or call recording is marked excluded from matching after Para AI already used it in a recommendation
-- The same real-world candidate exists as an independently-owned profile in another recruiter's own book — this feature has no visibility into or reconciliation with that; duplicate submission across recruiters to the same role is a platform-level risk this feature does not detect or prevent
+- Two recruiters, same candidate, same role — platform-prevented (the second recruiter can't submit to a taken role); out of scope to design here, confirmed with Paraform. There is one shared candidate record, not per-recruiter silos.
 - A volatile context item (comp expectation, location preference, timing) ages past the staleness threshold — flagged for reconfirmation in Context, and Para AI's matching weight for it is discounted correspondingly
 - A durable context item (resume, tenure history) ages — never flagged as stale; only preference-like signals decay
 
