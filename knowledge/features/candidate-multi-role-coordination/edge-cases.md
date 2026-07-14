@@ -10,6 +10,9 @@
 ## Permission states
 - No role above Recruiter currently defined (no team lead/admin visibility into other recruiters' candidates)
 - View-only or read-only access to a candidate record when a recruiter is covering for a colleague
+- Recruiter changes their default Para AI permissions after per-candidate overrides already exist elsewhere — overridden candidates keep their overrides; open question whether that should also surface a "defaults changed" notice (see open-questions.md)
+- Every action's permission is set to Off — Para AI degrades to a read-only summarizer for that candidate; this should be stated plainly in the UI, not implied
+- A recruiter attempts to set a relationship-sensitive action (submission, rejection/withdrawal, comp/offer messaging) to Auto — not offered as an option; Ask first is the only non-Off state for these, enforced by the system
 
 ## Content states
 - Candidate sourced but not yet submitted to any opportunity (zero-opportunity empty state)

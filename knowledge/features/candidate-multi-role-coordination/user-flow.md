@@ -25,7 +25,7 @@ The candidate page has three tabs — **Opportunities** (default landing: status
 13. Role A closes as Hired; other tracks close as no longer pursued.
 
 ## Decision points
-- **Is this action relationship-sensitive or high-stakes?** → Auto-executed (logistics, scheduling, status) vs. Recruiter-approval-required (submissions, rejections, compensation, anything sourced from excluded content).
+- **Is this action relationship-sensitive or high-stakes?** → Auto-executed (logistics, scheduling, status) vs. Recruiter-approval-required (submissions, rejections, compensation, anything sourced from excluded content). This split isn't fixed — it's the recruiter's Para AI Permissions setting for this action (recruiter-level default, optionally overridden for this candidate), reached from a settings control on the Para AI summary strip. Relationship-sensitive actions are permanently locked to Ask-first regardless of setting.
 - **Is a context item included in matching?** → Usable by Para AI in synthesis, recommendations, and proposed matches, or excluded entirely.
 - **Is a context item durable or volatile?** → Durable never goes stale; volatile gets a staleness flag past a set age and a discounted matching weight.
 - **Does a state change in one opportunity affect the others?** → e.g. an offer at Role A → Para pauses its own queued actions on Role B/C and waits for the recruiter, rather than firing them.
