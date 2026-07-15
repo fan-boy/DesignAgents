@@ -31,6 +31,11 @@ _Updated 2026-07-13 to match the as-built storyboard. Items marked ✅ are now d
 - **Add Phishing Link — no landing destination chosen:** Insert should be blocked until a destination is selected; the tracked URL only generates once a destination exists
 - **Add Phishing Link — cursor placed with no text selected:** define whether it inserts a new link or requires a selection (build shows selection-first)
 - **Add QR code:** insertion path exists in the toolbar as a sibling to Add Phishing Link — its own configure/confirm behavior still to spec
+- ✅ **Insert variable — one-click token, no typed syntax:** variables are chosen from a searchable menu and inserted as atomic token chips; admins never hand-author `{{ }}` syntax
+- **Insert variable — missing recipient data at send time:** each variable carries a per-variable fallback (e.g. First name → "there") so a blank/unknown value never renders raw tokens in a live email; per-variable fallback editing UI still to spec
+- **Insert variable — token in the Subject line (not just Body):** variables should be insertable in Subject too; build shows Body only — confirm Subject support
+- **Insert variable — deleting a token:** the chip deletes as one unit (no partial/broken tokens)
+- **Insert variable — which fields exist / where they come from:** the variable list (directory/IdP-sourced fields) and whether it is admin-configurable is an open question
 - Bulk actions on the library not addressed
 - Deploy attempted without deploy permission — disabled with tooltip
 

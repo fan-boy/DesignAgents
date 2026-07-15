@@ -73,6 +73,18 @@ The editor toolbar includes **Add Phishing Link** and **Add QR code** for embedd
 
 This makes the safe-URL conversion visible at the exact moment a link is created, and keeps the analyst in the email context rather than navigating away.
 
+**In-body authoring: personalization variables**
+
+Admins personalize an asset with recipient variables (first name, last name, email, job title, office location, mailing address, city, company name, department) without ever typing merge-tag syntax. The editor toolbar includes an **Insert variable** control (a `{ }` button beside Add Phishing Link / Add QR code). Inserting a variable is a three-step in-editor sub-flow:
+
+| Step | Behaviour |
+|---|---|
+| 1 — Insert variable | With the cursor placed in the body, the analyst clicks the **Insert variable** toolbar control |
+| 2 — Pick a variable | An anchored menu opens with a search field and plain-English variables grouped by **Recipient / Location / Company**, each row showing a faint sample value (e.g. First name → "John"). A footer note reads: "Missing values fall back to a default — e.g. First name → 'there'." |
+| 3 — Inserted | The chosen variable drops into the body at the cursor as a single **atomic token chip** (e.g. a styled "First name" pill), not editable free text — so it can't be typo'd, mis-spelled, or half-deleted. The Preview panel renders the token filled with sample data (e.g. "Hi John,") so the analyst sees what recipients receive |
+
+Design intent: this is the foolproof path — admins choose from named variables and click once; they never hand-author `{{ }}` syntax, and a per-variable fallback guarantees a missing value never leaks raw tokens into a live simulation. Variables resolve per recipient at send time.
+
 **Preview**
 
 The analyst can toggle between desktop and mobile preview of the asset at any point in the edit flow, before saving or deploying. Preview reflects the current draft state, including unsaved edits. The mobile preview renders the email at a narrower viewport with wrapped content.

@@ -29,12 +29,21 @@ _As-built, synced 2026-07-13 to the rebuilt Figma storyboard. The product labels
 2. **Configure** — an anchored popover opens with Link text (pre-filled from the selection), Landing destination (what the simulation points at), and a read-only Tracked simulation URL with the note "Automatically rewritten. Recipients never reach a real site." Actions: Cancel / Insert link.
 3. **Inserted** — the link becomes a visually distinct tracked-link token with a "Tracked link" badge, and a confirmation appears: "Phishing link added — routed through a safe simulation URL."
 
+## Add Variable (personalization) sub-flow (within Edit & Preview)
+
+1. **Insert variable** — with the cursor in the body, the analyst clicks the **Insert variable** (`{ }`) toolbar control.
+2. **Pick a variable** — an anchored menu opens with a search field and plain-English variables grouped Recipient / Location / Company (First name, Last name, Email, Job title, Office location, Mailing address, City, Company name, Department), each with a faint sample value and a footer note: "Missing values fall back to a default — e.g. First name → 'there'."
+3. **Inserted** — the variable drops in at the cursor as an atomic token chip (not editable free text, so it can't be typo'd or half-deleted). The Preview renders it filled with sample data (e.g. "Hi John,"). Variables resolve per recipient at send time.
+
+The design goal here is foolproofness: named variables chosen from a menu, one click to insert, never hand-typed merge-tag syntax, and a per-variable fallback so a missing value never leaks raw tokens into a live simulation.
+
 ## Decision points
 
 - **Tab choice (step 2):** Generate with AI vs. Create Manually vs. Upload EML File — determines the setup fields. AI and Upload modes go through Generating; Create Manually goes straight to editing.
 - **Difficulty change after generation:** changing the Difficulty selector does **not** alter the current draft. A different-difficulty variant requires the explicit **Regenerate** action.
 - **Regenerate clicked:** always triggers a confirmation modal before replacing the draft.
 - **Insert phishing link:** blocked until a landing destination is chosen; the tracked URL is generated once a destination exists.
+- **Insert variable:** one click from the menu inserts an atomic token; no typed syntax. Each variable carries a per-variable fallback so missing recipient data never renders raw tokens.
 - **Save with duplicate name:** blocked with an inline validation message; rename required.
 - **RBAC:** roles without create permission see a view-only library (no Create New Asset); roles without deploy permission see a disabled "Use in Campaign" with tooltip on Asset Detail.
 - **Delete an asset:** available from two places — the library row **Actions** menu (View details / Duplicate / Delete) and the **Delete** button on Asset Detail. Both open the same Delete confirmation modal, which warns if the asset is linked to a campaign. View-only roles do not see Delete.

@@ -11,6 +11,7 @@
     "Generating (progress)",
     "Edit & Preview",
     "Add Phishing Link sub-flow",
+    "Add Variable (personalization) sub-flow",
     "Preview (desktop / mobile)",
     "Asset Library (Custom Assets tab, empty, view-only)",
     "Asset Detail (deploy enabled / RBAC-disabled)",
@@ -32,7 +33,7 @@
     "Select motive (Authority, Urgency, etc. — matches Library Motive column)",
     "Sender email / Sender Name",
     "Subject",
-    "Body (WYSIWYG with Add Phishing Link + Add QR code)",
+    "Body (WYSIWYG with Add Phishing Link + Add QR code + Insert variable)",
     "Difficulty (Easy / Medium / Hard) — pre-generation input, default Medium",
     ".eml upload",
     "Screenshot upload (optional, workspace-gated)"
@@ -41,6 +42,11 @@
     "1 — Select display text in body; Add Phishing Link is the next action",
     "2 — Anchored popover: Link text, Landing destination, read-only Tracked simulation URL + trust note; Cancel / Insert link",
     "3 — Inserted as a tracked-link token with a badge + confirmation 'routed through a safe simulation URL'"
+  ],
+  "add_variable_subflow": [
+    "1 — Cursor in body; click the 'Insert variable' ({ }) toolbar control",
+    "2 — Anchored menu: search + plain-English variables grouped Recipient/Location/Company (First name, Last name, Email, Job title, Office location, Mailing address, City, Company name, Department) with sample values and a per-variable fallback note",
+    "3 — Inserted as an atomic token chip (not free text); Preview renders it filled with sample data. Foolproof: no hand-typed merge-tag syntax; missing values fall back to a default"
   ],
   "generating_stages": ["Analyzing input", "Drafting template", "Redacting sensitive data", "Rewriting links to safe URLs", "Ready"],
   "integrations": [

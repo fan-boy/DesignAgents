@@ -12,7 +12,7 @@
   ],
   "selected_strategy": "One-shot generation, three-tab creation surface, single WYSIWYG editor with an explicit Regenerate control (as built)",
   "selected_strategy_rationale": "Matches the PRD's scope of one generation pass plus manual editing (no iteration loop), respects the resolved decision that edits are never silently overwritten via opt-in confirmed regeneration, and reuses proven Dune conventions. As built, the creation surface is three tabs (Generate with AI / Create Manually / Upload EML File) on one page rather than a mode-chooser modal, and assets save into the existing Simulated Attacks Library (Custom Assets tab) rather than a new standalone library.",
-  "as_built_note": "Synced 2026-07-13 to the Figma rebuild (17 frames). Departures from the pre-build strategy: three-tab creation surface (no chooser modal); a third non-AI 'Create Manually' mode; reuse of the existing Simulated Attacks Library instead of a new Template Library; product noun 'asset'; Motive selector + prompt chips instead of a single category enum; inline difficulty + Regenerate (no persistent side panel); and an added Add Phishing Link 3-state sub-flow.",
+  "as_built_note": "Synced to the Figma rebuild (21 frames as of 2026-07-13). Departures from the pre-build strategy: three-tab creation surface (no chooser modal); a third non-AI 'Create Manually' mode; reuse of the existing Simulated Attacks Library instead of a new Template Library; product noun 'asset'; Motive selector + prompt chips instead of a single category enum; inline difficulty + Regenerate (no persistent side panel); a library row-actions Delete; an Add Phishing Link 3-state sub-flow; and an Add Variable (personalization) 3-state sub-flow — a foolproof merge-tag pattern where admins pick plain-English variables from a searchable menu and one click inserts an atomic token chip (no hand-typed syntax), with sample-data preview and a per-variable fallback.",
   "alternative_strategies": [
     {
       "name": "AEP-style persistent AI-refine panel (chat-style iterative refinement)",
@@ -51,12 +51,13 @@
     "Library and Setup-screen assumptions may need to change once retention and delete-behavior decisions are made"
   ],
   "ds_patterns_used": ["tabs", "modal", "table", "badge", "popover", "toast"],
-  "new_patterns_required": ["Tracked-link token style + 'Tracked link' badge for inserted phishing links (reuses redaction-token treatment)", "A true destructive button style is absent in the file — Regenerate/Delete reuse the primary style; flag for DS"],
+  "new_patterns_required": ["Tracked-link token style + 'Tracked link' badge for inserted phishing links (reuses redaction-token treatment)", "A true destructive button style is absent in the file — Regenerate/Delete reuse the primary style; flag for DS", "Personalization variable token chip (atomic, un-typo-able) + Insert-variable searchable grouped menu; distinct token style from redaction placeholders and tracked-link tokens"],
   "next_actions": [
     "Resolve the Active-on-save vs. downstream-deploy-gate product question with PM",
     "Confirm the motive/category taxonomy (Motive selector + prompt chips) and whether it is admin-configurable",
     "Finalize raw-upload retention/deletion policy and swap in the real content-handling disclosure copy",
-    "Unify placeholder-token syntax across modes and add a destructive button style to the DS"
+    "Unify placeholder-token syntax across modes and add a destructive button style to the DS",
+    "Confirm the personalization variable list and its source (directory/IdP fields), whether it is admin-configurable, whether fallbacks are admin-editable, and whether variables are insertable in the Subject/sender fields (built in Body only)"
   ],
   "last_updated": "2026-07-13"
 }

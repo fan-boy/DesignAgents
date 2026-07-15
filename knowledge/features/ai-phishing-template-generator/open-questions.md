@@ -15,6 +15,9 @@ _Updated 2026-07-13 after the Figma rebuild. Product noun is "asset."_
 - [ ] [Design] Placeholder-token syntax is not unified across creation modes — worth a follow-up pass.
 - [ ] [DS] A true destructive (red) button style is absent in this file's component set, so Regenerate and Delete reuse the primary style — confirm whether a destructive variant should be added.
 - [ ] [Both] Add QR code exists in the toolbar as a sibling to Add Phishing Link, but its configure/confirm behavior is not yet specified.
+- [ ] [Both] Personalization variables: which fields are available, and are they sourced from the directory/IdP user profile? Is the variable list a fixed set or admin-configurable/extensible? _(Built as a grouped menu: Recipient / Location / Company.)_
+- [ ] [PM] Can admins edit the per-variable fallback value (e.g. First name → "there"), or are fallbacks system-set? _(Build shows a fixed fallback note; editing UI unspecified.)_
+- [ ] [Design] Are variables insertable in the Subject line (and sender fields), or Body only? _(Build shows Body only.)_
 
 ## Resolved
 - [x] [Both] Should Copy an Email require a distinct or higher permission tier than the AI mode? — **Answer:** No. Same permission tier; no separate gate for v1.
